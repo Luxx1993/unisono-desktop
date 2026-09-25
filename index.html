@@ -8,20 +8,26 @@
     <script>
         if (window.tailwind) tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' }
-                    }
-                }
-            }
+            theme: { extend: { colors: { brand: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' } } } }
         }
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+
+    <!-- Classic scripts (no ES modules) so the app also runs when opened directly via file:// -->
+    <script src="js/state.js" defer></script>
+    <script src="js/apis/common.js" defer></script>
+    <script src="js/apis/gladia.js" defer></script>
+    <script src="js/apis/elevenlabs.js" defer></script>
+    <script src="js/apis/assembly.js" defer></script>
+    <script src="js/apis/deepgram.js" defer></script>
+    <script src="js/export.js" defer></script>
+    <script src="js/segment-editor.js" defer></script>
+    <script src="js/summary.js" defer></script>
+    <script src="js/app.js" defer></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
 
-    <!-- Header -->
     <header class="border-b border-slate-800 bg-slate-950/50 backdrop-blur py-4 px-6 flex justify-between items-center">
         <div class="flex items-center space-x-3">
             <i class="fa-solid fa-wave-square text-brand-500 text-2xl"></i>
@@ -30,73 +36,42 @@
         <span class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">100% Client-Side / Local Storage</span>
     </header>
 
-    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- Left Column: Settings & Upload -->
-        <div class="lg:col-span-5 space-y-6">
+        <!-- Left column: settings & upload -->
+        <div class="lg:col-span-4 space-y-6">
 
-            <!-- API Keys -->
-            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-5 shadow-lg">
-                <h2 class="text-lg font-semibold mb-4 flex items-center text-slate-200">
-                    <i class="fa-solid fa-key text-brand-500 mr-2"></i> API-Schlüssel (lokal gespeichert)
-                </h2>
-                <div class="space-y-4">
+            <details id="keys-panel" class="card group">
+                <summary class="card-title cursor-pointer list-none flex justify-between items-center">
+                    <span><i class="fa-solid fa-key text-brand-500 mr-2"></i> API-Schlüssel</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-500 transition group-open:rotate-180"></i>
+                </summary>
+                <div class="space-y-4 mt-4">
+                    <div><label for="key-gladia" class="field-label">Gladia</label><input type="password" id="key-gladia" autocomplete="off" class="field"></div>
+                    <div><label for="key-elevenlabs" class="field-label">ElevenLabs</label><input type="password" id="key-elevenlabs" autocomplete="off" class="field"></div>
+                    <div><label for="key-assembly" class="field-label">AssemblyAI</label><input type="password" id="key-assembly" autocomplete="off" class="field"></div>
+                    <div><label for="key-deepgram" class="field-label">Deepgram</label><input type="password" id="key-deepgram" autocomplete="off" class="field"></div>
                     <div>
-                        <label for="key-gladia" class="block text-xs font-medium text-slate-400 mb-1">Gladia API Key</label>
-                        <input type="password" id="key-gladia" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                        <label for="deepgram-proxy" class="field-label">Deepgram Proxy-URL <span class="text-slate-500">(nötig – Deepgram blockiert Browser-Anfragen)</span></label>
+                        <input type="url" id="deepgram-proxy" placeholder="https://mein-proxy.workers.dev" autocomplete="off" class="field">
                     </div>
-                    <div>
-                        <label for="key-elevenlabs" class="block text-xs font-medium text-slate-400 mb-1">ElevenLabs API Key</label>
-                        <input type="password" id="key-elevenlabs" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
-                    </div>
-                    <div>
-                        <label for="key-assembly" class="block text-xs font-medium text-slate-400 mb-1">AssemblyAI API Key</label>
-                        <input type="password" id="key-assembly" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
-                    </div>
-                    <div>
-                        <label for="key-deepgram" class="block text-xs font-medium text-slate-400 mb-1">Deepgram API Key</label>
-                        <input type="password" id="key-deepgram" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
-                    </div>
-                    <div>
-                        <label for="deepgram-proxy" class="block text-xs font-medium text-slate-400 mb-1">Deepgram Proxy-URL <span class="text-slate-500">(nötig – Deepgram blockiert Browser-Anfragen)</span></label>
-                        <input type="url" id="deepgram-proxy" placeholder="https://mein-proxy.workers.dev" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
-                    </div>
-                    <div class="border-t border-slate-700 pt-4">
-                        <label for="key-anthropic" class="block text-xs font-medium text-slate-400 mb-1">Anthropic API Key <span class="text-slate-500">(für Zusammenfassungen)</span></label>
-                        <input type="password" id="key-anthropic" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
-                    </div>
-                    <div>
-                        <label for="key-openai" class="block text-xs font-medium text-slate-400 mb-1">OpenAI API Key <span class="text-slate-500">(für Zusammenfassungen)</span></label>
-                        <input type="password" id="key-openai" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
-                    </div>
+                    <div class="border-t border-slate-700 pt-4"><label for="key-anthropic" class="field-label">Anthropic <span class="text-slate-500">(Zusammenfassungen)</span></label><input type="password" id="key-anthropic" autocomplete="off" class="field"></div>
+                    <div><label for="key-openai" class="field-label">OpenAI <span class="text-slate-500">(Zusammenfassungen)</span></label><input type="password" id="key-openai" autocomplete="off" class="field"></div>
                     <div class="flex gap-2">
-                        <button onclick="saveKeys()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-xs font-medium py-2 rounded-lg transition">Keys speichern</button>
-                        <button onclick="clearKeys()" class="bg-slate-800 hover:bg-rose-900/60 border border-slate-700 text-xs font-medium px-3 py-2 rounded-lg transition" title="Gespeicherte Keys aus diesem Browser löschen">Löschen</button>
+                        <button id="save-keys" class="btn flex-1">Keys speichern</button>
+                        <button id="clear-keys" class="btn btn-danger" title="Gespeicherte Keys aus diesem Browser löschen">Löschen</button>
                     </div>
+                    <p class="text-xs text-slate-500">Keys werden nur in diesem Browser gespeichert und direkt an den jeweiligen Anbieter geschickt.</p>
                 </div>
-            </div>
+            </details>
 
-            <!-- Provider, Model, Language, Diarization -->
-            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-5 shadow-lg space-y-4">
-                <h2 class="text-lg font-semibold flex items-center text-slate-200">
-                    <i class="fa-solid fa-sliders text-brand-500 mr-2"></i> Konfiguration
-                </h2>
+            <section class="card space-y-4">
+                <h2 class="card-title"><i class="fa-solid fa-sliders text-brand-500 mr-2"></i> Konfiguration</h2>
+                <div><label for="provider-select" class="field-label">Anbieter</label><select id="provider-select" class="field"></select></div>
+                <div><label for="model-select" class="field-label">Modell</label><select id="model-select" class="field"></select></div>
                 <div>
-                    <label for="provider-select" class="block text-xs font-medium text-slate-400 mb-1">Anbieter</label>
-                    <select id="provider-select" onchange="updateModels()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
-                        <option value="gladia">Gladia (v2)</option>
-                        <option value="elevenlabs">ElevenLabs (Scribe)</option>
-                        <option value="assembly">AssemblyAI (v2)</option>
-                        <option value="deepgram">Deepgram (Nova)</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="model-select" class="block text-xs font-medium text-slate-400 mb-1">Modell</label>
-                    <select id="model-select" onchange="updateHint()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500"></select>
-                </div>
-                <div>
-                    <label for="language-select" class="block text-xs font-medium text-slate-400 mb-1">Sprache</label>
-                    <select id="language-select" onchange="updateHint()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                    <label for="language-select" class="field-label">Sprache</label>
+                    <select id="language-select" class="field">
                         <option value="de">Deutsch</option>
                         <option value="en">Englisch</option>
                         <option value="fr">Französisch</option>
@@ -107,652 +82,97 @@
                 </div>
                 <div class="rounded-lg border border-slate-700 bg-slate-900/40 p-3 space-y-3">
                     <label class="flex items-center gap-2 text-sm text-slate-300">
-                        <input type="checkbox" id="diarize" checked onchange="updateHint()" class="accent-sky-500">
-                        Sprechererkennung (Diarization)
+                        <input type="checkbox" id="diarize" checked class="accent-sky-500"> Sprechererkennung
                     </label>
                     <div id="speaker-options">
-                        <label for="num-speakers" class="block text-xs font-medium text-slate-400 mb-1">Anzahl Sprecher <span class="text-slate-500">(optional, verbessert die Zuordnung)</span></label>
-                        <input type="number" id="num-speakers" min="1" max="32" placeholder="automatisch" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                        <label for="num-speakers" class="field-label">Anzahl Sprecher <span class="text-slate-500">(optional)</span></label>
+                        <input type="number" id="num-speakers" min="1" max="32" placeholder="automatisch" class="field">
                     </div>
                 </div>
                 <p id="model-hint" class="hidden text-xs text-amber-300/90"></p>
-            </div>
+            </section>
 
-            <!-- Upload -->
-            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-5 shadow-lg">
-                <h2 class="text-lg font-semibold mb-4 flex items-center text-slate-200">
-                    <i class="fa-solid fa-file-audio text-brand-500 mr-2"></i> Audio-Upload
-                </h2>
-                <div id="drop-zone" onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-slate-600 hover:border-brand-500 rounded-xl p-6 text-center cursor-pointer transition bg-slate-900/40">
+            <section class="card">
+                <h2 class="card-title mb-4"><i class="fa-solid fa-file-audio text-brand-500 mr-2"></i> Audio</h2>
+                <div id="drop-zone" role="button" tabindex="0" class="drop-zone">
                     <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-500 mb-2"></i>
                     <p class="text-sm font-medium text-slate-300">Datei hierher ziehen oder klicken</p>
                     <p class="text-xs text-slate-500 mt-1">MP3, WAV, M4A, FLAC, OGG, MP4 …</p>
-                    <input type="file" id="file-input" accept="audio/*,video/*" class="hidden" onchange="handleFile(this.files[0])">
+                    <input type="file" id="file-input" accept="audio/*,video/*" class="hidden">
                 </div>
-
-                <div id="file-info" class="hidden mt-4 bg-slate-900 rounded-lg p-3 border border-slate-700">
-                    <div class="flex justify-between items-center gap-2">
-                        <span id="file-name" class="text-xs font-medium truncate text-slate-300"></span>
-                        <span id="file-size" class="text-xs text-slate-500 shrink-0"></span>
-                    </div>
-                    <audio id="audio-preview" controls class="w-full mt-2 h-8"></audio>
+                <div id="file-info" class="hidden mt-4 flex justify-between items-center gap-2 bg-slate-900 rounded-lg px-3 py-2 border border-slate-700">
+                    <span id="file-name" class="text-xs font-medium truncate text-slate-300"></span>
+                    <span id="file-size" class="text-xs text-slate-500 shrink-0"></span>
                 </div>
-
-                <button id="start-btn" onclick="startTranscription()" disabled class="w-full mt-4 bg-brand-600 hover:bg-brand-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition shadow-md">
-                    Transkription starten
-                </button>
-            </div>
+                <button id="start-btn" disabled class="btn-primary w-full mt-4">Transkription starten</button>
+            </section>
         </div>
 
-        <!-- Right Column: Output -->
-        <div class="lg:col-span-7 flex flex-col space-y-6">
-            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-5 shadow-lg flex-1 flex flex-col">
+        <!-- Right column: editor & summary -->
+        <div class="lg:col-span-8 flex flex-col space-y-6">
+            <section class="card flex-1 flex flex-col">
                 <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
-                    <h2 class="text-lg font-semibold flex items-center text-slate-200">
-                        <i class="fa-solid fa-align-left text-brand-500 mr-2"></i> Ergebnis
-                    </h2>
+                    <h2 class="card-title"><i class="fa-solid fa-align-left text-brand-500 mr-2"></i> Transkript</h2>
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="copyText('output-text')" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-copy mr-1"></i> Kopieren</button>
-                        <button onclick="downloadTxt()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-download mr-1"></i> .TXT</button>
-                        <button onclick="downloadSrt()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-closed-captioning mr-1"></i> .SRT</button>
-                        <button onclick="downloadJson()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-file-code mr-1"></i> .JSON</button>
+                        <button id="copy-transcript" class="btn btn-sm" data-needs-transcript><i class="fa-solid fa-copy mr-1"></i> Kopieren</button>
+                        <button class="btn btn-sm" data-export="txt" data-needs-transcript><i class="fa-solid fa-download mr-1"></i> .TXT</button>
+                        <button class="btn btn-sm" data-export="srt" data-needs-transcript><i class="fa-solid fa-closed-captioning mr-1"></i> .SRT</button>
+                        <button class="btn btn-sm" data-export="vtt" data-needs-transcript><i class="fa-solid fa-closed-captioning mr-1"></i> .VTT</button>
+                        <button class="btn btn-sm" data-export="json" data-needs-transcript><i class="fa-solid fa-file-code mr-1"></i> .JSON</button>
+                        <button id="clear-transcript" class="btn btn-sm btn-danger" data-needs-transcript title="Transkript verwerfen"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>
 
-                <div id="status-banner" class="hidden mb-4 p-3 rounded-lg border text-xs font-medium flex items-center">
-                    <i id="status-icon" class="fa-solid fa-circle-notch fa-spin mr-2"></i>
+                <div id="status-banner" class="status-banner hidden" role="status">
+                    <i id="status-icon"></i>
                     <span id="status-text"></span>
                 </div>
 
-                <textarea id="output-text" oninput="updateSummaryButton()" placeholder="Das fertige Transkript erscheint hier und kann direkt bearbeitet werden …" class="w-full flex-1 min-h-[400px] bg-slate-900 border border-slate-700 rounded-lg p-4 text-sm font-mono text-slate-300 focus:outline-none focus:border-brand-500 resize-y"></textarea>
-                <p class="text-xs text-slate-500 mt-2">TXT und Zusammenfassung nutzen den bearbeiteten Text. SRT und JSON basieren auf dem Originalergebnis mit Zeitstempeln.</p>
-            </div>
+                <div id="player-bar" class="player-bar hidden">
+                    <audio id="audio-player" controls class="w-full h-9"></audio>
+                    <label class="flex items-center gap-2 text-xs text-slate-400 shrink-0">
+                        <input type="checkbox" id="follow-playback" checked class="accent-sky-500"> Mitlaufen
+                    </label>
+                </div>
 
-            <!-- LLM Summary -->
-            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-5 shadow-lg">
+                <div id="speaker-panel" class="speaker-panel hidden" aria-label="Sprecher"></div>
+                <div id="segment-list" class="segment-list"></div>
+            </section>
+
+            <section class="card">
                 <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
-                    <h2 class="text-lg font-semibold flex items-center text-slate-200">
-                        <i class="fa-solid fa-wand-magic-sparkles text-brand-500 mr-2"></i> KI-Zusammenfassung <span class="ml-2 text-xs font-normal text-slate-500">optional</span>
-                    </h2>
+                    <h2 class="card-title"><i class="fa-solid fa-wand-magic-sparkles text-brand-500 mr-2"></i> KI-Zusammenfassung <span class="ml-2 text-xs font-normal text-slate-500">optional</span></h2>
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="copyText('summary-text')" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-copy mr-1"></i> Kopieren</button>
-                        <button onclick="downloadSummary()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-download mr-1"></i> .MD</button>
+                        <button id="summary-copy" class="btn btn-sm"><i class="fa-solid fa-copy mr-1"></i> Kopieren</button>
+                        <button id="summary-download" class="btn btn-sm"><i class="fa-solid fa-download mr-1"></i> .MD</button>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                     <div>
-                        <label for="llm-provider" class="block text-xs font-medium text-slate-400 mb-1">Anbieter</label>
-                        <select id="llm-provider" onchange="updateLlmModels()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                        <label for="llm-provider" class="field-label">Anbieter</label>
+                        <select id="llm-provider" class="field">
                             <option value="anthropic">Anthropic (Claude)</option>
                             <option value="openai">OpenAI</option>
                         </select>
                     </div>
                     <div>
-                        <label for="llm-model" class="block text-xs font-medium text-slate-400 mb-1">Modell</label>
-                        <input id="llm-model" list="llm-model-list" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                        <label for="llm-model" class="field-label">Modell</label>
+                        <input id="llm-model" list="llm-model-list" autocomplete="off" class="field">
                         <datalist id="llm-model-list"></datalist>
                     </div>
                     <div>
-                        <label for="summary-mode" class="block text-xs font-medium text-slate-400 mb-1">Art</label>
-                        <select id="summary-mode" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                        <label for="summary-mode" class="field-label">Art</label>
+                        <select id="summary-mode" class="field">
                             <option value="bullets">Stichpunkte</option>
                             <option value="summary">Zusammenfassung</option>
                             <option value="minutes">Protokoll mit Aufgaben</option>
                         </select>
                     </div>
                 </div>
-                <button id="summary-btn" onclick="generateSummary()" disabled class="w-full bg-brand-600 hover:bg-brand-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition shadow-md mb-4">
-                    Zusammenfassung erstellen
-                </button>
-                <textarea id="summary-text" placeholder="Die Zusammenfassung erscheint hier …" class="w-full min-h-[220px] bg-slate-900 border border-slate-700 rounded-lg p-4 text-sm text-slate-300 focus:outline-none focus:border-brand-500 resize-y"></textarea>
-            </div>
+                <button id="summary-btn" disabled class="btn-primary w-full mb-4">Zusammenfassung erstellen</button>
+                <textarea id="summary-text" placeholder="Die Zusammenfassung erscheint hier …" class="field min-h-[220px] p-4 resize-y"></textarea>
+            </section>
         </div>
     </main>
-
-    <script>
-        const MODELS = {
-            gladia: [
-                { id: 'solaria-3', name: 'Solaria 3 (höchste Präzision, DE/EN/FR/ES/IT)' },
-                { id: 'solaria-1', name: 'Solaria 1 (100+ Sprachen)' }
-            ],
-            elevenlabs: [
-                { id: 'scribe_v2', name: 'Scribe v2 (neuestes Modell)' },
-                { id: 'scribe_v1', name: 'Scribe v1' }
-            ],
-            assembly: [
-                { id: 'universal-3-5-pro', name: 'Universal-3.5 Pro (höchste Genauigkeit)' },
-                { id: 'universal-2', name: 'Universal-2 (99 Sprachen, günstiger)' }
-            ],
-            deepgram: [
-                { id: 'nova-3', name: 'Nova-3 (neuestes Modell)' },
-                { id: 'nova-2', name: 'Nova-2' }
-            ]
-        };
-        const LLM_MODELS = {
-            anthropic: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5'],
-            openai: ['gpt-5', 'gpt-5-mini']
-        };
-        const SUMMARY_PROMPTS = {
-            bullets: 'Fasse das folgende Transkript in prägnanten Stichpunkten zusammen. Gruppiere nach Themen und nenne Entscheidungen und offene Punkte.',
-            summary: 'Schreibe eine gut lesbare Zusammenfassung des folgenden Transkripts in wenigen Absätzen. Halte dich an den Inhalt und erfinde nichts hinzu.',
-            minutes: 'Erstelle aus dem folgenden Transkript ein Besprechungsprotokoll mit den Abschnitten: Teilnehmer (soweit erkennbar), Themen, Ergebnisse/Entscheidungen, Aufgaben (Wer? Was? Bis wann?, soweit genannt) und offene Punkte.'
-        };
-        const STORED_FIELDS = {
-            gladia: 'key-gladia', elevenlabs: 'key-elevenlabs', assembly: 'key-assembly',
-            deepgram: 'key-deepgram', deepgram_proxy: 'deepgram-proxy',
-            anthropic: 'key-anthropic', openai: 'key-openai'
-        };
-        const POLL_INTERVAL_MS = 3000;
-        const POLL_TIMEOUT_MS = 60 * 60 * 1000;
-
-        let selectedFile = null;
-        let rawResult = null;   // original provider response
-        let segments = [];      // normalized: [{ speaker, start, end, text }] – speaker is 'A', 'B', … or null; times in seconds
-
-        const $ = id => document.getElementById(id);
-
-        window.addEventListener('DOMContentLoaded', () => {
-            loadKeys();
-            updateModels();
-            updateLlmModels();
-            setupDropZone();
-        });
-
-        // --- Keys (localStorage may be unavailable, e.g. in private mode) ---
-        function loadKeys() {
-            for (const [name, field] of Object.entries(STORED_FIELDS)) {
-                try { $(field).value = localStorage.getItem('scribe_key_' + name) || ''; } catch (_) {}
-            }
-        }
-
-        function saveKeys() {
-            try {
-                for (const [name, field] of Object.entries(STORED_FIELDS)) {
-                    localStorage.setItem('scribe_key_' + name, $(field).value.trim());
-                }
-                setStatus('API-Schlüssel lokal in diesem Browser gespeichert.', 'success');
-            } catch (_) {
-                setStatus('Speichern nicht möglich (Browser blockiert localStorage). Keys gelten nur für diese Sitzung.', 'error');
-            }
-        }
-
-        function clearKeys() {
-            for (const [name, field] of Object.entries(STORED_FIELDS)) {
-                $(field).value = '';
-                try { localStorage.removeItem('scribe_key_' + name); } catch (_) {}
-            }
-            setStatus('Gespeicherte API-Schlüssel gelöscht.', 'success');
-        }
-
-        function getKey(name, label) {
-            const key = $(STORED_FIELDS[name]).value.trim();
-            if (!key) throw new Error(`Bitte ${label} API-Key eingeben.`);
-            return key;
-        }
-
-        // --- Config ---
-        function updateModels() {
-            const provider = $('provider-select').value;
-            const modelSelect = $('model-select');
-            modelSelect.innerHTML = '';
-            for (const m of MODELS[provider]) {
-                const opt = document.createElement('option');
-                opt.value = m.id;
-                opt.textContent = m.name;
-                modelSelect.appendChild(opt);
-            }
-            updateHint();
-        }
-
-        function updateHint() {
-            $('speaker-options').classList.toggle('hidden', !$('diarize').checked);
-            const hints = [];
-            if ($('model-select').value === 'solaria-3' && $('language-select').value === 'auto') {
-                hints.push('Solaria 3 braucht eine feste Sprache. Bitte eine Sprache wählen oder auf Solaria 1 wechseln.');
-            }
-            if ($('provider-select').value === 'deepgram') {
-                hints.push('Deepgram erlaubt keine direkten Browser-Anfragen. Trage oben eine Proxy-URL ein (siehe README, Cloudflare-Worker-Vorlage im Repo).');
-            }
-            $('model-hint').textContent = hints.join(' ');
-            $('model-hint').classList.toggle('hidden', !hints.length);
-        }
-
-        function getSpeakerCount() {
-            const n = parseInt($('num-speakers').value, 10);
-            return Number.isInteger(n) && n > 0 ? n : null;
-        }
-
-        // Speaker index 0, 1, … → 'A', 'B', …, 'Z', 'AA', …
-        function speakerLetter(index) {
-            let s = '';
-            let n = index + 1;
-            while (n > 0) {
-                const r = (n - 1) % 26;
-                s = String.fromCharCode(65 + r) + s;
-                n = Math.floor((n - 1) / 26);
-            }
-            return s;
-        }
-
-        // --- File handling ---
-        function setupDropZone() {
-            const zone = $('drop-zone');
-            const highlight = on => zone.classList.toggle('border-brand-500', on);
-            ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); highlight(true); }));
-            ['dragleave', 'drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); highlight(false); }));
-            zone.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
-        }
-
-        function handleFile(file) {
-            if (!file) return;
-            selectedFile = file;
-            $('file-name').textContent = file.name;
-            $('file-size').textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-            const preview = $('audio-preview');
-            if (preview.src) URL.revokeObjectURL(preview.src);
-            preview.src = URL.createObjectURL(file);
-            $('file-info').classList.remove('hidden');
-            $('start-btn').disabled = false;
-        }
-
-        // --- Status ---
-        function setStatus(text, type = 'info') {
-            const banner = $('status-banner');
-            const styles = {
-                info: ['bg-blue-950/50', 'border-blue-700', 'text-blue-300', 'fa-solid fa-circle-notch fa-spin mr-2'],
-                success: ['bg-emerald-950/50', 'border-emerald-700', 'text-emerald-300', 'fa-solid fa-circle-check mr-2'],
-                error: ['bg-rose-950/50', 'border-rose-700', 'text-rose-300', 'fa-solid fa-triangle-exclamation mr-2']
-            };
-            banner.className = 'mb-4 p-3 rounded-lg border text-xs font-medium flex items-center';
-            const [bg, border, color, icon] = styles[type];
-            banner.classList.add(bg, border, color);
-            $('status-icon').className = icon;
-            $('status-text').textContent = text;
-        }
-
-        // --- Transcription ---
-        async function startTranscription() {
-            if (!selectedFile) return;
-            const provider = $('provider-select').value;
-            const opts = {
-                model: $('model-select').value,
-                language: $('language-select').value,
-                diarize: $('diarize').checked,
-                speakers: $('diarize').checked ? getSpeakerCount() : null
-            };
-
-            $('output-text').value = '';
-            $('summary-text').value = '';
-            rawResult = null;
-            segments = [];
-            updateSummaryButton();
-            $('start-btn').disabled = true;
-            const startedAt = Date.now();
-
-            try {
-                if (provider === 'gladia') await processGladia(opts);
-                else if (provider === 'elevenlabs') await processElevenLabs(opts);
-                else if (provider === 'assembly') await processAssembly(opts);
-                else await processDeepgram(opts);
-
-                $('output-text').value = formatTranscript(segments, opts.diarize);
-                const secs = Math.round((Date.now() - startedAt) / 1000);
-                setStatus(`Transkription abgeschlossen (${secs} s).`, 'success');
-            } catch (err) {
-                const hint = err instanceof TypeError ? ' (Netzwerk- oder CORS-Fehler)' : '';
-                setStatus('Fehler: ' + err.message + hint, 'error');
-            } finally {
-                $('start-btn').disabled = false;
-                updateSummaryButton();
-            }
-        }
-
-        async function fetchJson(url, options, label) {
-            const res = await fetch(url, options);
-            const text = await res.text();
-            let data = null;
-            try { data = text ? JSON.parse(text) : null; } catch (_) {}
-            if (!res.ok) {
-                const msg = data?.error?.message || data?.message || data?.err_msg
-                    || (typeof data?.error === 'string' ? data.error : null)
-                    || data?.detail?.message || (typeof data?.detail === 'string' ? data.detail : null)
-                    || text || res.statusText;
-                throw new Error(`${label}: HTTP ${res.status} – ${msg}`);
-            }
-            return data;
-        }
-
-        async function poll(label, check) {
-            const start = Date.now();
-            while (Date.now() - start < POLL_TIMEOUT_MS) {
-                const elapsed = Math.round((Date.now() - start) / 1000);
-                setStatus(`${label} verarbeitet Audio … (${elapsed} s)`);
-                await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
-                const done = await check();
-                if (done) return done;
-            }
-            throw new Error(`${label}: Zeitüberschreitung beim Warten auf das Ergebnis.`);
-        }
-
-        function fallbackSegment(text) {
-            return text ? [{ speaker: null, start: 0, end: 0, text }] : [];
-        }
-
-        // --- Gladia ---
-        async function processGladia({ model, language, diarize, speakers }) {
-            const key = getKey('gladia', 'Gladia');
-            if (model === 'solaria-3' && language === 'auto') {
-                throw new Error('Solaria 3 benötigt eine feste Sprache.');
-            }
-
-            setStatus('Lade Datei zu Gladia hoch …');
-            const form = new FormData();
-            form.append('audio', selectedFile);
-            const upload = await fetchJson('https://api.gladia.io/v2/upload', {
-                method: 'POST',
-                headers: { 'x-gladia-key': key },
-                body: form
-            }, 'Gladia Upload');
-
-            setStatus(`Starte Gladia-Transkription (${model}) …`);
-            const body = { audio_url: upload.audio_url, model, diarization: diarize };
-            if (speakers) body.diarization_config = { number_of_speakers: speakers };
-            if (language !== 'auto') body.language_config = { languages: [language], code_switching: false };
-            const job = await fetchJson('https://api.gladia.io/v2/pre-recorded', {
-                method: 'POST',
-                headers: { 'x-gladia-key': key, 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            }, 'Gladia Start');
-
-            const resultUrl = job.result_url || `https://api.gladia.io/v2/pre-recorded/${job.id}`;
-            const data = await poll('Gladia', async () => {
-                const d = await fetchJson(resultUrl, { headers: { 'x-gladia-key': key } }, 'Gladia Status');
-                if (d.status === 'error') throw new Error('Gladia: ' + (d.error_code || 'Verarbeitung fehlgeschlagen.'));
-                return d.status === 'done' ? d : null;
-            });
-
-            rawResult = data;
-            const t = data.result?.transcription || {};
-            segments = (t.utterances || []).map(u => ({
-                speaker: diarize && u.speaker != null ? speakerLetter(u.speaker) : null,
-                start: u.start, end: u.end, text: u.text.trim()
-            }));
-            if (!segments.length) segments = fallbackSegment(t.full_transcript);
-        }
-
-        // --- ElevenLabs ---
-        async function processElevenLabs({ model, language, diarize, speakers }) {
-            const key = getKey('elevenlabs', 'ElevenLabs');
-
-            setStatus('Sende Audio an ElevenLabs Scribe … (kann bei langen Dateien dauern)');
-            const form = new FormData();
-            form.append('file', selectedFile);
-            form.append('model_id', model);
-            form.append('diarize', String(diarize));
-            form.append('tag_audio_events', 'false');
-            if (speakers) form.append('num_speakers', String(speakers));
-            if (language !== 'auto') form.append('language_code', language);
-
-            const data = await fetchJson('https://api.elevenlabs.io/v1/speech-to-text', {
-                method: 'POST',
-                headers: { 'xi-api-key': key },
-                body: form
-            }, 'ElevenLabs');
-
-            rawResult = data;
-            segments = groupWordsBySpeaker(data.words || [], diarize);
-            if (!segments.length) segments = fallbackSegment(data.text);
-        }
-
-        // ElevenLabs returns single words; group consecutive words of the same speaker.
-        // Without diarization, start a new segment after sentence-ending punctuation.
-        function groupWordsBySpeaker(words, diarize) {
-            const out = [];
-            let cur = null;
-            for (const w of words) {
-                if (w.type === 'audio_event') continue;
-                const idx = diarize && w.speaker_id ? parseInt(w.speaker_id.replace(/\D/g, ''), 10) : NaN;
-                const speaker = Number.isNaN(idx) ? null : speakerLetter(idx);
-                const sentenceEnded = !diarize && cur && /[.!?]$/.test(cur.text.trim());
-                if (w.type === 'word' && (!cur || cur.speaker !== speaker || sentenceEnded)) {
-                    if (cur) out.push(cur);
-                    cur = { speaker, start: w.start, end: w.end, text: '' };
-                }
-                if (!cur) continue;
-                cur.text += w.text;
-                if (w.type === 'word') cur.end = w.end;
-            }
-            if (cur) out.push(cur);
-            return out.map(s => ({ ...s, text: s.text.trim() }));
-        }
-
-        // --- AssemblyAI ---
-        async function processAssembly({ model, language, diarize, speakers }) {
-            const key = getKey('assembly', 'AssemblyAI');
-
-            setStatus('Lade Datei zu AssemblyAI hoch …');
-            const upload = await fetchJson('https://api.assemblyai.com/v2/upload', {
-                method: 'POST',
-                headers: { 'authorization': key, 'Content-Type': 'application/octet-stream' },
-                body: selectedFile
-            }, 'AssemblyAI Upload');
-
-            setStatus(`Starte AssemblyAI-Transkription (${model}) …`);
-            const body = { audio_url: upload.upload_url, speech_models: [model], speaker_labels: diarize };
-            if (speakers) body.speakers_expected = speakers;
-            if (language === 'auto') body.language_detection = true;
-            else body.language_code = language;
-            const job = await fetchJson('https://api.assemblyai.com/v2/transcript', {
-                method: 'POST',
-                headers: { 'authorization': key, 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            }, 'AssemblyAI Start');
-
-            const data = await poll('AssemblyAI', async () => {
-                const d = await fetchJson(`https://api.assemblyai.com/v2/transcript/${job.id}`,
-                    { headers: { 'authorization': key } }, 'AssemblyAI Status');
-                if (d.status === 'error') throw new Error('AssemblyAI: ' + (d.error || 'Verarbeitung fehlgeschlagen.'));
-                return d.status === 'completed' ? d : null;
-            });
-
-            rawResult = data;
-            segments = (data.utterances || []).map(u => ({
-                speaker: diarize ? u.speaker : null, start: u.start / 1000, end: u.end / 1000, text: u.text
-            }));
-            if (!segments.length) segments = fallbackSegment(data.text);
-        }
-
-        // --- Deepgram ---
-        async function processDeepgram({ model, language, diarize }) {
-            const key = getKey('deepgram', 'Deepgram');
-            const base = ($('deepgram-proxy').value.trim() || 'https://api.deepgram.com').replace(/\/+$/, '');
-
-            const params = new URLSearchParams({
-                model, diarize: String(diarize), utterances: 'true', smart_format: 'true', punctuate: 'true'
-            });
-            if (language === 'auto') params.set('detect_language', 'true');
-            else params.set('language', language);
-
-            setStatus(`Sende Audio an Deepgram (${model}) …`);
-            const data = await fetchJson(`${base}/v1/listen?${params}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Token ' + key,
-                    'Content-Type': selectedFile.type || 'application/octet-stream'
-                },
-                body: selectedFile
-            }, 'Deepgram');
-
-            rawResult = data;
-            segments = (data.results?.utterances || []).map(u => ({
-                speaker: diarize && u.speaker != null ? speakerLetter(u.speaker) : null,
-                start: u.start, end: u.end, text: u.transcript.trim()
-            }));
-            if (!segments.length) segments = fallbackSegment(data.results?.channels?.[0]?.alternatives?.[0]?.transcript);
-        }
-
-        // --- Output & export ---
-        function fmtClock(sec) {
-            const s = Math.floor(sec);
-            const pad = n => String(n).padStart(2, '0');
-            return `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`;
-        }
-
-        function fmtSrt(sec) {
-            const ms = Math.round(sec * 1000);
-            const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60;
-            const pad = (n, l = 2) => String(n).padStart(l, '0');
-            return `${pad(h)}:${pad(m)}:${pad(s)},${pad(ms % 1000, 3)}`;
-        }
-
-        // Diarization on:  [Sprecher A - 00:01:12]: Hallo, wie geht es dir?
-        // Diarization off: [00:01:12]: Hallo, wie geht es dir?
-        function formatTranscript(segs, withSpeakers) {
-            const hasTimes = segs.some(s => s.end > 0);
-            if (!hasTimes && !segs.some(s => s.speaker)) return segs.map(s => s.text).join('\n\n');
-            return segs.map(s => {
-                const parts = [];
-                if (withSpeakers && s.speaker) parts.push(`Sprecher ${s.speaker}`);
-                if (hasTimes) parts.push(fmtClock(s.start));
-                return `[${parts.join(' - ')}]: ${s.text}`;
-            }).join('\n\n');
-        }
-
-        function download(content, filename, type) {
-            const url = URL.createObjectURL(new Blob([content], { type }));
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-        }
-
-        function baseName() {
-            return selectedFile ? selectedFile.name.replace(/\.[^.]+$/, '') : 'transkription';
-        }
-
-        function downloadTxt() {
-            const text = $('output-text').value;
-            if (text) download(text, baseName() + '.txt', 'text/plain;charset=utf-8');
-        }
-
-        function downloadSrt() {
-            const timed = segments.filter(s => s.end > 0);
-            if (!timed.length) return setStatus('Keine Zeitstempel vorhanden – SRT-Export nicht möglich.', 'error');
-            const srt = timed.map((s, i) =>
-                `${i + 1}\n${fmtSrt(s.start)} --> ${fmtSrt(s.end)}\n${s.speaker ? `Sprecher ${s.speaker}: ` : ''}${s.text}\n`
-            ).join('\n');
-            download(srt, baseName() + '.srt', 'application/x-subrip;charset=utf-8');
-        }
-
-        function downloadJson() {
-            if (rawResult) download(JSON.stringify(rawResult, null, 2), baseName() + '.json', 'application/json');
-        }
-
-        function downloadSummary() {
-            const text = $('summary-text').value;
-            if (text) download(text, baseName() + '-zusammenfassung.md', 'text/markdown;charset=utf-8');
-        }
-
-        async function copyText(id) {
-            const el = $(id);
-            if (!el.value) return;
-            try {
-                await navigator.clipboard.writeText(el.value);
-                setStatus('In die Zwischenablage kopiert.', 'success');
-            } catch (_) {
-                el.select();
-                setStatus('Kopieren blockiert – Text ist markiert, bitte mit Strg+C kopieren.', 'error');
-            }
-        }
-
-        // --- LLM summary ---
-        function updateLlmModels() {
-            const provider = $('llm-provider').value;
-            const list = $('llm-model-list');
-            list.innerHTML = '';
-            for (const id of LLM_MODELS[provider]) {
-                const opt = document.createElement('option');
-                opt.value = id;
-                list.appendChild(opt);
-            }
-            $('llm-model').value = LLM_MODELS[provider][0];
-        }
-
-        function updateSummaryButton() {
-            $('summary-btn').disabled = !$('output-text').value.trim();
-        }
-
-        async function generateSummary() {
-            const transcript = $('output-text').value.trim();
-            if (!transcript) return;
-            const provider = $('llm-provider').value;
-            const model = $('llm-model').value.trim();
-            const instruction = SUMMARY_PROMPTS[$('summary-mode').value];
-            const system = 'Du bist ein sorgfältiger Assistent, der Gesprächstranskripte auswertet. '
-                + 'Antworte auf Deutsch in Markdown. Gib nur Inhalte wieder, die im Transkript vorkommen. '
-                + 'Das Transkript ist automatisch erstellt und kann Erkennungsfehler enthalten.';
-            const user = `${instruction}\n\n<transcript>\n${transcript}\n</transcript>`;
-
-            $('summary-btn').disabled = true;
-            $('summary-text').value = '';
-            setStatus(`Erstelle Zusammenfassung mit ${model} …`);
-            try {
-                if (!model) throw new Error('Bitte ein Modell angeben.');
-                const text = provider === 'anthropic'
-                    ? await summarizeAnthropic(model, system, user)
-                    : await summarizeOpenAI(model, system, user);
-                $('summary-text').value = text.trim();
-                setStatus('Zusammenfassung erstellt.', 'success');
-            } catch (err) {
-                const hint = err instanceof TypeError ? ' (Netzwerk- oder CORS-Fehler)' : '';
-                setStatus('Fehler bei der Zusammenfassung: ' + err.message + hint, 'error');
-            } finally {
-                updateSummaryButton();
-            }
-        }
-
-        async function summarizeAnthropic(model, system, user) {
-            const key = getKey('anthropic', 'Anthropic');
-            const headers = {
-                'x-api-key': key,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true',
-                'content-type': 'application/json'
-            };
-            const body = { model, max_tokens: 16000, system, messages: [{ role: 'user', content: user }] };
-            // On a safety decline, let the API re-run the request on a fallback model instead of stopping.
-            if (['claude-opus-5', 'claude-fable-5-1'].includes(model)) {
-                headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
-                body.fallbacks = 'default';
-            }
-            const data = await fetchJson('https://api.anthropic.com/v1/messages', {
-                method: 'POST', headers, body: JSON.stringify(body)
-            }, 'Anthropic');
-
-            if (data.stop_reason === 'refusal') {
-                throw new Error('Anfrage wurde vom Modell abgelehnt' + (data.stop_details?.explanation ? ': ' + data.stop_details.explanation : '.'));
-            }
-            const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
-            if (data.stop_reason === 'max_tokens') return text + '\n\n[… Ausgabe wegen Längenlimit abgeschnitten]';
-            return text;
-        }
-
-        async function summarizeOpenAI(model, system, user) {
-            const key = getKey('openai', 'OpenAI');
-            const data = await fetchJson('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model,
-                    messages: [
-                        { role: 'system', content: system },
-                        { role: 'user', content: user }
-                    ]
-                })
-            }, 'OpenAI');
-            return data.choices?.[0]?.message?.content || '';
-        }
-    </script>
 </body>
 </html>
