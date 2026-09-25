@@ -22,6 +22,7 @@
     <script src="js/apis/assembly.js" defer></script>
     <script src="js/apis/deepgram.js" defer></script>
     <script src="js/export.js" defer></script>
+    <script src="js/vocabulary.js" defer></script>
     <script src="js/segment-editor.js" defer></script>
     <script src="js/summary.js" defer></script>
     <script src="js/app.js" defer></script>
@@ -90,6 +91,26 @@
                     </div>
                 </div>
                 <p id="model-hint" class="hidden text-xs text-amber-300/90"></p>
+            </section>
+
+            <section class="card space-y-3">
+                <div class="flex justify-between items-center gap-2">
+                    <h2 class="card-title"><i class="fa-solid fa-spell-check text-brand-500 mr-2"></i> Fachbegriffe</h2>
+                    <span id="vocab-count" class="text-xs text-slate-500"></span>
+                </div>
+                <label class="flex items-center gap-2 text-sm text-slate-300">
+                    <input type="checkbox" id="vocab-enabled" checked class="accent-sky-500"> Bei der Transkription mitschicken
+                </label>
+                <div>
+                    <label for="vocab-text" class="field-label">Ein Begriff pro Zeile – Namen, Firmen, Fachwörter, Abkürzungen. Zeilen mit # sind Kommentare.</label>
+                    <textarea id="vocab-text" rows="7" spellcheck="false" class="field font-mono resize-y" placeholder="# Projekt Neubau Musterstraße&#10;Brandschottung&#10;Deckendurchführung&#10;Estrichleger&#10;Fa. Mustermann Elektro"></textarea>
+                </div>
+                <p id="vocab-hint" class="hidden text-xs text-slate-400"></p>
+                <div class="flex gap-2">
+                    <button id="vocab-import" class="btn flex-1"><i class="fa-solid fa-file-import mr-1"></i> Importieren</button>
+                    <button id="vocab-export" class="btn flex-1"><i class="fa-solid fa-file-export mr-1"></i> Exportieren</button>
+                    <input type="file" id="vocab-file" accept=".txt,.csv,text/plain,text/csv" class="hidden">
+                </div>
             </section>
 
             <section class="card">

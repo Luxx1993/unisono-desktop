@@ -3,7 +3,7 @@ window.Scribe = window.Scribe || {};
 (function (S) {
     const BASE = 'https://api.assemblyai.com/v2';
 
-    async function transcribe(file, { key, model, language, diarize, speakers, onStatus }) {
+    async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, onStatus }) {
         onStatus('Lade Datei zu AssemblyAI hoch …');
         const upload = await S.http.fetchJson(`${BASE}/upload`, {
             method: 'POST',
@@ -14,6 +14,11 @@ window.Scribe = window.Scribe || {};
         onStatus(`Starte AssemblyAI-Transkription (${model}) …`);
         const body = { audio_url: upload.upload_url, speech_models: [model], speaker_labels: diarize };
         if (speakers) body.speakers_expected = speakers;
+        if (vocabulary?.length) {
+            // Universal-3.5 Pro takes keyterm prompts; Universal-2 uses the older word boost.
+            if (model === 'universal-2') Object.assign(body, { word_boost: vocabulary, boost_param: 'default' });
+            else body.keyterms_prompt = vocabulary;
+        }
         if (language === 'auto') body.language_detection = true;
         else body.language_code = language;
         const job = await S.http.fetchJson(`${BASE}/transcript`, {
@@ -45,6 +50,7 @@ window.Scribe = window.Scribe || {};
             { id: 'universal-3-5-pro', name: 'Universal-3.5 Pro (höchste Genauigkeit)' },
             { id: 'universal-2', name: 'Universal-2 (99 Sprachen, günstiger)' }
         ],
+        vocabularySupport: () => ({ maxTerms: 1000, maxWords: 6 }),
         transcribe
     };
 })(window.Scribe);

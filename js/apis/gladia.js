@@ -3,7 +3,7 @@ window.Scribe = window.Scribe || {};
 (function (S) {
     const BASE = 'https://api.gladia.io/v2';
 
-    async function transcribe(file, { key, model, language, diarize, speakers, onStatus }) {
+    async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, onStatus }) {
         if (model === 'solaria-3' && language === 'auto') {
             throw new Error('Solaria 3 benötigt eine feste Sprache.');
         }
@@ -21,6 +21,10 @@ window.Scribe = window.Scribe || {};
         const body = { audio_url: upload.audio_url, model, diarization: diarize };
         if (speakers) body.diarization_config = { number_of_speakers: speakers };
         if (language !== 'auto') body.language_config = { languages: [language], code_switching: false };
+        if (vocabulary?.length) {
+            body.custom_vocabulary = true;
+            body.custom_vocabulary_config = { vocabulary, default_intensity: 0.5 };
+        }
         const job = await S.http.fetchJson(`${BASE}/pre-recorded`, {
             method: 'POST',
             headers: { 'x-gladia-key': key, 'Content-Type': 'application/json' },
@@ -51,6 +55,7 @@ window.Scribe = window.Scribe || {};
             { id: 'solaria-3', name: 'Solaria 3 (höchste Präzision, DE/EN/FR/ES/IT)' },
             { id: 'solaria-1', name: 'Solaria 1 (100+ Sprachen)' }
         ],
+        vocabularySupport: () => ({}),
         transcribe
     };
 })(window.Scribe);

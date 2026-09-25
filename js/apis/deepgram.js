@@ -5,13 +5,15 @@
  */
 window.Scribe = window.Scribe || {};
 (function (S) {
-    async function transcribe(file, { key, model, language, diarize, proxy, onStatus }) {
+    async function transcribe(file, { key, model, language, diarize, vocabulary, proxy, onStatus }) {
         const base = (proxy || 'https://api.deepgram.com').replace(/\/+$/, '');
         const params = new URLSearchParams({
             model, diarize: String(diarize), utterances: 'true', smart_format: 'true', punctuate: 'true'
         });
         if (language === 'auto') params.set('detect_language', 'true');
         else params.set('language', language);
+        // Nova-3: keyterm prompting (repeat the parameter per term); older models: keywords.
+        for (const term of vocabulary || []) params.append(model === 'nova-3' ? 'keyterm' : 'keywords', term);
 
         onStatus(`Sende Audio an Deepgram (${model}) …`);
         const raw = await S.http.fetchJson(`${base}/v1/listen?${params}`, {
@@ -40,6 +42,8 @@ window.Scribe = window.Scribe || {};
             { id: 'nova-2', name: 'Nova-2' }
         ],
         needsProxy: true,
+        // Terms travel in the URL, so keep the list moderate. Nova-2 keywords are single words.
+        vocabularySupport: model => (model === 'nova-3' ? { maxTerms: 100 } : { maxTerms: 100, maxWords: 1 }),
         transcribe
     };
 })(window.Scribe);

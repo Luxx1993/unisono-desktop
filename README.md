@@ -14,6 +14,19 @@ UI-Tool zum Hochladen, Transkribieren und Bearbeiten von Audioaufnahmen – komp
 4. Transkript im Segment-Editor korrigieren (siehe unten) und als TXT, SRT, VTT oder JSON exportieren.
 5. Optional: Mit einem Anthropic- oder OpenAI-Key per Klick Stichpunkte, eine Zusammenfassung oder ein Protokoll erzeugen lassen.
 
+## Fachbegriffe
+
+In der Karte **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und Abkürzungen (ein Begriff pro Zeile, Zeilen mit `#` sind Kommentare). Die Liste bleibt im Browser gespeichert, lässt sich als `.txt` exportieren und aus `.txt`/`.csv` importieren. Bei jeder Transkription wird sie im jeweils passenden Format mitgeschickt:
+
+| Anbieter | Parameter | Grenzen |
+|---|---|---|
+| Gladia | `custom_vocabulary_config` | – |
+| ElevenLabs | `keyterms` (nur Scribe v2) | max. 100 Begriffe à 50 Zeichen, ca. 30 % Aufpreis |
+| AssemblyAI | `keyterms_prompt` (Universal-3.5 Pro), `word_boost` (Universal-2) | max. 1.000 Begriffe à 6 Wörter |
+| Deepgram | `keyterm` (Nova-3), `keywords` (Nova-2, nur Einzelwörter) | max. 100 Begriffe |
+
+Unter der Liste steht, wie viele Begriffe beim gewählten Anbieter ankommen und welche wegen der Grenzen übersprungen werden.
+
 ## Segment-Editor
 
 Das Transkript besteht aus Abschnitten (Segmenten) mit Sprecher, Zeitstempel und Text:
@@ -69,6 +82,7 @@ css/styles.css          Komponenten-Styles (Karten, Felder, Segment-Editor, Spre
 js/state.js             Zentraler State: Segmente, Sprecher, Rohdaten, Autosave
 js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Player-Sync
 js/export.js            TXT, SRT, VTT, JSON aus dem bearbeiteten Stand
+js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
 js/summary.js           KI-Zusammenfassung (Anthropic / OpenAI)
 js/app.js               Keys, Konfiguration, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP- und Polling-Helfer

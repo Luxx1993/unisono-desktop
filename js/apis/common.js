@@ -6,7 +6,11 @@
  * where segments are [{ speaker: 'A' | null, start, end, text }] with times in seconds.
  *
  * options: { key, model, language ('de' | … | 'auto'), diarize, speakers (number | null),
+ *            vocabulary (string[] – already trimmed to the provider's limits),
  *            proxy (Deepgram only), onStatus(text) }
+ *
+ * Optional: vocabularySupport(model) → { maxTerms, maxChars, maxWords, note } or null,
+ * describing whether and how the model accepts technical terms (see vocabulary.js).
  */
 window.Scribe = window.Scribe || {};
 (function (S) {

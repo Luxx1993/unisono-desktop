@@ -1,7 +1,7 @@
 /* ElevenLabs Scribe: one synchronous multipart request. */
 window.Scribe = window.Scribe || {};
 (function (S) {
-    async function transcribe(file, { key, model, language, diarize, speakers, onStatus }) {
+    async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, onStatus }) {
         onStatus('Sende Audio an ElevenLabs Scribe … (kann bei langen Dateien dauern)');
         const form = new FormData();
         form.append('file', file);
@@ -10,6 +10,7 @@ window.Scribe = window.Scribe || {};
         form.append('tag_audio_events', 'false');
         if (speakers) form.append('num_speakers', String(speakers));
         if (language !== 'auto') form.append('language_code', language);
+        for (const term of vocabulary || []) form.append('keyterms', term);
 
         const raw = await S.http.fetchJson('https://api.elevenlabs.io/v1/speech-to-text', {
             method: 'POST',
@@ -50,6 +51,10 @@ window.Scribe = window.Scribe || {};
             { id: 'scribe_v2', name: 'Scribe v2 (neuestes Modell)' },
             { id: 'scribe_v1', name: 'Scribe v1' }
         ],
+        // Keyterms exist only on Scribe v2 and cost extra.
+        vocabularySupport: model => model === 'scribe_v2'
+            ? { maxTerms: 100, maxChars: 50, note: 'Hinweis: ElevenLabs berechnet mit Fachbegriffen ca. 30 % Aufpreis.' }
+            : null,
         transcribe
     };
 })(window.Scribe);

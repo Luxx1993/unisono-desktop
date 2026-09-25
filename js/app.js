@@ -106,6 +106,15 @@ window.Scribe = window.Scribe || {};
         }
         $('model-hint').textContent = hints.join(' ');
         $('model-hint').classList.toggle('hidden', !hints.length);
+
+        const vocabHint = S.vocabulary.describe(vocabularySupport());
+        $('vocab-hint').textContent = vocabHint;
+        $('vocab-hint').classList.toggle('hidden', !vocabHint);
+    }
+
+    function vocabularySupport() {
+        const api = S.apis[$('provider-select').value];
+        return api.vocabularySupport ? api.vocabularySupport($('model-select').value) : null;
     }
 
     function getSpeakerCount() {
@@ -145,6 +154,7 @@ window.Scribe = window.Scribe || {};
 
         const provider = $('provider-select').value;
         const diarize = $('diarize').checked;
+        const { terms: vocabulary } = S.vocabulary.prepare(S.vocabulary.getTerms(), vocabularySupport());
         $('start-btn').disabled = true;
         const startedAt = Date.now();
 
@@ -156,6 +166,7 @@ window.Scribe = window.Scribe || {};
                 diarize,
                 speakers: diarize ? getSpeakerCount() : null,
                 proxy: $('deepgram-proxy').value.trim(),
+                vocabulary,
                 onStatus: text => setStatus(text)
             });
             S.state.setTranscript({ raw, segments, provider, fileName: currentFile.name });
@@ -177,6 +188,8 @@ window.Scribe = window.Scribe || {};
         S.ui = { setStatus, showError, copy, getKey };
 
         loadKeys();
+        S.vocabulary.init();
+        S.vocabulary.onChange(updateHint);
         populateProviders();
         setupDropZone();
 
