@@ -23,6 +23,7 @@
     <script src="js/apis/deepgram.js" defer></script>
     <script src="js/export.js" defer></script>
     <script src="js/vocabulary.js" defer></script>
+    <script src="js/recorder.js" defer></script>
     <script src="js/segment-editor.js" defer></script>
     <script src="js/summary.js" defer></script>
     <script src="js/app.js" defer></script>
@@ -65,6 +66,41 @@
                     <p class="text-xs text-slate-500">Keys werden nur in diesem Browser gespeichert und direkt an den jeweiligen Anbieter geschickt.</p>
                 </div>
             </details>
+
+            <section class="card">
+                <h2 class="card-title mb-4"><i class="fa-solid fa-file-audio text-brand-500 mr-2"></i> Audio</h2>
+
+                <div id="recorder" class="recorder">
+                    <div class="flex items-center gap-2">
+                        <button id="rec-start" class="rec-btn rec-btn-record"><i class="fa-solid fa-microphone mr-2"></i> Aufnehmen</button>
+                        <button id="rec-pause" class="rec-btn hidden"><i class="fa-solid fa-pause mr-2"></i> Pause</button>
+                        <button id="rec-resume" class="rec-btn hidden"><i class="fa-solid fa-play mr-2"></i> Weiter</button>
+                        <button id="rec-stop" class="rec-btn rec-btn-stop hidden"><i class="fa-solid fa-stop mr-2"></i> Stopp</button>
+                        <button id="rec-save" class="btn btn-sm ml-auto hidden" title="Aufnahme als Audiodatei speichern"><i class="fa-solid fa-download mr-1"></i> Sichern</button>
+                    </div>
+                    <div id="rec-live" class="rec-live hidden" aria-live="polite">
+                        <span class="rec-dot" aria-hidden="true"></span>
+                        <span id="rec-state" class="text-xs text-slate-300"></span>
+                        <span id="rec-time" class="rec-time">00:00:00</span>
+                        <div class="rec-level" aria-hidden="true"><div id="rec-level-bar" class="rec-level-bar"></div></div>
+                    </div>
+                    <p id="rec-unsupported" class="hidden text-xs text-amber-300/90">Dieser Browser unterstützt keine Aufnahme über das Mikrofon.</p>
+                </div>
+
+                <p class="or-divider"><span>oder Datei hochladen</span></p>
+
+                <div id="drop-zone" role="button" tabindex="0" class="drop-zone">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-500 mb-2"></i>
+                    <p class="text-sm font-medium text-slate-300">Datei hierher ziehen oder klicken</p>
+                    <p class="text-xs text-slate-500 mt-1">MP3, WAV, M4A, FLAC, OGG, MP4 …</p>
+                    <input type="file" id="file-input" accept="audio/*,video/*" class="hidden">
+                </div>
+                <div id="file-info" class="hidden mt-4 flex justify-between items-center gap-2 bg-slate-900 rounded-lg px-3 py-2 border border-slate-700">
+                    <span id="file-name" class="text-xs font-medium truncate text-slate-300"></span>
+                    <span id="file-size" class="text-xs text-slate-500 shrink-0"></span>
+                </div>
+                <button id="start-btn" disabled class="btn-primary w-full mt-4">Transkription starten</button>
+            </section>
 
             <section class="card space-y-4">
                 <h2 class="card-title"><i class="fa-solid fa-sliders text-brand-500 mr-2"></i> Konfiguration</h2>
@@ -113,20 +149,6 @@
                 </div>
             </section>
 
-            <section class="card">
-                <h2 class="card-title mb-4"><i class="fa-solid fa-file-audio text-brand-500 mr-2"></i> Audio</h2>
-                <div id="drop-zone" role="button" tabindex="0" class="drop-zone">
-                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-500 mb-2"></i>
-                    <p class="text-sm font-medium text-slate-300">Datei hierher ziehen oder klicken</p>
-                    <p class="text-xs text-slate-500 mt-1">MP3, WAV, M4A, FLAC, OGG, MP4 …</p>
-                    <input type="file" id="file-input" accept="audio/*,video/*" class="hidden">
-                </div>
-                <div id="file-info" class="hidden mt-4 flex justify-between items-center gap-2 bg-slate-900 rounded-lg px-3 py-2 border border-slate-700">
-                    <span id="file-name" class="text-xs font-medium truncate text-slate-300"></span>
-                    <span id="file-size" class="text-xs text-slate-500 shrink-0"></span>
-                </div>
-                <button id="start-btn" disabled class="btn-primary w-full mt-4">Transkription starten</button>
-            </section>
         </div>
 
         <!-- Right column: editor & summary -->

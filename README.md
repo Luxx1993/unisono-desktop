@@ -14,6 +14,14 @@ UI-Tool zum Hochladen, Transkribieren und Bearbeiten von Audioaufnahmen – komp
 4. Transkript im Segment-Editor korrigieren (siehe unten) und als TXT, SRT, VTT oder JSON exportieren.
 5. Optional: Mit einem Anthropic- oder OpenAI-Key per Klick Stichpunkte, eine Zusammenfassung oder ein Protokoll erzeugen lassen.
 
+## Mikrofonaufnahme
+
+Mit **Aufnehmen** in der Audio-Karte nimmst du Diktate oder Besprechungen direkt im Browser auf – mit Pause/Weiter, Zeitanzeige und Pegelanzeige. Während der Aufnahme bleibt der Bildschirm an (wo der Browser das erlaubt). Nach **Stopp** wird die Aufnahme wie eine hochgeladene Datei behandelt: Sie liegt im Player und kann transkribiert oder über **Sichern** als Audiodatei gespeichert werden.
+
+- Format: Opus/WebM (Chrome, Edge, Firefox) bzw. AAC/M4A (Safari), ca. 0,5 MB pro Minute.
+- Der Browser fragt beim ersten Mal nach der Mikrofon-Freigabe.
+- Die Aufnahme existiert nur in diesem Tab. Beim Schließen während einer Aufnahme warnt der Browser; eine gestoppte Aufnahme vor dem Schließen transkribieren oder sichern.
+
 ## Fachbegriffe
 
 In der Karte **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und Abkürzungen (ein Begriff pro Zeile, Zeilen mit `#` sind Kommentare). Die Liste bleibt im Browser gespeichert, lässt sich als `.txt` exportieren und aus `.txt`/`.csv` importieren. Bei jeder Transkription wird sie im jeweils passenden Format mitgeschickt:
@@ -83,6 +91,7 @@ js/state.js             Zentraler State: Segmente, Sprecher, Rohdaten, Autosave
 js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Player-Sync
 js/export.js            TXT, SRT, VTT, JSON aus dem bearbeiteten Stand
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
+js/recorder.js          Mikrofonaufnahme (MediaRecorder), Pegel, Pause, Bildschirm-wach-halten
 js/summary.js           KI-Zusammenfassung (Anthropic / OpenAI)
 js/app.js               Keys, Konfiguration, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP- und Polling-Helfer

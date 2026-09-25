@@ -79,7 +79,33 @@ window.Scribe = window.Scribe || {};
         return key;
     }
 
-    // --- Configuration ---
+    // --- Configuration (remembered per browser) ---
+    const CONFIG_KEY = 'scribe_config';
+    const CONFIG_FIELDS = ['provider-select', 'model-select', 'language-select', 'diarize', 'num-speakers'];
+
+    function saveConfig() {
+        const values = {};
+        for (const id of CONFIG_FIELDS) values[id] = $(id).type === 'checkbox' ? $(id).checked : $(id).value;
+        try { localStorage.setItem(CONFIG_KEY, JSON.stringify(values)); } catch (_) {}
+    }
+
+    function loadConfig() {
+        let values = null;
+        try { values = JSON.parse(localStorage.getItem(CONFIG_KEY) || 'null'); } catch (_) {}
+        if (!values) return;
+        // Provider first: it decides which models exist.
+        if (S.apis[values['provider-select']]) {
+            $('provider-select').value = values['provider-select'];
+            updateModels();
+        }
+        for (const id of CONFIG_FIELDS.slice(1)) {
+            if (!(id in values)) continue;
+            if ($(id).type === 'checkbox') $(id).checked = values[id];
+            else if ($(id).tagName !== 'SELECT' || [...$(id).options].some(o => o.value === values[id])) $(id).value = values[id];
+        }
+        updateHint();
+    }
+
     function populateProviders() {
         const select = $('provider-select');
         for (const [id, api] of Object.entries(S.apis)) {
@@ -135,6 +161,10 @@ window.Scribe = window.Scribe || {};
 
     function handleFile(file) {
         if (!file) return;
+        if (S.recorder.isActive()) {
+            setStatus('Bitte zuerst die laufende Aufnahme stoppen.', 'error');
+            return;
+        }
         currentFile = file;
         $('file-name').textContent = file.name;
         $('file-size').textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
@@ -145,6 +175,22 @@ window.Scribe = window.Scribe || {};
         if (player.src) URL.revokeObjectURL(player.src);
         player.src = URL.createObjectURL(file);
         $('player-bar').classList.remove('hidden');
+    }
+
+    // Chrome's MediaRecorder writes WebM without a duration, so the player reports Infinity
+    // and can't show progress or seek properly. Seeking far past the end makes it compute
+    // the real duration; then jump back to the start.
+    function fixUnknownDuration() {
+        const player = $('audio-player');
+        player.addEventListener('loadedmetadata', () => {
+            if (player.duration !== Infinity) return;
+            const reset = () => {
+                player.removeEventListener('durationchange', reset);
+                player.currentTime = 0;
+            };
+            player.addEventListener('durationchange', reset);
+            player.currentTime = 1e101;
+        });
     }
 
     // --- Transcription ---
@@ -186,12 +232,17 @@ window.Scribe = window.Scribe || {};
     // --- Init ---
     function init() {
         S.ui = { setStatus, showError, copy, getKey };
+        S.app = { hasFile: () => !!currentFile };
 
         loadKeys();
         S.vocabulary.init();
         S.vocabulary.onChange(updateHint);
         populateProviders();
+        loadConfig();
+        CONFIG_FIELDS.forEach(id => $(id).addEventListener('change', saveConfig));
         setupDropZone();
+        S.recorder.init({ onRecorded: handleFile });
+        fixUnknownDuration();
 
         $('save-keys').addEventListener('click', saveKeys);
         $('clear-keys').addEventListener('click', clearKeys);

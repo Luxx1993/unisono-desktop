@@ -311,3 +311,106 @@
 @media (hover: none) {
     .seg-actions { opacity: 1; }
 }
+
+/* --- Recorder --- */
+.recorder {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.rec-btn {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.55rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--border);
+    color: #f1f5f9;
+    transition: background 0.15s;
+}
+
+.rec-btn:hover:not(:disabled) { background: var(--border-strong); }
+.rec-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.rec-btn-record { background: #be123c; }
+.rec-btn-record:hover:not(:disabled) { background: #e11d48; }
+.rec-btn-stop { background: #f1f5f9; color: #0f172a; }
+.rec-btn-stop:hover:not(:disabled) { background: #fff; }
+
+.rec-live {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--bg-field);
+}
+
+.rec-dot {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 9999px;
+    background: #64748b;
+    flex-shrink: 0;
+}
+
+.recorder.is-recording .rec-dot {
+    background: #f43f5e;
+    animation: rec-pulse 1.2s ease-in-out infinite;
+}
+
+.recorder.is-paused .rec-dot { background: #fbbf24; }
+
+@keyframes rec-pulse {
+    50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .recorder.is-recording .rec-dot { animation: none; }
+}
+
+.rec-time {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.875rem;
+    color: #f1f5f9;
+}
+
+.rec-level {
+    flex: 1;
+    height: 0.4rem;
+    border-radius: 9999px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.rec-level-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #34d399, #fbbf24 70%, #f43f5e);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.08s linear;
+}
+
+.or-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-block: 1rem;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.or-divider::before,
+.or-divider::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--border);
+}
+
+.drop-zone.is-disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
