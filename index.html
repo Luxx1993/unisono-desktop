@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scribe Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        if (window.tailwind) tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-950/50 backdrop-blur py-4 px-6 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <i class="fa-solid fa-wave-square text-brand-500 text-2xl"></i>
+            <h1 class="text-xl font-bold tracking-wide">Scribe Studio</h1>
+        </div>
+        <span class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">100% Client-Side / Local Storage</span>
+    </header>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Settings & Upload -->
+        <div class="lg:col-span-5 space-y-6">
+
+            <!-- API Keys -->
+            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-5 shadow-lg">
+                <h2 class="text-lg font-semibold mb-4 flex items-center text-slate-200">
+                    <i class="fa-solid fa-key text-brand-500 mr-2"></i> API-Schlüssel (lokal gespeichert)
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="key-gladia" class="block text-xs font-medium text-slate-400 mb-1">Gladia API Key</label>
+                        <input type="password" id="key-gladia" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label for="key-elevenlabs" class="block text-xs font-medium text-slate-400 mb-1">ElevenLabs API Key</label>
+                        <input type="password" id="key-elevenlabs" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label for="key-assembly" class="block text-xs font-medium text-slate-400 mb-1">AssemblyAI API Key</label>
+                        <input type="password" id="key-assembly" autocomplete="off" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveKeys()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-xs font-medium py-2 rounded-lg transition">Keys speichern</button>
+                        <button onclick="clearKeys()" class="bg-slate-800 hover:bg-rose-900/60 border border-slate-700 text-xs font-medium px-3 py-2 rounded-lg transition" title="Gespeicherte Keys aus diesem Browser löschen">Löschen</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Provider, Model, Language -->
+            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-5 shadow-lg space-y-4">
+                <h2 class="text-lg font-semibold flex items-center text-slate-200">
+                    <i class="fa-solid fa-sliders text-brand-500 mr-2"></i> Konfiguration
+                </h2>
+                <div>
+                    <label for="provider-select" class="block text-xs font-medium text-slate-400 mb-1">Anbieter</label>
+                    <select id="provider-select" onchange="updateModels()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                        <option value="gladia">Gladia (v2)</option>
+                        <option value="elevenlabs">ElevenLabs (Scribe)</option>
+                        <option value="assembly">AssemblyAI (v2)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="model-select" class="block text-xs font-medium text-slate-400 mb-1">Modell</label>
+                    <select id="model-select" onchange="updateHint()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500"></select>
+                </div>
+                <div>
+                    <label for="language-select" class="block text-xs font-medium text-slate-400 mb-1">Sprache</label>
+                    <select id="language-select" onchange="updateHint()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                        <option value="de">Deutsch</option>
+                        <option value="en">Englisch</option>
+                        <option value="fr">Französisch</option>
+                        <option value="es">Spanisch</option>
+                        <option value="it">Italienisch</option>
+                        <option value="auto">Automatisch erkennen</option>
+                    </select>
+                </div>
+                <label class="flex items-center gap-2 text-sm text-slate-300">
+                    <input type="checkbox" id="diarize" checked class="accent-sky-500">
+                    Sprechererkennung
+                </label>
+                <p id="model-hint" class="hidden text-xs text-amber-300/90"></p>
+            </div>
+
+            <!-- Upload -->
+            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-5 shadow-lg">
+                <h2 class="text-lg font-semibold mb-4 flex items-center text-slate-200">
+                    <i class="fa-solid fa-file-audio text-brand-500 mr-2"></i> Audio-Upload
+                </h2>
+                <div id="drop-zone" onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-slate-600 hover:border-brand-500 rounded-xl p-6 text-center cursor-pointer transition bg-slate-900/40">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-500 mb-2"></i>
+                    <p class="text-sm font-medium text-slate-300">Datei hierher ziehen oder klicken</p>
+                    <p class="text-xs text-slate-500 mt-1">MP3, WAV, M4A, FLAC, OGG, MP4 …</p>
+                    <input type="file" id="file-input" accept="audio/*,video/*" class="hidden" onchange="handleFile(this.files[0])">
+                </div>
+
+                <div id="file-info" class="hidden mt-4 bg-slate-900 rounded-lg p-3 border border-slate-700">
+                    <div class="flex justify-between items-center gap-2">
+                        <span id="file-name" class="text-xs font-medium truncate text-slate-300"></span>
+                        <span id="file-size" class="text-xs text-slate-500 shrink-0"></span>
+                    </div>
+                    <audio id="audio-preview" controls class="w-full mt-2 h-8"></audio>
+                </div>
+
+                <button id="start-btn" onclick="startTranscription()" disabled class="w-full mt-4 bg-brand-600 hover:bg-brand-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition shadow-md">
+                    Transkription starten
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Column: Output -->
+        <div class="lg:col-span-7 flex flex-col space-y-6">
+            <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-5 shadow-lg flex-1 flex flex-col">
+                <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+                    <h2 class="text-lg font-semibold flex items-center text-slate-200">
+                        <i class="fa-solid fa-align-left text-brand-500 mr-2"></i> Ergebnis
+                    </h2>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="copyToClipboard()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-copy mr-1"></i> Kopieren</button>
+                        <button onclick="downloadTxt()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-download mr-1"></i> .TXT</button>
+                        <button onclick="downloadSrt()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-closed-captioning mr-1"></i> .SRT</button>
+                        <button onclick="downloadJson()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-file-code mr-1"></i> .JSON</button>
+                    </div>
+                </div>
+
+                <div id="status-banner" class="hidden mb-4 p-3 rounded-lg border text-xs font-medium flex items-center">
+                    <i id="status-icon" class="fa-solid fa-circle-notch fa-spin mr-2"></i>
+                    <span id="status-text"></span>
+                </div>
+
+                <textarea id="output-text" placeholder="Das fertige Transkript erscheint hier und kann direkt bearbeitet werden …" class="w-full flex-1 min-h-[400px] bg-slate-900 border border-slate-700 rounded-lg p-4 text-sm font-mono text-slate-300 focus:outline-none focus:border-brand-500 resize-y"></textarea>
+                <p class="text-xs text-slate-500 mt-2">TXT exportiert den bearbeiteten Text. SRT und JSON basieren auf dem Originalergebnis mit Zeitstempeln.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const MODELS = {
+            gladia: [
+                { id: 'solaria-3', name: 'Solaria 3 (höchste Präzision, DE/EN/FR/ES/IT)' },
+                { id: 'solaria-1', name: 'Solaria 1 (100+ Sprachen)' }
+            ],
+            elevenlabs: [
+                { id: 'scribe_v2', name: 'Scribe v2 (neuestes Modell)' },
+                { id: 'scribe_v1', name: 'Scribe v1' }
+            ],
+            assembly: [
+                { id: 'universal-3-5-pro', name: 'Universal-3.5 Pro (höchste Genauigkeit)' },
+                { id: 'universal-2', name: 'Universal-2 (99 Sprachen, günstiger)' }
+            ]
+        };
+        const KEY_FIELDS = { gladia: 'key-gladia', elevenlabs: 'key-elevenlabs', assembly: 'key-assembly' };
+        const POLL_INTERVAL_MS = 3000;
+        const POLL_TIMEOUT_MS = 60 * 60 * 1000;
+
+        let selectedFile = null;
+        let rawResult = null;   // original provider response
+        let segments = [];      // normalized: [{ speaker, start, end, text }] in seconds
+
+        const $ = id => document.getElementById(id);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadKeys();
+            updateModels();
+            setupDropZone();
+        });
+
+        // --- Keys (localStorage may be unavailable, e.g. in private mode) ---
+        function loadKeys() {
+            for (const [provider, field] of Object.entries(KEY_FIELDS)) {
+                try { $(field).value = localStorage.getItem('scribe_key_' + provider) || ''; } catch (_) {}
+            }
+        }
+
+        function saveKeys() {
+            try {
+                for (const [provider, field] of Object.entries(KEY_FIELDS)) {
+                    localStorage.setItem('scribe_key_' + provider, $(field).value.trim());
+                }
+                setStatus('API-Schlüssel lokal in diesem Browser gespeichert.', 'success');
+            } catch (_) {
+                setStatus('Speichern nicht möglich (Browser blockiert localStorage). Keys gelten nur für diese Sitzung.', 'error');
+            }
+        }
+
+        function clearKeys() {
+            for (const [provider, field] of Object.entries(KEY_FIELDS)) {
+                $(field).value = '';
+                try { localStorage.removeItem('scribe_key_' + provider); } catch (_) {}
+            }
+            setStatus('Gespeicherte API-Schlüssel gelöscht.', 'success');
+        }
+
+        function getKey(provider, label) {
+            const key = $(KEY_FIELDS[provider]).value.trim();
+            if (!key) throw new Error(`Bitte ${label} API-Key eingeben.`);
+            return key;
+        }
+
+        // --- Config ---
+        function updateModels() {
+            const provider = $('provider-select').value;
+            const modelSelect = $('model-select');
+            modelSelect.innerHTML = '';
+            for (const m of MODELS[provider]) {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.name;
+                modelSelect.appendChild(opt);
+            }
+            updateHint();
+        }
+
+        function updateHint() {
+            const hint = $('model-hint');
+            const needsFixedLanguage = $('model-select').value === 'solaria-3' && $('language-select').value === 'auto';
+            hint.textContent = needsFixedLanguage
+                ? 'Solaria 3 braucht eine feste Sprache. Bitte eine Sprache wählen oder auf Solaria 1 wechseln.'
+                : '';
+            hint.classList.toggle('hidden', !needsFixedLanguage);
+        }
+
+        // --- File handling ---
+        function setupDropZone() {
+            const zone = $('drop-zone');
+            const highlight = on => zone.classList.toggle('border-brand-500', on);
+            ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); highlight(true); }));
+            ['dragleave', 'drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); highlight(false); }));
+            zone.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+        }
+
+        function handleFile(file) {
+            if (!file) return;
+            selectedFile = file;
+            $('file-name').textContent = file.name;
+            $('file-size').textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            const preview = $('audio-preview');
+            if (preview.src) URL.revokeObjectURL(preview.src);
+            preview.src = URL.createObjectURL(file);
+            $('file-info').classList.remove('hidden');
+            $('start-btn').disabled = false;
+        }
+
+        // --- Status ---
+        function setStatus(text, type = 'info') {
+            const banner = $('status-banner');
+            const styles = {
+                info: ['bg-blue-950/50', 'border-blue-700', 'text-blue-300', 'fa-solid fa-circle-notch fa-spin mr-2'],
+                success: ['bg-emerald-950/50', 'border-emerald-700', 'text-emerald-300', 'fa-solid fa-circle-check mr-2'],
+                error: ['bg-rose-950/50', 'border-rose-700', 'text-rose-300', 'fa-solid fa-triangle-exclamation mr-2']
+            };
+            banner.className = 'mb-4 p-3 rounded-lg border text-xs font-medium flex items-center';
+            const [bg, border, color, icon] = styles[type];
+            banner.classList.add(bg, border, color);
+            $('status-icon').className = icon;
+            $('status-text').textContent = text;
+        }
+
+        // --- Transcription ---
+        async function startTranscription() {
+            if (!selectedFile) return;
+            const provider = $('provider-select').value;
+            const opts = {
+                model: $('model-select').value,
+                language: $('language-select').value,
+                diarize: $('diarize').checked
+            };
+
+            $('output-text').value = '';
+            rawResult = null;
+            segments = [];
+            $('start-btn').disabled = true;
+            const startedAt = Date.now();
+
+            try {
+                if (provider === 'gladia') await processGladia(opts);
+                else if (provider === 'elevenlabs') await processElevenLabs(opts);
+                else await processAssembly(opts);
+
+                $('output-text').value = formatTranscript(segments, opts.diarize);
+                const secs = Math.round((Date.now() - startedAt) / 1000);
+                setStatus(`Transkription abgeschlossen (${secs} s).`, 'success');
+            } catch (err) {
+                const hint = err instanceof TypeError ? ' (Netzwerk- oder CORS-Fehler)' : '';
+                setStatus('Fehler: ' + err.message + hint, 'error');
+            } finally {
+                $('start-btn').disabled = false;
+            }
+        }
+
+        async function fetchJson(url, options, label) {
+            const res = await fetch(url, options);
+            const text = await res.text();
+            let data = null;
+            try { data = text ? JSON.parse(text) : null; } catch (_) {}
+            if (!res.ok) {
+                const msg = data?.message || data?.error || data?.detail?.message
+                    || (typeof data?.detail === 'string' ? data.detail : null)
+                    || text || res.statusText;
+                throw new Error(`${label}: HTTP ${res.status} – ${msg}`);
+            }
+            return data;
+        }
+
+        async function poll(label, check) {
+            const start = Date.now();
+            while (Date.now() - start < POLL_TIMEOUT_MS) {
+                const elapsed = Math.round((Date.now() - start) / 1000);
+                setStatus(`${label} verarbeitet Audio … (${elapsed} s)`);
+                await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
+                const done = await check();
+                if (done) return done;
+            }
+            throw new Error(`${label}: Zeitüberschreitung beim Warten auf das Ergebnis.`);
+        }
+
+        // --- Gladia ---
+        async function processGladia({ model, language, diarize }) {
+            const key = getKey('gladia', 'Gladia');
+            if (model === 'solaria-3' && language === 'auto') {
+                throw new Error('Solaria 3 benötigt eine feste Sprache.');
+            }
+
+            setStatus('Lade Datei zu Gladia hoch …');
+            const form = new FormData();
+            form.append('audio', selectedFile);
+            const upload = await fetchJson('https://api.gladia.io/v2/upload', {
+                method: 'POST',
+                headers: { 'x-gladia-key': key },
+                body: form
+            }, 'Gladia Upload');
+
+            setStatus(`Starte Gladia-Transkription (${model}) …`);
+            const body = { audio_url: upload.audio_url, model, diarization: diarize };
+            if (language !== 'auto') body.language_config = { languages: [language], code_switching: false };
+            const job = await fetchJson('https://api.gladia.io/v2/pre-recorded', {
+                method: 'POST',
+                headers: { 'x-gladia-key': key, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            }, 'Gladia Start');
+
+            const resultUrl = job.result_url || `https://api.gladia.io/v2/pre-recorded/${job.id}`;
+            const data = await poll('Gladia', async () => {
+                const d = await fetchJson(resultUrl, { headers: { 'x-gladia-key': key } }, 'Gladia Status');
+                if (d.status === 'error') throw new Error('Gladia: ' + (d.error_code || 'Verarbeitung fehlgeschlagen.'));
+                return d.status === 'done' ? d : null;
+            });
+
+            rawResult = data;
+            const t = data.result?.transcription || {};
+            segments = (t.utterances || []).map(u => ({
+                speaker: u.speaker != null ? `Sprecher ${u.speaker + 1}` : null,
+                start: u.start, end: u.end, text: u.text.trim()
+            }));
+            if (!segments.length && t.full_transcript) segments = [{ speaker: null, start: 0, end: 0, text: t.full_transcript }];
+        }
+
+        // --- ElevenLabs ---
+        async function processElevenLabs({ model, language, diarize }) {
+            const key = getKey('elevenlabs', 'ElevenLabs');
+
+            setStatus('Sende Audio an ElevenLabs Scribe … (kann bei langen Dateien dauern)');
+            const form = new FormData();
+            form.append('file', selectedFile);
+            form.append('model_id', model);
+            form.append('diarize', String(diarize));
+            form.append('tag_audio_events', 'false');
+            if (language !== 'auto') form.append('language_code', language);
+
+            const data = await fetchJson('https://api.elevenlabs.io/v1/speech-to-text', {
+                method: 'POST',
+                headers: { 'xi-api-key': key },
+                body: form
+            }, 'ElevenLabs');
+
+            rawResult = data;
+            segments = groupWordsBySpeaker(data.words || []);
+            if (!segments.length && data.text) segments = [{ speaker: null, start: 0, end: 0, text: data.text }];
+        }
+
+        function groupWordsBySpeaker(words) {
+            const out = [];
+            let cur = null;
+            for (const w of words) {
+                if (w.type === 'audio_event') continue;
+                const speaker = w.speaker_id ? 'Sprecher ' + (parseInt(w.speaker_id.replace(/\D/g, ''), 10) + 1 || w.speaker_id) : null;
+                if (w.type === 'word' && (!cur || cur.speaker !== speaker)) {
+                    if (cur) out.push(cur);
+                    cur = { speaker, start: w.start, end: w.end, text: '' };
+                }
+                if (!cur) continue;
+                cur.text += w.text;
+                if (w.type === 'word') cur.end = w.end;
+            }
+            if (cur) out.push(cur);
+            return out.map(s => ({ ...s, text: s.text.trim() }));
+        }
+
+        // --- AssemblyAI ---
+        async function processAssembly({ model, language, diarize }) {
+            const key = getKey('assembly', 'AssemblyAI');
+
+            setStatus('Lade Datei zu AssemblyAI hoch …');
+            const upload = await fetchJson('https://api.assemblyai.com/v2/upload', {
+                method: 'POST',
+                headers: { 'authorization': key, 'Content-Type': 'application/octet-stream' },
+                body: selectedFile
+            }, 'AssemblyAI Upload');
+
+            setStatus(`Starte AssemblyAI-Transkription (${model}) …`);
+            const body = { audio_url: upload.upload_url, speech_models: [model], speaker_labels: diarize };
+            if (language === 'auto') body.language_detection = true;
+            else body.language_code = language;
+            const job = await fetchJson('https://api.assemblyai.com/v2/transcript', {
+                method: 'POST',
+                headers: { 'authorization': key, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            }, 'AssemblyAI Start');
+
+            const data = await poll('AssemblyAI', async () => {
+                const d = await fetchJson(`https://api.assemblyai.com/v2/transcript/${job.id}`,
+                    { headers: { 'authorization': key } }, 'AssemblyAI Status');
+                if (d.status === 'error') throw new Error('AssemblyAI: ' + (d.error || 'Verarbeitung fehlgeschlagen.'));
+                return d.status === 'completed' ? d : null;
+            });
+
+            rawResult = data;
+            segments = (data.utterances || []).map(u => ({
+                speaker: 'Sprecher ' + u.speaker, start: u.start / 1000, end: u.end / 1000, text: u.text
+            }));
+            if (!segments.length && data.text) segments = [{ speaker: null, start: 0, end: 0, text: data.text }];
+        }
+
+        // --- Output & export ---
+        function fmtClock(sec) {
+            const s = Math.floor(sec);
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
+            return (h ? String(h).padStart(2, '0') + ':' : '') + String(m).padStart(2, '0') + ':' + String(r).padStart(2, '0');
+        }
+
+        function fmtSrt(sec) {
+            const ms = Math.round(sec * 1000);
+            const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60;
+            const pad = (n, l = 2) => String(n).padStart(l, '0');
+            return `${pad(h)}:${pad(m)}:${pad(s)},${pad(ms % 1000, 3)}`;
+        }
+
+        function formatTranscript(segs, withSpeakers) {
+            const hasTimes = segs.some(s => s.end > 0);
+            return segs.map(s => {
+                const prefix = [
+                    hasTimes ? `[${fmtClock(s.start)}]` : '',
+                    withSpeakers && s.speaker ? `${s.speaker}:` : ''
+                ].filter(Boolean).join(' ');
+                return prefix ? `${prefix} ${s.text}` : s.text;
+            }).join('\n\n');
+        }
+
+        function download(content, filename, type) {
+            const url = URL.createObjectURL(new Blob([content], { type }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function baseName() {
+            return selectedFile ? selectedFile.name.replace(/\.[^.]+$/, '') : 'transkription';
+        }
+
+        function downloadTxt() {
+            const text = $('output-text').value;
+            if (text) download(text, baseName() + '.txt', 'text/plain;charset=utf-8');
+        }
+
+        function downloadSrt() {
+            const timed = segments.filter(s => s.end > 0);
+            if (!timed.length) return setStatus('Keine Zeitstempel vorhanden – SRT-Export nicht möglich.', 'error');
+            const srt = timed.map((s, i) =>
+                `${i + 1}\n${fmtSrt(s.start)} --> ${fmtSrt(s.end)}\n${s.speaker ? s.speaker + ': ' : ''}${s.text}\n`
+            ).join('\n');
+            download(srt, baseName() + '.srt', 'application/x-subrip;charset=utf-8');
+        }
+
+        function downloadJson() {
+            if (rawResult) download(JSON.stringify(rawResult, null, 2), baseName() + '.json', 'application/json');
+        }
+
+        async function copyToClipboard() {
+            const text = $('output-text').value;
+            if (!text) return;
+            try {
+                await navigator.clipboard.writeText(text);
+                setStatus('In die Zwischenablage kopiert.', 'success');
+            } catch (_) {
+                $('output-text').select();
+                setStatus('Kopieren blockiert – Text ist markiert, bitte mit Strg+C kopieren.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
