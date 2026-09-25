@@ -42,6 +42,10 @@ window.Scribe = window.Scribe || {};
             { id: 'nova-2', name: 'Nova-2' }
         ],
         needsProxy: true,
+        // Deepgram itself takes 2 GB; a Cloudflare Worker (free/pro plan) accepts at most 100 MB per request.
+        limits: ({ proxy }) => (proxy
+            ? { maxBytes: 100 * 1024 * 1024, source: 'Proxy (Cloudflare Worker)' }
+            : { maxBytes: 2 * 1024 * 1024 * 1024 }),
         // Terms travel in the URL, so keep the list moderate. Nova-2 keywords are single words.
         vocabularySupport: model => (model === 'nova-3' ? { maxTerms: 100 } : { maxTerms: 100, maxWords: 1 }),
         transcribe

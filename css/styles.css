@@ -465,3 +465,19 @@
 
 .export-options label { display: flex; align-items: center; gap: 0.5rem; }
 .export-options label:has(input:disabled) { opacity: 0.5; }
+.export-note { padding-left: 1.4rem; font-size: 0.7rem; color: var(--text-muted); }
+.export-note.is-warning { color: #fbbf24; }
+.export-note:empty { display: none; }
+
+.rec-recovery {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #b45309;
+    border-radius: 0.5rem;
+    background: rgb(69 26 3 / 0.5);
+    color: #fcd34d;
+    font-size: 0.8rem;
+}

@@ -51,6 +51,7 @@ window.Scribe = window.Scribe || {};
             { id: 'scribe_v2', name: 'Scribe v2 (neuestes Modell)' },
             { id: 'scribe_v1', name: 'Scribe v1' }
         ],
+        limits: () => ({ maxBytes: 3 * 1024 * 1024 * 1024, maxSeconds: 10 * 3600 }),
         // Keyterms exist only on Scribe v2 and cost extra.
         vocabularySupport: model => model === 'scribe_v2'
             ? { maxTerms: 100, maxChars: 50, note: 'Hinweis: ElevenLabs berechnet mit Fachbegriffen ca. 30 % Aufpreis.' }

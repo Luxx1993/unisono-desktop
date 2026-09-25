@@ -51,6 +51,7 @@ window.Scribe = window.Scribe || {};
             { id: 'universal-2', name: 'Universal-2 (99 Sprachen, günstiger)' }
         ],
         vocabularySupport: () => ({ maxTerms: 1000, maxWords: 6 }),
+        limits: () => ({ maxBytes: 2.2 * 1024 * 1024 * 1024, maxSeconds: 10 * 3600 }),
         transcribe
     };
 })(window.Scribe);

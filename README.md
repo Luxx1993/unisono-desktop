@@ -20,7 +20,22 @@ Mit **Aufnehmen** in der Audio-Karte nimmst du Diktate oder Besprechungen direkt
 
 - Format: Opus/WebM (Chrome, Edge, Firefox) bzw. AAC/M4A (Safari), ca. 0,5 MB pro Minute.
 - Der Browser fragt beim ersten Mal nach der Mikrofon-Freigabe.
-- Die Aufnahme existiert nur in diesem Tab. Beim Schließen während einer Aufnahme warnt der Browser; eine gestoppte Aufnahme vor dem Schließen transkribieren oder sichern.
+- **Absturzsicher:** Während der Aufnahme wird jede Sekunde im Browser (IndexedDB) gesichert. Wird der Tab geschlossen, neu geladen oder vom Handy beendet, bietet Scribe Studio beim nächsten Öffnen an, die unterbrochene Aufnahme wiederherzustellen. Nach einem normalen Stopp wird die Sicherung gelöscht.
+- Beim Schließen des Tabs warnt der Browser, solange eine Aufnahme läuft oder eine fertige Aufnahme weder transkribiert noch gesichert wurde.
+- Im privaten Modus mancher Browser ist keine Sicherung möglich; die App weist beim Start der Aufnahme darauf hin.
+
+## Grenzen der Anbieter
+
+Vor dem Upload prüft Scribe Studio Dateigröße und Länge gegen die Grenzen des gewählten Anbieters und schlägt passende Alternativen vor – so schlägt nichts erst nach einem langen Upload fehl.
+
+| Anbieter | Max. Dateigröße | Max. Länge |
+|---|---|---|
+| Gladia | 1.000 MB | 2:15 h (Enterprise: 4:15 h) |
+| ElevenLabs | 3 GB | 10 h |
+| AssemblyAI | 2,2 GB | 10 h |
+| Deepgram | 2 GB, über Cloudflare-Worker-Proxy 100 MB | – |
+
+Beim HTML-Export mit eingebettetem Audio wird die Datei etwa ein Drittel größer als das Audio. Ab 25 MB Audio ist das Einbetten deshalb standardmäßig aus.
 
 ## Fachbegriffe
 
@@ -102,6 +117,7 @@ js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Player-Sync
 js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem bearbeiteten Stand
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
 js/recorder.js          Mikrofonaufnahme (MediaRecorder), Pegel, Pause, Bildschirm-wach-halten
+js/recording-backup.js  Laufende Sicherung der Aufnahme in IndexedDB, Wiederherstellung
 js/summary.js           KI-Zusammenfassung (Anthropic / OpenAI)
 js/app.js               Keys, Konfiguration, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP- und Polling-Helfer

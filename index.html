@@ -23,6 +23,7 @@
     <script src="js/apis/deepgram.js" defer></script>
     <script src="js/export.js" defer></script>
     <script src="js/vocabulary.js" defer></script>
+    <script src="js/recording-backup.js" defer></script>
     <script src="js/recorder.js" defer></script>
     <script src="js/segment-editor.js" defer></script>
     <script src="js/summary.js" defer></script>
@@ -69,6 +70,14 @@
 
             <section class="card">
                 <h2 class="card-title mb-4"><i class="fa-solid fa-file-audio text-brand-500 mr-2"></i> Audio</h2>
+
+                <div id="rec-recovery" class="rec-recovery hidden" role="alert">
+                    <p><i class="fa-solid fa-life-ring mr-2"></i><span id="rec-recovery-text"></span></p>
+                    <div class="flex gap-2">
+                        <button id="rec-restore" class="btn btn-sm">Wiederherstellen</button>
+                        <button id="rec-discard" class="btn btn-sm btn-danger">Verwerfen</button>
+                    </div>
+                </div>
 
                 <div id="recorder" class="recorder">
                     <div class="flex items-center gap-2">
@@ -174,6 +183,7 @@
                                 <div class="export-options">
                                     <label><input type="checkbox" id="export-summary" checked class="accent-sky-500"> Zusammenfassung einbeziehen</label>
                                     <label><input type="checkbox" id="export-audio" checked class="accent-sky-500"> Audio in HTML-Seite einbetten</label>
+                                    <span id="export-audio-note" class="export-note"></span>
                                 </div>
                             </div>
                         </div>

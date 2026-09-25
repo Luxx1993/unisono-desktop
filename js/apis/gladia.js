@@ -56,6 +56,7 @@ window.Scribe = window.Scribe || {};
             { id: 'solaria-1', name: 'Solaria 1 (100+ Sprachen)' }
         ],
         vocabularySupport: () => ({}),
+        limits: () => ({ maxBytes: 1000 * 1024 * 1024, maxSeconds: 135 * 60 }),
         transcribe
     };
 })(window.Scribe);

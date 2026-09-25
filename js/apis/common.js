@@ -11,6 +11,9 @@
  *
  * Optional: vocabularySupport(model) → { maxTerms, maxChars, maxWords, note } or null,
  * describing whether and how the model accepts technical terms (see vocabulary.js).
+ *
+ * limits({ proxy }) → { maxBytes, maxSeconds, source } – checked before a file is sent
+ * (see app.js), so a too-large or too-long file fails fast instead of after the upload.
  */
 window.Scribe = window.Scribe || {};
 (function (S) {

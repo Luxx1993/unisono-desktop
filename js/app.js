@@ -15,6 +15,10 @@ window.Scribe = window.Scribe || {};
     };
 
     let currentFile = null;
+    let currentDuration = null;  // seconds, once the player has read the file
+
+    const MB = 1024 * 1024;
+    const HTML_AUDIO_WARN_BYTES = 25 * MB;
 
     // --- Status & helpers shared with other modules ---
     function setStatus(text, type = 'info') {
@@ -124,10 +128,12 @@ window.Scribe = window.Scribe || {};
     function updateHint() {
         $('speaker-options').classList.toggle('hidden', !$('diarize').checked);
         const hints = [];
+        const limitMsg = limitMessage($('provider-select').value);
+        if (limitMsg) hints.push(limitMsg);
         if ($('model-select').value === 'solaria-3' && $('language-select').value === 'auto') {
             hints.push('Solaria 3 braucht eine feste Sprache. Bitte eine Sprache wählen oder auf Solaria 1 wechseln.');
         }
-        if (S.apis[$('provider-select').value].needsProxy) {
+        if (S.apis[$('provider-select').value].needsProxy && !$('deepgram-proxy').value.trim()) {
             hints.push('Deepgram erlaubt keine direkten Browser-Anfragen. Trage unter „API-Schlüssel“ eine Proxy-URL ein (siehe README).');
         }
         $('model-hint').textContent = hints.join(' ');
@@ -141,6 +147,68 @@ window.Scribe = window.Scribe || {};
     function vocabularySupport() {
         const api = S.apis[$('provider-select').value];
         return api.vocabularySupport ? api.vocabularySupport($('model-select').value) : null;
+    }
+
+    // --- Provider limits: file size and duration are checked before anything is uploaded ---
+    function formatSize(bytes) {
+        return bytes >= 1024 * MB
+            ? (bytes / (1024 * MB)).toFixed(1).replace('.', ',') + ' GB'
+            : Math.max(1, Math.round(bytes / MB)) + ' MB';
+    }
+
+    function limitProblems(providerId) {
+        if (!currentFile) return [];
+        const api = S.apis[providerId];
+        const lim = api.limits ? api.limits({ proxy: $('deepgram-proxy').value.trim() }) : {};
+        const problems = [];
+        if (lim.maxBytes && currentFile.size > lim.maxBytes) {
+            problems.push(`Die Datei ist ${formatSize(currentFile.size)} groß, ${lim.source || api.label} nimmt höchstens ${formatSize(lim.maxBytes)} an.`);
+        }
+        if (lim.maxSeconds && currentDuration && currentDuration > lim.maxSeconds) {
+            problems.push(`Die Aufnahme ist ${S.format.clock(currentDuration)} lang, ${api.label} verarbeitet höchstens ${S.format.clock(lim.maxSeconds)}.`);
+        }
+        return problems;
+    }
+
+    function limitMessage(providerId) {
+        const problems = limitProblems(providerId);
+        if (!problems.length) return '';
+        const fitting = Object.keys(S.apis).filter(id => id !== providerId && !limitProblems(id).length);
+        return problems.join(' ') + (fitting.length
+            ? ` Passende Anbieter: ${fitting.map(id => S.apis[id].label).join(', ')}.`
+            : ' Bitte die Datei kürzen oder teilen.');
+    }
+
+    // The duration is known once the player has read the file's metadata (usually instantly).
+    // If the browser can't decode the file (player error), skip the duration check – the
+    // provider may still accept the format, and the size check applies regardless.
+    function waitForDuration(timeoutMs = 3000) {
+        const player = $('audio-player');
+        if (currentDuration || !currentFile || player.error) return Promise.resolve();
+        setStatus('Prüfe Audiodatei …');
+        return new Promise(resolve => {
+            const done = () => {
+                player.removeEventListener('durationchange', check);
+                player.removeEventListener('error', done);
+                clearTimeout(timer);
+                resolve();
+            };
+            const check = () => { if (currentDuration) done(); };
+            const timer = setTimeout(done, timeoutMs);
+            player.addEventListener('durationchange', check);
+            player.addEventListener('error', done);
+        });
+    }
+
+    function trackDuration() {
+        const player = $('audio-player');
+        const update = () => {
+            if (!Number.isFinite(player.duration) || player.duration <= 0 || player.duration === currentDuration) return;
+            currentDuration = player.duration;
+            updateHint();
+        };
+        player.addEventListener('loadedmetadata', update);
+        player.addEventListener('durationchange', update);
     }
 
     function getSpeakerCount() {
@@ -166,6 +234,9 @@ window.Scribe = window.Scribe || {};
             return;
         }
         currentFile = file;
+        currentDuration = null;
+        // Embedding large audio makes the HTML export heavy; start with it off for big files.
+        $('export-audio').checked = file.size <= HTML_AUDIO_WARN_BYTES;
         $('file-name').textContent = file.name;
         $('file-size').textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
         $('file-info').classList.remove('hidden');
@@ -175,6 +246,7 @@ window.Scribe = window.Scribe || {};
         if (player.src) URL.revokeObjectURL(player.src);
         player.src = URL.createObjectURL(file);
         $('player-bar').classList.remove('hidden');
+        updateHint();
     }
 
     // Chrome's MediaRecorder writes WebM without a duration, so the player reports Infinity
@@ -199,6 +271,13 @@ window.Scribe = window.Scribe || {};
         if (S.state.get().segments.length && !confirm('Das aktuelle Transkript inklusive deiner Änderungen wird ersetzt. Fortfahren?')) return;
 
         const provider = $('provider-select').value;
+        await waitForDuration();
+        const limitMsg = limitMessage(provider);
+        if (limitMsg) {
+            setStatus(limitMsg, 'error');
+            return;
+        }
+
         const diarize = $('diarize').checked;
         const { terms: vocabulary } = S.vocabulary.prepare(S.vocabulary.getTerms(), vocabularySupport());
         $('start-btn').disabled = true;
@@ -216,6 +295,7 @@ window.Scribe = window.Scribe || {};
                 onStatus: text => setStatus(text)
             });
             S.state.setTranscript({ raw, segments, provider, fileName: currentFile.name });
+            S.recorder.markUsed(currentFile);
             setStatus(`Transkription abgeschlossen (${Math.round((Date.now() - startedAt) / 1000)} s).`, 'success');
         } catch (err) {
             showError('Fehler', err);
@@ -235,6 +315,10 @@ window.Scribe = window.Scribe || {};
                 const audio = $('export-audio');
                 audio.disabled = !currentFile;
                 audio.parentElement.title = currentFile ? '' : 'Keine Audiodatei geladen';
+                // Base64 embedding adds about a third to the audio size.
+                const note = $('export-audio-note');
+                note.textContent = currentFile ? `HTML-Datei wird ca. ${formatSize(currentFile.size * 1.34)} groß` : '';
+                note.classList.toggle('is-warning', !!currentFile && currentFile.size > HTML_AUDIO_WARN_BYTES);
                 menu.querySelector('[role="menuitem"]').focus();
             }
         };
@@ -285,6 +369,8 @@ window.Scribe = window.Scribe || {};
         setupDropZone();
         S.recorder.init({ onRecorded: handleFile });
         fixUnknownDuration();
+        trackDuration();
+        $('deepgram-proxy').addEventListener('input', updateHint);
 
         $('save-keys').addEventListener('click', saveKeys);
         $('clear-keys').addEventListener('click', clearKeys);
