@@ -414,3 +414,54 @@
     opacity: 0.4;
     pointer-events: none;
 }
+
+/* --- Export menu --- */
+.export-wrap { position: relative; }
+
+.export-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.35rem);
+    z-index: 20;
+    width: min(20rem, calc(100vw - 2rem));
+    display: flex;
+    flex-direction: column;
+    padding: 0.35rem;
+    background: #0b1222;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.6rem;
+    box-shadow: 0 16px 32px -8px rgb(0 0 0 / 0.5);
+}
+
+.export-menu [role="menuitem"] {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    padding: 0.5rem 0.65rem;
+    border-radius: 0.4rem;
+    text-align: left;
+}
+
+.export-menu [role="menuitem"]:hover,
+.export-menu [role="menuitem"]:focus-visible {
+    background: var(--border);
+    outline: none;
+}
+
+.export-menu strong { font-size: 0.85rem; color: #f1f5f9; font-weight: 600; }
+.export-menu span { font-size: 0.72rem; color: var(--text-muted); }
+
+.export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    padding: 0.6rem 0.65rem 0.35rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--text);
+}
+
+.export-options label { display: flex; align-items: center; gap: 0.5rem; }
+.export-options label:has(input:disabled) { opacity: 0.5; }

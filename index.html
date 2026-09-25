@@ -158,10 +158,25 @@
                     <h2 class="card-title"><i class="fa-solid fa-align-left text-brand-500 mr-2"></i> Transkript</h2>
                     <div class="flex flex-wrap gap-2">
                         <button id="copy-transcript" class="btn btn-sm" data-needs-transcript><i class="fa-solid fa-copy mr-1"></i> Kopieren</button>
-                        <button class="btn btn-sm" data-export="txt" data-needs-transcript><i class="fa-solid fa-download mr-1"></i> .TXT</button>
-                        <button class="btn btn-sm" data-export="srt" data-needs-transcript><i class="fa-solid fa-closed-captioning mr-1"></i> .SRT</button>
-                        <button class="btn btn-sm" data-export="vtt" data-needs-transcript><i class="fa-solid fa-closed-captioning mr-1"></i> .VTT</button>
-                        <button class="btn btn-sm" data-export="json" data-needs-transcript><i class="fa-solid fa-file-code mr-1"></i> .JSON</button>
+                        <button id="open-project" class="btn btn-sm" title="Gespeicherte Projektdatei (.scribe.json) öffnen"><i class="fa-solid fa-folder-open mr-1"></i> Öffnen</button>
+                        <input type="file" id="project-file" accept=".json,application/json" class="hidden">
+                        <div class="export-wrap">
+                            <button id="export-toggle" class="btn btn-sm" aria-haspopup="true" aria-expanded="false" aria-controls="export-menu" data-needs-transcript>
+                                <i class="fa-solid fa-download mr-1"></i> Exportieren <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i>
+                            </button>
+                            <div id="export-menu" class="export-menu hidden" role="menu">
+                                <button role="menuitem" data-export="html"><strong>HTML-Seite</strong><span>Zum Lesen und Teilen, im Browser als PDF druckbar</span></button>
+                                <button role="menuitem" data-export="md"><strong>Markdown</strong><span>Für Obsidian, Notion oder Wikis – mit Datum, Sprechern, Tags</span></button>
+                                <button role="menuitem" data-export="txt"><strong>Text</strong><span>Schlicht, zum Einfügen in E-Mail oder Word</span></button>
+                                <button role="menuitem" data-export="srt"><strong>Untertitel SRT</strong><span>Für Videoschnitt und Player</span></button>
+                                <button role="menuitem" data-export="vtt"><strong>Untertitel VTT</strong><span>Für Web-Player, mit Sprechernamen</span></button>
+                                <button role="menuitem" data-export="json"><strong>Projektdatei</strong><span>Später hier öffnen und weiterbearbeiten</span></button>
+                                <div class="export-options">
+                                    <label><input type="checkbox" id="export-summary" checked class="accent-sky-500"> Zusammenfassung einbeziehen</label>
+                                    <label><input type="checkbox" id="export-audio" checked class="accent-sky-500"> Audio in HTML-Seite einbetten</label>
+                                </div>
+                            </div>
+                        </div>
                         <button id="clear-transcript" class="btn btn-sm btn-danger" data-needs-transcript title="Transkript verwerfen"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>

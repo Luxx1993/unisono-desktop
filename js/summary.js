@@ -101,5 +101,13 @@ window.Scribe = window.Scribe || {};
         return data.choices?.[0]?.message?.content || '';
     }
 
-    S.summary = { init };
+    function getText() {
+        return $('summary-text').value;
+    }
+
+    function setText(text) {
+        $('summary-text').value = text || '';
+    }
+
+    S.summary = { init, getText, setText };
 })(window.Scribe);

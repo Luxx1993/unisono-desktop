@@ -224,6 +224,48 @@ window.Scribe = window.Scribe || {};
         }
     }
 
+    // --- Export menu & project files ---
+    function setupExportMenu() {
+        const toggle = $('export-toggle');
+        const menu = $('export-menu');
+        const setOpen = open => {
+            menu.classList.toggle('hidden', !open);
+            toggle.setAttribute('aria-expanded', String(open));
+            if (open) {
+                const audio = $('export-audio');
+                audio.disabled = !currentFile;
+                audio.parentElement.title = currentFile ? '' : 'Keine Audiodatei geladen';
+                menu.querySelector('[role="menuitem"]').focus();
+            }
+        };
+        toggle.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
+        document.addEventListener('click', e => { if (!e.target.closest('.export-wrap')) setOpen(false); });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && !menu.classList.contains('hidden')) { setOpen(false); toggle.focus(); }
+        });
+        menu.querySelectorAll('[data-export]').forEach(item => item.addEventListener('click', () => {
+            setOpen(false);
+            S.export.exportAs(item.dataset.export, {
+                includeSummary: $('export-summary').checked,
+                audioFile: item.dataset.export === 'html' && $('export-audio').checked ? currentFile : null
+            });
+        }));
+    }
+
+    async function openProject(file) {
+        if (!file) return;
+        if (S.state.get().segments.length && !confirm('Das aktuelle Transkript inklusive deiner Änderungen wird ersetzt. Fortfahren?')) return;
+        try {
+            const data = JSON.parse(await file.text());
+            S.state.loadProject(data);
+            S.summary.setText(data.summary);
+            const audioHint = data.fileName ? ` Für den Player die Audiodatei „${data.fileName}“ laden.` : '';
+            setStatus(`Projekt geöffnet: ${S.state.get().segments.length} Abschnitte.${audioHint}`, 'success');
+        } catch (err) {
+            setStatus(err instanceof SyntaxError ? 'Die Datei ist kein gültiges JSON.' : err.message, 'error');
+        }
+    }
+
     function updateTranscriptActions() {
         const has = S.state.get().segments.length > 0;
         document.querySelectorAll('[data-needs-transcript]').forEach(b => { b.disabled = !has; });
@@ -232,7 +274,7 @@ window.Scribe = window.Scribe || {};
     // --- Init ---
     function init() {
         S.ui = { setStatus, showError, copy, getKey };
-        S.app = { hasFile: () => !!currentFile };
+        S.app = { hasFile: () => !!currentFile, getFile: () => currentFile };
 
         loadKeys();
         S.vocabulary.init();
@@ -252,7 +294,9 @@ window.Scribe = window.Scribe || {};
         $('diarize').addEventListener('change', updateHint);
         $('start-btn').addEventListener('click', startTranscription);
 
-        document.querySelectorAll('[data-export]').forEach(b => b.addEventListener('click', () => S.export.exportAs(b.dataset.export)));
+        setupExportMenu();
+        $('open-project').addEventListener('click', () => $('project-file').click());
+        $('project-file').addEventListener('change', e => { openProject(e.target.files[0]); e.target.value = ''; });
         $('copy-transcript').addEventListener('click', () => copy(S.export.toText()));
         $('clear-transcript').addEventListener('click', () => {
             if (confirm('Transkript und alle Änderungen verwerfen?')) S.state.clear();

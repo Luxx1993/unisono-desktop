@@ -46,11 +46,21 @@ Das Transkript besteht aus Abschnitten (Segmenten) mit Sprecher, Zeitstempel und
 - **Click-to-Jump:** Klick auf den Zeitstempel springt im Player an diese Stelle. Der gerade gesprochene Abschnitt wird hervorgehoben („Mitlaufen“ scrollt automatisch mit).
 - **Automatisch gespeichert:** Das bearbeitete Transkript bleibt nach einem Neuladen der Seite erhalten. Die Audiodatei selbst wird nicht gespeichert und muss für den Player erneut geladen werden.
 
-Alle Exporte und die KI-Zusammenfassung verwenden den bearbeiteten Stand. Format der Textausgabe:
+Alle Exporte und die KI-Zusammenfassung verwenden den bearbeiteten Stand.
 
-```
-[Herr Müller - 00:01:12]: Hallo, wie geht es dir?
-```
+## Export
+
+Über **Exportieren** über dem Transkript:
+
+| Format | Wofür |
+|---|---|
+| **HTML-Seite** | Eigenständige Datei zum Lesen und Weitergeben. Optional mit eingebettetem Audio: Klick auf einen Zeitstempel spielt die Stelle ab. Im Browser über *Drucken → Als PDF speichern* sauber druckbar. |
+| **Markdown** | Für Obsidian, Notion oder Wikis – mit Frontmatter (Titel, Datum, Quelle, Anbieter, Dauer, Sprecher, Tags). |
+| **Text** | `[Herr Müller - 00:01:12]: Hallo, wie geht es dir?` – zum Einfügen in E-Mail oder Word. |
+| **Untertitel SRT / VTT** | Für Videos; VTT enthält die Sprechernamen. |
+| **Projektdatei** (`.scribe.json`) | Speichert Transkript, Sprechernamen und Zusammenfassung. Über **Öffnen** später wieder laden und weiterbearbeiten. Die Audiodatei selbst ist nicht enthalten. |
+
+Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (abschaltbar im Menü).
 
 ## Anbieter & Modelle
 
@@ -89,7 +99,7 @@ index.html              Layout
 css/styles.css          Komponenten-Styles (Karten, Felder, Segment-Editor, Sprecherfarben)
 js/state.js             Zentraler State: Segmente, Sprecher, Rohdaten, Autosave
 js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Player-Sync
-js/export.js            TXT, SRT, VTT, JSON aus dem bearbeiteten Stand
+js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem bearbeiteten Stand
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
 js/recorder.js          Mikrofonaufnahme (MediaRecorder), Pegel, Pause, Bildschirm-wach-halten
 js/summary.js           KI-Zusammenfassung (Anthropic / OpenAI)

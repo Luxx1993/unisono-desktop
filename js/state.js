@@ -24,6 +24,7 @@ window.Scribe = window.Scribe || {};
     const state = {
         fileName: null,
         provider: null,
+        createdAt: null,   // ISO date of the transcription
         raw: null,
         segments: [],
         speakers: []
@@ -105,6 +106,31 @@ window.Scribe = window.Scribe || {};
         state.raw = raw ?? null;
         state.provider = provider ?? null;
         state.fileName = fileName ?? null;
+        state.createdAt = segments.length ? new Date().toISOString() : null;
+        emit('reset');
+    }
+
+    // Opens a project file written by Scribe.export (format 'scribe-studio', version 1).
+    // Keeps the edited speaker names and segments exactly as saved.
+    function loadProject(data) {
+        if (data?.format !== 'scribe-studio' || !Array.isArray(data.segments)) {
+            throw new Error('Das ist keine Scribe-Studio-Projektdatei.');
+        }
+        const num = v => (Number.isFinite(v) ? v : 0);
+        state.speakers = (Array.isArray(data.speakers) ? data.speakers : [])
+            .filter(s => s && typeof s.id === 'string')
+            .map(s => ({ id: s.id, name: String(s.name ?? 'Sprecher ' + s.id) }));
+        state.segments = data.segments.map(s => ({
+            id: newSegmentId(),
+            speaker: typeof s.speaker === 'string' ? s.speaker : null,
+            start: num(s.start),
+            end: num(s.end),
+            text: String(s.text ?? '')
+        }));
+        state.fileName = data.fileName || null;
+        state.provider = data.provider || null;
+        state.createdAt = data.createdAt || null;
+        state.raw = data.raw ?? null;
         emit('reset');
     }
 
@@ -168,9 +194,9 @@ window.Scribe = window.Scribe || {};
 
     function persist() {
         try {
-            const { fileName, provider, segments, speakers } = state;
+            const { fileName, provider, createdAt, segments, speakers } = state;
             if (!segments.length) localStorage.removeItem(STORAGE_KEY);
-            else localStorage.setItem(STORAGE_KEY, JSON.stringify({ fileName, provider, segments, speakers }));
+            else localStorage.setItem(STORAGE_KEY, JSON.stringify({ fileName, provider, createdAt, segments, speakers }));
         } catch (_) { /* storage unavailable or full – editing still works */ }
     }
 
@@ -188,6 +214,7 @@ window.Scribe = window.Scribe || {};
         if (!saved || !Array.isArray(saved.segments) || !saved.segments.length) return false;
         state.fileName = saved.fileName || null;
         state.provider = saved.provider || null;
+        state.createdAt = saved.createdAt || null;
         state.raw = null;
         state.speakers = Array.isArray(saved.speakers) ? saved.speakers : [];
         state.segments = saved.segments.map(s => ({ ...s, id: newSegmentId() }));
@@ -198,7 +225,7 @@ window.Scribe = window.Scribe || {};
     S.speakerLetter = speakerLetter;
     S.state = {
         subscribe, get, getSpeaker, speakerName, speakerIndex, hasTimes, hasSpeakers, segmentAt,
-        setTranscript, clear, updateText, renameSpeaker, addSpeaker, setSegmentSpeaker,
+        setTranscript, loadProject, clear, updateText, renameSpeaker, addSpeaker, setSegmentSpeaker,
         mergeWithNext, deleteSegment, restore
     };
 })(window.Scribe);
