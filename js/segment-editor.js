@@ -8,6 +8,8 @@
 window.Scribe = window.Scribe || {};
 (function (S) {
     const PALETTE_SIZE = 8;
+    // Browsers with CSS field-sizing grow textareas with their content natively – no JS needed.
+    const NATIVE_AUTOSIZE = !!window.CSS?.supports?.('field-sizing', 'content');
     const NEW_SPEAKER = '__new';
 
     let listEl, speakersEl, player, followEl;
@@ -22,12 +24,18 @@ window.Scribe = window.Scribe || {};
         S.state.subscribe(onStateChange);
         player.addEventListener('timeupdate', syncActive);
         player.addEventListener('seeked', syncActive);
-        window.addEventListener('resize', () => listEl.querySelectorAll('.seg-text').forEach(fitHeight));
+        listEl.classList.toggle('native-autosize', NATIVE_AUTOSIZE);
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => fitAll(listEl.querySelectorAll('.seg-text')), 150);
+        });
         render();
     }
 
     function onStateChange(type, detail) {
-        if (type === 'reset' || type === 'segments') render();
+        if (type === 'segments' && detail) patchSegments(detail);
+        else if (type === 'reset' || type === 'segments') render();
         else if (type === 'speakers') { renderSpeakers(); refreshSpeakerSelects(); }
         else if (type === 'speaker-renamed') refreshSpeakerLabels(detail);
     }
@@ -111,7 +119,32 @@ window.Scribe = window.Scribe || {};
         }
         const withTimes = S.state.hasTimes();
         segments.forEach((seg, i) => listEl.append(renderSegment(seg, withTimes, i === segments.length - 1)));
-        requestAnimationFrame(() => listEl.querySelectorAll('.seg-text').forEach(fitHeight));
+        requestAnimationFrame(() => fitAll(listEl.querySelectorAll('.seg-text')));
+    }
+
+    // Updates only the affected rows – re-rendering 1,000+ segments for a merge was slow.
+    function patchSegments({ changed, removed }) {
+        const { segments } = S.state.get();
+        if (!segments.length) return render();
+        const rowOf = id => listEl.querySelector(`.segment[data-id="${id}"]`);
+        removed.forEach(id => rowOf(id)?.remove());
+        const lastId = segments[segments.length - 1].id;
+        // The last row has no merge button, so it must be redrawn if it changed position.
+        const redraw = new Set([...changed, lastId]);
+        const withTimes = S.state.hasTimes();
+        const fresh = [];
+        for (const id of redraw) {
+            const seg = segments.find(s => s.id === id);
+            const row = rowOf(id);
+            if (!seg || !row) continue;
+            const next = renderSegment(seg, withTimes, id === lastId);
+            row.replaceWith(next);
+            fresh.push(next.querySelector('.seg-text'));
+        }
+        requestAnimationFrame(() => fitAll(fresh));
+        renderSpeakers();
+        activeId = null;
+        syncActive();
     }
 
     function renderSegment(seg, withTimes, isLast) {
@@ -165,9 +198,20 @@ window.Scribe = window.Scribe || {};
         return row;
     }
 
+    // Sizing many textareas one by one (write height, read scrollHeight, repeat) forces a
+    // full layout per textarea – with a 2-hour transcript that froze the page for seconds.
+    // Batch it instead: all writes, then all reads, then all writes → three layouts in total.
+    function fitAll(textareas) {
+        if (NATIVE_AUTOSIZE) return;
+        const list = [...textareas];
+        list.forEach(t => { t.style.height = 'auto'; });
+        // scrollHeight excludes the border; with box-sizing: border-box the height includes it.
+        const heights = list.map(t => t.scrollHeight + t.offsetHeight - t.clientHeight);
+        list.forEach((t, i) => { t.style.height = heights[i] + 'px'; });
+    }
+
     function fitHeight(textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
+        fitAll([textarea]);
     }
 
     // --- Player sync ---

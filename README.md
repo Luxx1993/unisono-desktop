@@ -52,7 +52,7 @@ Unter der Liste steht, wie viele Begriffe beim gewählten Anbieter ankommen und 
 
 ## Segment-Editor
 
-Das Transkript besteht aus Abschnitten (Segmenten) mit Sprecher, Zeitstempel und Text:
+Das Transkript besteht aus Abschnitten (Segmenten) mit Sprecher, Zeitstempel und Text. Viele Anbieter – besonders Gladia – liefern sehr kleine Bruchstücke („Ja,“ / „gut.“). Scribe Studio fasst direkt aufeinanderfolgende Bruchstücke desselben Sprechers automatisch zu Absätzen zusammen (Pause ≤ 2 s, Absatz ≤ 60 s); der Text bleibt dabei vollständig erhalten.
 
 - **Sprecher umbenennen:** In der Sprecherleiste über dem Transkript z. B. „Sprecher A“ in „Herr Müller“ ändern – alle Abschnitte dieses Sprechers ändern sich sofort mit.
 - **Sprecher zuordnen:** Pro Abschnitt über das Auswahlfeld einen anderen oder neuen Sprecher wählen.
@@ -112,6 +112,7 @@ Der Proxy speichert nichts. Der API-Key bleibt in deinem Browser und wird nur du
 ```
 index.html              Layout
 css/styles.css          Komponenten-Styles (Karten, Felder, Segment-Editor, Sprecherfarben)
+css/tailwind.css        Erzeugte Tailwind-Klassen (npm run build:css)
 js/state.js             Zentraler State: Segmente, Sprecher, Rohdaten, Autosave
 js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Player-Sync
 js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem bearbeiteten Stand
@@ -127,8 +128,17 @@ deepgram-proxy/         Cloudflare-Worker-Vorlage für Deepgram
 
 Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und nicht als ES-Module: Browser blockieren ES-Module, wenn eine Seite per Doppelklick (`file://`) geöffnet wird. Die Module teilen sich das globale Objekt `window.Scribe`. Ein neuer Anbieter wird als Datei unter `js/apis/` angelegt, registriert sich in `Scribe.apis` und in `index.html` eingebunden.
 
+## Tailwind-CSS neu erzeugen
+
+Die Tailwind-Klassen liegen fertig erzeugt in `css/tailwind.css` – die App braucht dafür kein Skript aus dem Internet. Nur wer im HTML oder JS **neue Tailwind-Klassen** verwendet, muss die Datei neu erzeugen (Node.js nötig):
+
+```
+npm install
+npm run build:css
+```
+
 ## Hinweise
 
-- Tailwind CSS und Font Awesome werden per CDN geladen – für die Oberfläche ist eine Internetverbindung nötig (die sowieso für die APIs gebraucht wird).
+- Font Awesome (Symbole) wird per CDN geladen; ohne Internet fehlen nur die Symbole.
 - Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen oder der Key ist ungültig.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.

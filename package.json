@@ -1,0 +1,11 @@
+{
+  "name": "scribe-studio",
+  "private": true,
+  "description": "Browser-only transcription UI for Gladia, ElevenLabs, AssemblyAI and Deepgram",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.js -i css/tailwind.src.css -o css/tailwind.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
