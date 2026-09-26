@@ -72,6 +72,7 @@ window.Scribe = window.Scribe || {};
             chip.append(el('span', 'speaker-dot'));
             const input = el('input', 'speaker-name', { value: spk.name, spellcheck: false });
             input.setAttribute('aria-label', `Name für Sprecher ${spk.id}`);
+            input.dataset.speaker = spk.id;
             input.addEventListener('input', () => S.state.renameSpeaker(spk.id, input.value));
             input.addEventListener('blur', () => {
                 if (!input.value.trim()) {
@@ -91,6 +92,9 @@ window.Scribe = window.Scribe || {};
     function refreshSpeakerLabels(speakerId) {
         const name = S.state.speakerName(speakerId);
         listEl.querySelectorAll(`option[value="${CSS.escape(speakerId)}"]`).forEach(o => { o.textContent = name; });
+        // Renamed elsewhere than in its own field (e.g. by a project file): update the panel too.
+        const input = speakersEl.querySelector(`input[data-speaker="${CSS.escape(speakerId)}"]`);
+        if (input && input !== document.activeElement && input.value !== name) input.value = name;
     }
 
     function refreshSpeakerSelects() {

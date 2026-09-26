@@ -1,34 +1,68 @@
 # Scribe Studio
 
-UI-Tool zum Aufnehmen, Transkribieren und Bearbeiten von Audioaufnahmen – komplett im Browser, ohne Installation und ohne eigenen Server (BYOK: *Bring Your Own Key*). Gestaltet im Stil „Deep Audio Precision“ von TranscribeLocal.
+Audioaufnahmen aufnehmen, transkribieren und bearbeiten – komplett im Browser, ohne Installation und ohne eigenen Server. Du bringst deine eigenen API-Schlüssel mit (BYOK: *Bring Your Own Key*), die Audiodatei geht direkt vom Browser zum gewählten Anbieter.
 
-- **Keine Zwischenserver:** Der Browser spricht direkt mit den APIs von Gladia, ElevenLabs, AssemblyAI und Mistral.
-- **Keine laufenden Kosten:** Es fallen nur die API-Gebühren der Anbieter an.
-- **Datenschutz:** API-Schlüssel liegen ausschließlich im `localStorage` deines Browsers (per Button löschbar).
+<img src="docs/screenshots/transcript.png" alt="Transkript mit Sprechern, Player und KI-Zusammenfassung" width="100%">
 
-## Nutzung
+## Auf einen Blick
 
-1. Repository herunterladen (*Code → Download ZIP*) und `index.html` im Browser öffnen – Doppelklick genügt, ein Server ist nicht nötig.
-2. Über das **Zahnrad ⚙️ oben rechts** die Einstellungen öffnen, unter **API-Schlüssel** die Keys eintragen und mit **Test-Ping** prüfen (zeigt auch, ob der Anbieter Anfragen aus dem Browser zulässt).
-3. Unter **Transkription** den Anbieter wählen, aufnehmen oder eine Datei ablegen, Modell, Sprache und Sprechererkennung einstellen, **Transkription starten**.
-4. Transkript im Segment-Editor korrigieren (siehe unten) und als TXT, SRT, VTT oder JSON exportieren.
-5. Optional: Mit einem Anthropic- oder OpenAI-Key per Klick Stichpunkte, eine Zusammenfassung oder ein Protokoll erzeugen lassen.
+- **Läuft einfach so:** `index.html` per Doppelklick öffnen – kein Node.js, kein Server, keine Installation. Ideal für Dienstrechner.
+- **Vier Anbieter:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral), jeweils mit Sprechererkennung.
+- **Aufnehmen im Browser:** Mikrofonaufnahme mit Pause, Pegelanzeige und Absturzsicherung.
+- **Fachbegriffe:** eine Liste mit Namen und Fachwörtern, die in passender Form an jeden Anbieter geht.
+- **Segment-Editor:** Sprecher umbenennen und zuordnen, Text korrigieren, Abschnitte zusammenführen, mitlaufender Player.
+- **Export:** HTML-Seite (mit Audio, als PDF druckbar), Markdown, Text, SRT/VTT und Projektdatei zum Weiterbearbeiten.
+- **KI-Zusammenfassung:** Stichpunkte, Zusammenfassung oder Protokoll mit Aufgaben über Anthropic (Claude) oder OpenAI.
+- **Vier Designs** in Hell und Dunkel, jedes ein eigenes Designsystem.
+- **Datenschutz:** Keys, Transkript und Einstellungen bleiben in deinem Browser und lassen sich dort jederzeit löschen.
+
+## Schnellstart
+
+1. Repository herunterladen (*Code → Download ZIP*), entpacken und `index.html` im Browser öffnen.
+2. Beim ersten Start öffnen sich die Einstellungen. Unter **API-Schlüssel** mindestens einen Key eintragen und mit **Test-Ping** prüfen – der zeigt auch, ob der Anbieter Anfragen direkt aus dem Browser zulässt.
+3. Unter **Transkription** den Anbieter wählen, aufnehmen oder eine Datei ablegen, Modell, Sprache und Sprechererkennung einstellen und **Transkription starten**.
+4. Unter **Transkript & Export** korrigieren, Sprecher benennen, zusammenfassen lassen und exportieren.
+
+<img src="docs/screenshots/start.png" alt="Startseite: Anbieter, Aufnahme oder Datei, Einstellungen" width="100%">
 
 ## Einstellungen
 
-Das Zahnrad oben rechts öffnet ein Fenster mit allen dauerhaften Einstellungen. Alles wird nur in diesem Browser gespeichert.
+Das Zahnrad ⚙️ oben rechts öffnet ein Fenster mit allen dauerhaften Einstellungen. Alles wird nur in diesem Browser gespeichert.
 
-- **API-Schlüssel:** Keys für die Transkriptions-Anbieter und die KI-Zusammenfassung, jeweils mit **Test-Ping**.
-- **Fachbegriffe:** die Begriffsliste mit Import und Export (siehe unten). Auf der Startseite steht nur, wie viele Begriffe mitgeschickt werden.
-- **Darstellung:** Dunkel, Hell oder wie im Betriebssystem eingestellt, dazu vier Designs. Jedes ist ein eigenes Designsystem mit eigener Schrift, Ecken, Rahmen, Schatten, Button-Stil, Effekten und Bewegung; die Karten zeigen eine kleine Live-Vorschau:
-
-  | Design | Charakter | Schriften |
-  |---|---|---|
-  | Deep Audio Precision (Standard) | Tech-Glas: Nachtblau, Indigo-Verläufe, Leuchten, Milchglas, Shimmer, gleitende Übergänge | Plus Jakarta Sans, Inter, JetBrains Mono |
-  | Graphit | Neo-Brutalismus: 2-px-Tuschrahmen, harte versetzte Schatten, Neon-Limette, Karopapier, Buttons drücken sich ein | Space Grotesk, Space Mono |
-  | Bernstein | Analog und warm: Serifen, kursive Beschriftungen, Pillen-Buttons, sehr runde Karten ohne Rahmen, weiche warme Schatten, Filmkorn, federnde Bewegung | Fraunces, DM Sans, DM Mono |
-  | Swiss | Editorial nach dem Swiss-Stil (Palette „Bone & forest“) aus dem Skill `code-motion-video`: Inhalt offen auf Papier unter kräftigen Linien, Eckklammern am Bildrand, feines Punktraster und Korn, Versalien, schnelle Wischer. Hell Papier und Waldgrün, dunkel Schwarz und Salbei | Schibsted Grotesk, Martian Mono |
+- **API-Schlüssel:** Keys für die Transkriptions-Anbieter und die KI-Zusammenfassung, jeweils mit **Test-Ping** und Link zum Erstellen eines Keys.
+- **Fachbegriffe:** die Begriffsliste mit Import und Export (siehe unten).
+- **Darstellung:** Dunkel, Hell oder wie im Betriebssystem eingestellt, dazu die Wahl des Designs (siehe unten).
 - **Daten & Datenschutz:** Keys, das zuletzt bearbeitete Transkript und die Sicherung einer unterbrochenen Aufnahme einzeln löschen oder alles zurücksetzen.
+
+<img src="docs/screenshots/settings-keys.png" alt="Einstellungen – API-Schlüssel mit Test-Ping" width="100%">
+
+## Designs
+
+Jedes Design ist ein eigenes Designsystem mit eigener Schrift, Farben, Ecken, Rahmen, Schatten, Button-Stil, Effekten und Bewegung – jeweils in Hell und Dunkel. Die Auswahl zeigt eine kleine Live-Vorschau.
+
+| Design | Charakter | Schriften |
+|---|---|---|
+| **Deep Audio Precision** (Standard) | Tech-Glas aus TranscribeLocal: Nachtblau, Indigo-Verläufe, Leuchten, Milchglas, Glanzeffekt auf dem Start-Button, gleitende Übergänge | Plus Jakarta Sans, Inter, JetBrains Mono |
+| **Graphit** | Neo-Brutalismus: 2-px-Tuschrahmen, harte versetzte Schatten, Neon-Limette, Karopapier; Buttons drücken sich beim Klick ein | Space Grotesk, Space Mono |
+| **Bernstein** | Analog und warm: Serifen, kursive Beschriftungen, Pillen-Buttons, runde Karten ohne Rahmen, weiche warme Schatten, Filmkorn, federnde Bewegung | Fraunces, DM Sans, DM Mono |
+| **Swiss** | Editorial nach dem Swiss-Stil (Palette „Bone & forest“) aus dem Skill `code-motion-video`: Inhalt offen auf Papier unter kräftigen Linien, Eckklammern am Bildrand, feines Punktraster und Korn, Versalien, schnelle Wischer. Hell Papier und Waldgrün, dunkel Schwarz und Salbei; Sprecherfarben beginnen mit Persimmon | Schibsted Grotesk, Martian Mono |
+
+<img src="docs/screenshots/settings-designs.png" alt="Einstellungen – Darstellung mit Live-Vorschau der Designs" width="100%">
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/design-graphit-light.png" alt="Graphit, hell"><br><sub>Graphit · hell</sub></td>
+    <td><img src="docs/screenshots/design-bernstein-dark.png" alt="Bernstein, dunkel"><br><sub>Bernstein · dunkel</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/design-swiss-light.png" alt="Swiss, hell"><br><sub>Swiss · hell</sub></td>
+    <td><img src="docs/screenshots/design-swiss-dark.png" alt="Swiss, dunkel"><br><sub>Swiss · dunkel</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/design-deep-light.png" alt="Deep Audio Precision, hell"><br><sub>Deep Audio Precision · hell</sub></td>
+    <td><img src="docs/screenshots/design-bernstein-light.png" alt="Bernstein, hell"><br><sub>Bernstein · hell</sub></td>
+  </tr>
+</table>
 
 ## Mikrofonaufnahme
 
@@ -49,12 +83,13 @@ Vor dem Upload prüft Scribe Studio Dateigröße und Länge gegen die Grenzen de
 | Gladia | 1.000 MB | 2:15 h (Enterprise: 4:15 h) |
 | ElevenLabs | 3 GB | 10 h |
 | AssemblyAI | 2,2 GB | 10 h |
+| Mistral | keine Vorabprüfung | keine Vorabprüfung |
 
-Beim HTML-Export mit eingebettetem Audio wird die Datei etwa ein Drittel größer als das Audio. Ab 25 MB Audio ist das Einbetten deshalb standardmäßig aus.
+Besprechungen von 1–2 Stunden (typisch 40–60 MB) passen bei allen Anbietern.
 
 ## Fachbegriffe
 
-In den Einstellungen unter **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und Abkürzungen (ein Begriff pro Zeile, Zeilen mit `#` sind Kommentare). Die Liste bleibt im Browser gespeichert, lässt sich als `.txt` exportieren und aus `.txt`/`.csv` importieren. Bei jeder Transkription wird sie im jeweils passenden Format mitgeschickt:
+In den Einstellungen (⚙️) unter **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und Abkürzungen (ein Begriff pro Zeile, Zeilen mit `#` sind Kommentare). Die Liste bleibt im Browser gespeichert, lässt sich als `.txt` exportieren und aus `.txt`/`.csv` importieren. Bei jeder Transkription wird sie im jeweils passenden Format mitgeschickt:
 
 | Anbieter | Parameter | Grenzen |
 |---|---|---|
@@ -63,18 +98,21 @@ In den Einstellungen unter **Fachbegriffe** pflegst du eine Liste mit Namen, Fir
 | AssemblyAI | `keyterms_prompt` (Universal-3.5 Pro), `word_boost` (Universal-2) | max. 1.000 Begriffe à 6 Wörter |
 | Mistral | `context_bias` | max. 100 Begriffe (für Deutsch laut Mistral noch experimentell) |
 
-Unter der Liste steht, wie viele Begriffe beim gewählten Anbieter ankommen und welche wegen der Grenzen übersprungen werden.
+Auf der Startseite steht, wie viele Begriffe beim gewählten Anbieter ankommen und welche wegen der Grenzen übersprungen werden.
+
+<img src="docs/screenshots/settings-vocab.png" alt="Einstellungen – Fachbegriffe" width="720">
 
 ## Segment-Editor
 
 Das Transkript besteht aus Abschnitten (Segmenten) mit Sprecher, Zeitstempel und Text. Viele Anbieter – besonders Gladia – liefern sehr kleine Bruchstücke („Ja,“ / „gut.“). Scribe Studio fasst direkt aufeinanderfolgende Bruchstücke desselben Sprechers automatisch zu Absätzen zusammen (Pause ≤ 2 s, Absatz ≤ 60 s); der Text bleibt dabei vollständig erhalten.
 
-- **Sprecher umbenennen:** In der Sprecherleiste über dem Transkript z. B. „Sprecher A“ in „Herr Müller“ ändern – alle Abschnitte dieses Sprechers ändern sich sofort mit.
-- **Sprecher zuordnen:** Pro Abschnitt über das Auswahlfeld einen anderen oder neuen Sprecher wählen.
+- **Sprecher umbenennen:** In der Sprecherleiste links z. B. „Sprecher A“ in „Projektleitung“ ändern – alle Abschnitte dieses Sprechers ändern sich sofort mit. Über **+ Sprecher** kommt ein weiterer hinzu.
+- **Sprecher zuordnen:** Pro Abschnitt über das Auswahlfeld einen anderen Sprecher wählen.
 - **Text korrigieren:** Direkt im Abschnitt tippen.
 - **Zusammenführen / Löschen:** Über die Symbole rechts im Abschnitt.
-- **Click-to-Jump:** Klick auf den Zeitstempel springt im Player an diese Stelle. Der gerade gesprochene Abschnitt wird hervorgehoben („Mitlaufen“ scrollt automatisch mit).
+- **Click-to-Jump:** Klick auf den Zeitstempel springt im Player an diese Stelle. Der gerade gesprochene Abschnitt wird hervorgehoben, **Mitlaufen** scrollt automatisch mit.
 - **Automatisch gespeichert:** Das bearbeitete Transkript bleibt nach einem Neuladen der Seite erhalten. Die Audiodatei selbst wird nicht gespeichert und muss für den Player erneut geladen werden.
+- **Auch lange Aufnahmen:** Eine echte Besprechung mit 348 Abschnitten öffnet und rendert in etwa einer Viertelsekunde.
 
 Alle Exporte und die KI-Zusammenfassung verwenden den bearbeiteten Stand.
 
@@ -86,11 +124,13 @@ Alle Exporte und die KI-Zusammenfassung verwenden den bearbeiteten Stand.
 |---|---|
 | **HTML-Seite** | Eigenständige Datei zum Lesen und Weitergeben. Optional mit eingebettetem Audio: Klick auf einen Zeitstempel spielt die Stelle ab. Im Browser über *Drucken → Als PDF speichern* sauber druckbar. |
 | **Markdown** | Für Obsidian, Notion oder Wikis – mit Frontmatter (Titel, Datum, Quelle, Anbieter, Dauer, Sprecher, Tags). |
-| **Text** | `[Herr Müller - 00:01:12]: Hallo, wie geht es dir?` – zum Einfügen in E-Mail oder Word. |
+| **Text** | `[Projektleitung - 00:01:12]: Guten Morgen …` – zum Einfügen in E-Mail oder Word. |
 | **Untertitel SRT / VTT** | Für Videos; VTT enthält die Sprechernamen. |
 | **Projektdatei** (`.scribe.json`) | Speichert Transkript, Sprechernamen und Zusammenfassung. Über **Öffnen** später wieder laden und weiterbearbeiten. Die Audiodatei selbst ist nicht enthalten. |
 
-Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (abschaltbar im Menü).
+Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (abschaltbar im Menü). Beim HTML-Export mit eingebettetem Audio wird die Datei etwa ein Drittel größer als das Audio; ab 25 MB Audio ist das Einbetten deshalb standardmäßig aus.
+
+<img src="docs/screenshots/export.png" alt="Exportmenü" width="100%">
 
 ## Anbieter & Modelle
 
@@ -112,6 +152,18 @@ Sprechererkennung (Diarization) ist bei allen Anbietern aktivierbar.
 
 Zusammengefasst wird immer der aktuelle (ggf. von dir korrigierte) Text im Ergebnisfeld.
 
+## Handy und Tablet
+
+Die Oberfläche passt sich an schmale Bildschirme an: Navigation und Einstellungen rutschen untereinander, das Transkript steht oben.
+
+<img src="docs/screenshots/mobile.png" alt="Scribe Studio auf dem Handy" width="300">
+
+## Datenschutz
+
+- Es gibt keinen Server von Scribe Studio. Audio und Keys gehen nur an den Anbieter, den du auswählst.
+- API-Keys, das zuletzt bearbeitete Transkript, Fachbegriffe und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme liegt in IndexedDB.
+- Alles lässt sich unter ⚙️ → **Daten & Datenschutz** einzeln löschen oder komplett zurücksetzen.
+- API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.
 
 ## Projektstruktur
 
@@ -133,6 +185,7 @@ js/settings.js          Einstellungsfenster: Kategorien, Darstellung, Daten lös
 js/app.js               Keys, Konfiguration, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP- und Polling-Helfer
 js/apis/*.js            Je ein Modul pro Anbieter (Gladia, ElevenLabs, AssemblyAI, Mistral)
+docs/screenshots/       Bilder für diese README
 ```
 
 Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und nicht als ES-Module: Browser blockieren ES-Module, wenn eine Seite per Doppelklick (`file://`) geöffnet wird. Die Module teilen sich das globale Objekt `window.Scribe`. Ein neuer Anbieter wird als Datei unter `js/apis/` angelegt, registriert sich in `Scribe.apis` und in `index.html` eingebunden.
@@ -164,4 +217,8 @@ npm run build:css
 
 - Schriften und Symbole (Material Symbols) kommen von Google Fonts; die Schriften eines Designs werden erst geladen, wenn es gewählt oder in den Einstellungen angezeigt wird. Ohne Internet greifen Standardschriften, und Symbole erscheinen als Wörter.
 - Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen. Der **Test-Ping** in den Einstellungen zeigt das vorab.
-- API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.
+
+## Ausblick
+
+- **Etappe 2:** Fortschrittsanzeige während der Transkription, Player mit Wellenform, Suche im Transkript, Verteilung der Redezeit auf die Sprecher.
+- **Etappe 3:** Verlauf/Archiv früherer Transkripte im Browser und Kennzahlen.
