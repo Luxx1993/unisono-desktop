@@ -70,21 +70,21 @@
 }
 
 /* Both modes share one palette family: bone, forest ink and forest green as the one accent.
-   Dark is the same page with the lights turned down, not a different poster. */
+   Dark is the same page on black instead of paper. */
 
-/* ---------- Dark: forest-tinted ink, bone text, light forest green ---------- */
+/* ---------- Dark: pure black ground, bone text, light forest green ---------- */
 [data-theme="swiss"][data-mode="dark"] {
-    --c-bg: 22 28 25;
-    --c-surface-lowest: 16 21 18;
-    --c-surface-low: 28 35 31;
-    --c-surface: 34 42 38;
-    --c-surface-high: 43 52 47;
-    --c-surface-highest: 55 65 59;
-    --c-surface-bright: 64 75 68;
+    --c-bg: 0 0 0;
+    --c-surface-lowest: 0 0 0;
+    --c-surface-low: 12 12 12;
+    --c-surface: 20 20 20;
+    --c-surface-high: 30 30 30;
+    --c-surface-highest: 42 42 42;
+    --c-surface-bright: 52 52 52;
     --c-on-surface: 237 234 227;
     --c-on-surface-variant: 200 208 201;
-    --c-outline: 150 164 155;
-    --c-outline-variant: 78 92 84;
+    --c-outline: 150 156 152;
+    --c-outline-variant: 70 72 70;
     --c-primary: 140 200 164;
     --c-on-primary: 16 21 18;
     --c-primary-container: 127 186 150;
