@@ -1,0 +1,248 @@
+/*
+ * Color themes. Every color in the app comes from these variables, written as RGB channels
+ * ("R G B") so both Tailwind (rgb(var(--c-x) / <alpha-value>)) and styles.css can add alpha.
+ *
+ * <html data-mode="dark|light" data-theme="deep|graphit|amber"> selects the set; the small
+ * script in index.html sets both attributes before the page paints (see js/appearance.js).
+ *
+ * Besides colors, a theme can change the fonts (--font-*) and corner radii (--r-*).
+ *
+ * To add a theme: copy one theme's two blocks (dark + light), rename it, and add an entry to
+ * THEMES in js/appearance.js.
+ */
+
+/* ---------- Shared: type and shape (themes may override) ---------- */
+:root {
+    --font-display: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+    --font-body: Inter, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --display-weight: 700;
+    --display-tracking: -0.01em;
+    --r-sm: 0.25rem;
+    --r-md: 0.375rem;
+    --r-lg: 0.5rem;
+    --r-xl: 0.75rem;
+    --r-2xl: 1rem;
+}
+
+/* ---------- Shared per mode: semantic colors, speakers ---------- */
+:root,
+[data-mode="dark"] {
+    color-scheme: dark;
+    --c-secondary: 78 222 163;
+    --c-on-secondary: 0 56 36;
+    --c-secondary-container: 0 165 114;
+    --c-on-secondary-container: 0 49 31;
+    --c-tertiary: 123 208 255;
+    --c-error: 255 180 171;
+    --c-on-error: 105 0 5;
+    --c-error-container: 147 0 10;
+    --c-on-error-container: 255 218 214;
+    --c-warning: 251 191 36;
+    --c-danger: 179 38 30;
+    --c-success-bg: 0 49 31;
+    --c-success-fg: 201 248 226;
+    --c-error-bg: 60 8 12;
+    --c-error-fg: 255 218 214;
+    --c-warn-bg: 69 26 3;
+    --c-warn-fg: 253 230 138;
+    --shadow-alpha: 0.5;
+
+    --c-spk-0: 165 180 252;
+    --c-spk-1: 56 189 248;
+    --c-spk-2: 244 114 182;
+    --c-spk-3: 251 191 36;
+    --c-spk-4: 78 222 163;
+    --c-spk-5: 251 146 60;
+    --c-spk-6: 192 132 252;
+    --c-spk-7: 248 113 113;
+}
+
+[data-mode="light"] {
+    color-scheme: light;
+    --c-secondary: 4 120 87;
+    --c-on-secondary: 255 255 255;
+    --c-secondary-container: 209 250 229;
+    --c-on-secondary-container: 6 78 59;
+    --c-tertiary: 3 105 161;
+    --c-error: 179 38 30;
+    --c-on-error: 255 255 255;
+    --c-error-container: 253 226 223;
+    --c-on-error-container: 92 10 6;
+    --c-warning: 180 83 9;
+    --c-danger: 185 28 28;
+    --c-success-bg: 220 252 235;
+    --c-success-fg: 6 78 59;
+    --c-error-bg: 254 232 229;
+    --c-error-fg: 92 10 6;
+    --c-warn-bg: 254 243 199;
+    --c-warn-fg: 120 53 15;
+    --shadow-alpha: 0.12;
+
+    --c-spk-0: 79 70 229;
+    --c-spk-1: 2 132 199;
+    --c-spk-2: 219 39 119;
+    --c-spk-3: 180 83 9;
+    --c-spk-4: 4 120 87;
+    --c-spk-5: 234 88 12;
+    --c-spk-6: 147 51 234;
+    --c-spk-7: 220 38 38;
+}
+
+/* ---------- Deep Audio Precision (default, from TranscribeLocal) ---------- */
+:root,
+[data-theme="deep"][data-mode="dark"] {
+    --c-bg: 10 18 42;
+    --c-surface-lowest: 5 13 37;
+    --c-surface-low: 19 26 51;
+    --c-surface: 23 30 55;
+    --c-surface-high: 33 41 66;
+    --c-surface-highest: 44 52 77;
+    --c-surface-bright: 49 56 82;
+    --c-on-surface: 219 225 255;
+    --c-on-surface-variant: 199 196 215;
+    --c-outline: 144 143 160;
+    --c-outline-variant: 70 69 84;
+    --c-primary: 192 193 255;
+    --c-on-primary: 16 0 169;
+    --c-primary-container: 128 131 255;
+}
+
+[data-theme="deep"][data-mode="light"] {
+    --c-bg: 246 247 252;
+    --c-surface-lowest: 255 255 255;
+    --c-surface-low: 240 242 250;
+    --c-surface: 233 236 248;
+    --c-surface-high: 224 228 244;
+    --c-surface-highest: 212 217 236;
+    --c-surface-bright: 255 255 255;
+    --c-on-surface: 20 26 51;
+    --c-on-surface-variant: 69 70 90;
+    --c-outline: 111 112 134;
+    --c-outline-variant: 197 198 216;
+    --c-primary: 79 70 229;
+    --c-on-primary: 255 255 255;
+    --c-primary-container: 99 102 241;
+}
+
+/* ---------- Graphit: neutral grey, sky-blue accent ---------- */
+[data-theme="graphit"][data-mode="dark"] {
+    --c-bg: 17 19 24;
+    --c-surface-lowest: 11 13 17;
+    --c-surface-low: 24 27 33;
+    --c-surface: 29 32 39;
+    --c-surface-high: 38 42 50;
+    --c-surface-highest: 50 54 63;
+    --c-surface-bright: 58 63 73;
+    --c-on-surface: 226 229 236;
+    --c-on-surface-variant: 196 199 208;
+    --c-outline: 139 144 155;
+    --c-outline-variant: 67 71 80;
+    --c-primary: 125 211 252;
+    --c-on-primary: 0 52 76;
+    --c-primary-container: 56 189 248;
+}
+
+[data-theme="graphit"][data-mode="light"] {
+    --c-bg: 246 247 249;
+    --c-surface-lowest: 255 255 255;
+    --c-surface-low: 240 242 245;
+    --c-surface: 233 236 240;
+    --c-surface-high: 223 227 233;
+    --c-surface-highest: 210 215 223;
+    --c-surface-bright: 255 255 255;
+    --c-on-surface: 23 26 32;
+    --c-on-surface-variant: 72 77 88;
+    --c-outline: 113 119 130;
+    --c-outline-variant: 198 203 211;
+    --c-primary: 2 132 199;
+    --c-on-primary: 255 255 255;
+    --c-primary-container: 14 165 233;
+}
+
+/* ---------- Bernstein: warm dark brown, amber accent ---------- */
+[data-theme="amber"][data-mode="dark"] {
+    --c-bg: 24 20 16;
+    --c-surface-lowest: 16 13 10;
+    --c-surface-low: 32 27 22;
+    --c-surface: 38 32 26;
+    --c-surface-high: 49 42 35;
+    --c-surface-highest: 62 54 45;
+    --c-surface-bright: 70 61 51;
+    --c-on-surface: 240 230 218;
+    --c-on-surface-variant: 214 202 188;
+    --c-outline: 158 146 132;
+    --c-outline-variant: 82 72 62;
+    --c-primary: 255 196 120;
+    --c-on-primary: 70 40 0;
+    --c-primary-container: 234 160 64;
+}
+
+[data-theme="amber"][data-mode="light"] {
+    --c-bg: 251 248 243;
+    --c-surface-lowest: 255 255 255;
+    --c-surface-low: 246 241 233;
+    --c-surface: 240 233 223;
+    --c-surface-high: 232 223 210;
+    --c-surface-highest: 220 209 194;
+    --c-surface-bright: 255 255 255;
+    --c-on-surface: 35 28 20;
+    --c-on-surface-variant: 88 76 62;
+    --c-outline: 128 115 99;
+    --c-outline-variant: 214 203 188;
+    --c-primary: 180 83 9;
+    --c-on-primary: 255 255 255;
+    --c-primary-container: 217 119 6;
+}
+
+/* ---------- Swiss (Bone & forest): editorial, hard edges, one hot accent ----------
+   From the Swiss / editorial style of the code-motion-video skill: bone #EDEAE3,
+   forest #1F3B2D, persimmon #E4572E, sage #9DB5A5; Schibsted Grotesk + Martian Mono. */
+[data-theme="swiss"] {
+    --font-display: "Schibsted Grotesk", Inter, system-ui, sans-serif;
+    --font-body: "Schibsted Grotesk", Inter, system-ui, sans-serif;
+    --font-mono: "Martian Mono", "JetBrains Mono", ui-monospace, monospace;
+    --display-weight: 800;
+    --display-tracking: -0.03em;
+    --r-sm: 0;
+    --r-md: 1px;
+    --r-lg: 2px;
+    --r-xl: 2px;
+    --r-2xl: 3px;
+}
+
+[data-theme="swiss"][data-mode="dark"] {
+    --c-bg: 31 59 45;
+    --c-surface-lowest: 25 49 37;
+    --c-surface-low: 36 67 51;
+    --c-surface: 42 75 58;
+    --c-surface-high: 50 85 67;
+    --c-surface-highest: 61 97 78;
+    --c-surface-bright: 70 107 87;
+    --c-on-surface: 237 234 227;
+    --c-on-surface-variant: 200 211 203;
+    --c-outline: 157 181 165;
+    --c-outline-variant: 88 118 101;
+    --c-primary: 240 122 86;
+    --c-on-primary: 22 40 31;
+    --c-primary-container: 228 87 46;
+    --c-tertiary: 157 181 165;
+}
+
+[data-theme="swiss"][data-mode="light"] {
+    --c-bg: 237 234 227;
+    --c-surface-lowest: 246 244 239;
+    --c-surface-low: 231 227 219;
+    --c-surface: 225 221 211;
+    --c-surface-high: 216 211 200;
+    --c-surface-highest: 205 199 187;
+    --c-surface-bright: 250 248 244;
+    --c-on-surface: 31 59 45;
+    --c-on-surface-variant: 60 84 71;
+    --c-outline: 101 124 111;
+    --c-outline-variant: 182 190 180;
+    --c-primary: 196 64 28;
+    --c-on-primary: 250 247 242;
+    --c-primary-container: 228 87 46;
+    --c-tertiary: 45 96 72;
+}

@@ -273,5 +273,11 @@ window.Scribe = window.Scribe || {};
         checkForInterrupted();
     }
 
-    S.recorder = { init, isActive, markUsed };
+    // Settings → "Daten & Datenschutz": drop the backup without asking again.
+    function discardBackup() {
+        hideRecovery();
+        return S.recordingBackup.clear();
+    }
+
+    S.recorder = { init, isActive, markUsed, discardBackup };
 })(window.Scribe);

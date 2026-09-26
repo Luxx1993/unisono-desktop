@@ -142,7 +142,7 @@ window.Scribe = window.Scribe || {};
     }
 
     function getKey(id) {
-        if (!keys[id]) throw new Error(`Bitte zuerst den API-Key für ${keyMeta(id).label} unter „API-Einstellungen“ eintragen.`);
+        if (!keys[id]) throw new Error(`Bitte zuerst den API-Key für ${keyMeta(id).label} in den Einstellungen (Zahnrad oben rechts) eintragen.`);
         return keys[id];
     }
 
@@ -150,6 +150,7 @@ window.Scribe = window.Scribe || {};
         renderKeyStatus();
         renderProviderCards();
         updateHint();
+        S.settings.refresh();
     }
 
     function renderKeyStatus() {
@@ -179,8 +180,8 @@ window.Scribe = window.Scribe || {};
             const refreshBadge = () => (keys[id] ? setBadge('saved', 'Gespeichert') : setBadge(null, 'Nicht gespeichert'));
             refreshBadge();
 
-            // Saving on 'change' stays silent: a message appearing on blur would shift the
-            // buttons below, so a click on "Test-Ping" right after typing would miss.
+            // Saved silently while typing: anything that changes on blur (badge, message) can
+            // re-wrap the card and move the buttons, so a click on "Test-Ping" would miss.
             const save = ({ quiet = false } = {}) => {
                 const persisted = storeKey(id, input.value);
                 refreshBadge();
@@ -188,7 +189,7 @@ window.Scribe = window.Scribe || {};
                 if (!persisted) showFeedback('error', 'Der Browser blockiert das Speichern. Der Key gilt nur bis zum Schließen der Seite.');
                 else if (!quiet) showFeedback('info', keys[id] ? 'Key gespeichert.' : 'Key entfernt.');
             };
-            input.addEventListener('change', () => save({ quiet: true }));
+            input.addEventListener('input', () => save({ quiet: true }));
 
             const mask = h('button', { type: 'button', class: 'icon-btn', title: 'Anzeigen / verbergen', onclick: () => {
                 input.type = input.type === 'password' ? 'text' : 'password';
@@ -206,13 +207,12 @@ window.Scribe = window.Scribe || {};
 
             return h('div', { class: 'key-card' },
                 h('div', { class: 'flex flex-col gap-3' },
-                    h('div', { class: 'flex items-start justify-between gap-3' },
-                        h('div', { class: 'flex items-center gap-3 min-w-0' },
-                            h('div', { class: 'provider-icon' }, icon(meta.icon)),
-                            h('div', { class: 'min-w-0' },
-                                h('h3', { class: 'font-headline text-on-surface font-semibold text-[15px]', text: meta.label }),
-                                h('p', { class: 'text-on-surface-variant text-[12px]', text: meta.description }))),
-                        badge),
+                    h('div', { class: 'flex flex-col gap-2' },
+                        h('div', { class: 'flex items-center gap-3' },
+                            h('div', { class: 'provider-icon shrink-0' }, icon(meta.icon)),
+                            h('h3', { class: 'flex-1 min-w-0 font-headline text-on-surface font-semibold text-[15px]', text: meta.label }),
+                            badge),
+                        h('p', { class: 'text-on-surface-variant text-[12px] leading-relaxed', text: meta.description })),
                     h('div', { class: 'flex flex-col gap-1.5' },
                         h('label', { class: 'field-label', for: inputId, text: 'API-Key' }),
                         h('div', { class: 'key-input-wrap' }, input, mask)),
@@ -278,8 +278,8 @@ window.Scribe = window.Scribe || {};
         });
         $('provider-cards').replaceChildren(...cards);
         const missing = !keys[selectedProvider];
-        $('provider-key-note').textContent = missing ? 'Key fehlt → API-Einstellungen' : 'Key hinterlegt';
-        $('provider-key-note').className = 'font-code text-[11px] ' + (missing ? 'text-error' : 'text-secondary');
+        $('provider-key-note').textContent = missing ? 'Key fehlt → Einstellungen' : 'Key hinterlegt';
+        $('provider-key-note').className = 'font-code text-[11px] hover:underline ' + (missing ? 'text-error' : 'text-secondary');
     }
 
     function selectProvider(id, { keepModel = false } = {}) {
@@ -336,8 +336,12 @@ window.Scribe = window.Scribe || {};
         $('model-hint').classList.toggle('hidden', !hints.length);
 
         const vocabHint = S.vocabulary.describe(vocabularySupport());
-        $('vocab-hint').textContent = vocabHint;
-        $('vocab-hint').classList.toggle('hidden', !vocabHint);
+        const termCount = S.vocabulary.count();
+        $('vocab-hint').textContent = vocabHint || (termCount
+            ? `Ausgeschaltet – ${termCount} Begriff${termCount === 1 ? '' : 'e'} werden nicht mitgeschickt.`
+            : 'Noch keine Fachbegriffe. Namen und Fachwörter in einer Liste verbessern die Erkennung.');
+        $('vocab-hint-settings').textContent = vocabHint ? `Mit ${api.label}: ${vocabHint}` : '';
+        $('vocab-hint-settings').classList.toggle('hidden', !vocabHint);
 
         $('start-btn-text').textContent = `Transkription starten (${api.label.split(' ')[0]})`;
         $('start-hint').textContent = !currentFile
@@ -614,13 +618,16 @@ window.Scribe = window.Scribe || {};
     function init() {
         trackHeaderHeight();
         S.ui = { setStatus, showError, copy, getKey };
-        S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, switchView };
+        S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, switchView, openSettings: tab => S.settings.open(tab) };
 
         loadKeys();
         renderKeyCards();
         renderKeyStatus();
         S.vocabulary.init();
         S.vocabulary.onChange(updateHint);
+        S.settings.init({
+            keyCount: () => ({ saved: allKeyIds().filter(id => keys[id]).length, total: allKeyIds().length })
+        });
         loadConfig();
         CONFIG_FIELDS.forEach(id => $(id).addEventListener('change', () => { updateHint(); saveConfig(); }));
         setupDropZone();
@@ -656,8 +663,9 @@ window.Scribe = window.Scribe || {};
         const firstVisit = !Object.keys(S.apis).some(id => keys[id]);
         const restored = S.state.restore();
         updateTranscriptView();
-        switchView(firstVisit ? 'settings' : 'start');
+        switchView('start');
         if (firstVisit) {
+            S.settings.open('keys');
             setStatus('Willkommen! Trage zuerst den API-Key für mindestens einen Anbieter ein.', 'success');
         } else if (restored) {
             const name = S.state.get().fileName;

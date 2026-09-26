@@ -2,17 +2,26 @@
 
 UI-Tool zum Aufnehmen, Transkribieren und Bearbeiten von Audioaufnahmen – komplett im Browser, ohne Installation und ohne eigenen Server (BYOK: *Bring Your Own Key*). Gestaltet im Stil „Deep Audio Precision“ von TranscribeLocal.
 
-- **Keine Zwischenserver:** Der Browser spricht direkt mit den APIs von Gladia, ElevenLabs und AssemblyAI.
+- **Keine Zwischenserver:** Der Browser spricht direkt mit den APIs von Gladia, ElevenLabs, AssemblyAI und Mistral.
 - **Keine laufenden Kosten:** Es fallen nur die API-Gebühren der Anbieter an.
 - **Datenschutz:** API-Schlüssel liegen ausschließlich im `localStorage` deines Browsers (per Button löschbar).
 
 ## Nutzung
 
 1. Repository herunterladen (*Code → Download ZIP*) und `index.html` im Browser öffnen – Doppelklick genügt, ein Server ist nicht nötig.
-2. Unter **API-Einstellungen** die Keys eintragen und mit **Test-Ping** prüfen (zeigt auch, ob der Anbieter Anfragen aus dem Browser zulässt).
+2. Über das **Zahnrad ⚙️ oben rechts** die Einstellungen öffnen, unter **API-Schlüssel** die Keys eintragen und mit **Test-Ping** prüfen (zeigt auch, ob der Anbieter Anfragen aus dem Browser zulässt).
 3. Unter **Transkription** den Anbieter wählen, aufnehmen oder eine Datei ablegen, Modell, Sprache und Sprechererkennung einstellen, **Transkription starten**.
 4. Transkript im Segment-Editor korrigieren (siehe unten) und als TXT, SRT, VTT oder JSON exportieren.
 5. Optional: Mit einem Anthropic- oder OpenAI-Key per Klick Stichpunkte, eine Zusammenfassung oder ein Protokoll erzeugen lassen.
+
+## Einstellungen
+
+Das Zahnrad oben rechts öffnet ein Fenster mit allen dauerhaften Einstellungen. Alles wird nur in diesem Browser gespeichert.
+
+- **API-Schlüssel:** Keys für die Transkriptions-Anbieter und die KI-Zusammenfassung, jeweils mit **Test-Ping**.
+- **Fachbegriffe:** die Begriffsliste mit Import und Export (siehe unten). Auf der Startseite steht nur, wie viele Begriffe mitgeschickt werden.
+- **Darstellung:** Dunkel, Hell oder wie im Betriebssystem eingestellt, dazu vier Designs: *Deep Audio Precision* (Standard, aus TranscribeLocal), *Graphit*, *Bernstein* und *Swiss* (Papier, Waldgrün und Signalrot, eckig und editorial, nach dem Swiss-Stil aus dem Skill `code-motion-video`).
+- **Daten & Datenschutz:** Keys, das zuletzt bearbeitete Transkript und die Sicherung einer unterbrochenen Aufnahme einzeln löschen oder alles zurücksetzen.
 
 ## Mikrofonaufnahme
 
@@ -38,7 +47,7 @@ Beim HTML-Export mit eingebettetem Audio wird die Datei etwa ein Drittel größe
 
 ## Fachbegriffe
 
-In der Karte **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und Abkürzungen (ein Begriff pro Zeile, Zeilen mit `#` sind Kommentare). Die Liste bleibt im Browser gespeichert, lässt sich als `.txt` exportieren und aus `.txt`/`.csv` importieren. Bei jeder Transkription wird sie im jeweils passenden Format mitgeschickt:
+In den Einstellungen unter **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und Abkürzungen (ein Begriff pro Zeile, Zeilen mit `#` sind Kommentare). Die Liste bleibt im Browser gespeichert, lässt sich als `.txt` exportieren und aus `.txt`/`.csv` importieren. Bei jeder Transkription wird sie im jeweils passenden Format mitgeschickt:
 
 | Anbieter | Parameter | Grenzen |
 |---|---|---|
@@ -101,7 +110,8 @@ Zusammengefasst wird immer der aktuelle (ggf. von dir korrigierte) Text im Ergeb
 
 ```
 index.html              Layout
-css/styles.css          Komponenten-Styles (Karten, Felder, Segment-Editor, Sprecherfarben)
+css/themes.css          Farben, Schriften und Eckenradien je Design und Hell/Dunkel (CSS-Variablen)
+css/styles.css          Komponenten-Styles (Karten, Felder, Segment-Editor, Einstellungsfenster)
 css/tailwind.css        Erzeugte Tailwind-Klassen (npm run build:css)
 js/state.js             Zentraler State: Segmente, Sprecher, Rohdaten, Autosave
 js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Player-Sync
@@ -110,6 +120,8 @@ js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, A
 js/recorder.js          Mikrofonaufnahme (MediaRecorder), Pegel, Pause, Bildschirm-wach-halten
 js/recording-backup.js  Laufende Sicherung der Aufnahme in IndexedDB, Wiederherstellung
 js/summary.js           KI-Zusammenfassung (Anthropic / OpenAI)
+js/appearance.js        Hell/Dunkel und Design, wird vor dem ersten Zeichnen gesetzt
+js/settings.js          Einstellungsfenster: Kategorien, Darstellung, Daten löschen
 js/app.js               Keys, Konfiguration, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP- und Polling-Helfer
 js/apis/*.js            Je ein Modul pro Anbieter (Gladia, ElevenLabs, AssemblyAI, Mistral)
@@ -119,11 +131,14 @@ Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und n
 
 ## Design anpassen
 
-Das Aussehen steckt in drei Dateien:
+Das Aussehen steckt in vier Dateien:
 
-- `tailwind.config.js` – Farbpalette und Schriftrollen („Deep Audio Precision“)
-- `css/styles.css` – Bausteine wie Panels, Buttons, Anbieter- und Key-Karten, Segmente, Rekorder, Exportmenü; Farben als CSS-Variablen in `:root`
-- `index.html` – Aufbau der drei Ansichten mit Tailwind-Klassen
+- `css/themes.css` – alle Farben, Schriften und Eckenradien als CSS-Variablen, je Design ein Block für Dunkel und einer für Hell
+- `tailwind.config.js` – verbindet die Tailwind-Farben (`bg-primary`, `text-on-surface` …) mit diesen Variablen
+- `css/styles.css` – Bausteine wie Panels, Buttons, Anbieter- und Key-Karten, Segmente, Rekorder, Exportmenü, Einstellungsfenster
+- `index.html` – Aufbau der Ansichten mit Tailwind-Klassen
+
+**Neues Design anlegen:** in `css/themes.css` die beiden Blöcke eines vorhandenen Designs kopieren (z. B. `[data-theme="graphit"][data-mode="dark"]` und `…[data-mode="light"]`), umbenennen und die Werte ändern (Farben als `R G B`). Dann in `js/appearance.js` einen Eintrag in `THEMES` ergänzen – er erscheint automatisch unter Einstellungen → Darstellung. Neu erzeugt werden muss dafür nichts.
 
 Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-list`, `vocab-text`) und die Klassennamen aus `styles.css` auf die Seite zu. Solange diese erhalten bleiben, lassen sich Layout, Farben und Schriften frei ändern.
 
@@ -138,6 +153,6 @@ npm run build:css
 
 ## Hinweise
 
-- Schriften (Plus Jakarta Sans, Inter, JetBrains Mono) und Symbole (Material Symbols) kommen von Google Fonts. Ohne Internet greifen Standardschriften, und Symbole erscheinen als Wörter.
-- Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen. Der **Test-Ping** unter API-Einstellungen zeigt das vorab.
+- Schriften (Plus Jakarta Sans, Inter, JetBrains Mono; im Swiss-Design Schibsted Grotesk und Martian Mono) und Symbole (Material Symbols) kommen von Google Fonts. Ohne Internet greifen Standardschriften, und Symbole erscheinen als Wörter.
+- Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen. Der **Test-Ping** in den Einstellungen zeigt das vorab.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.
