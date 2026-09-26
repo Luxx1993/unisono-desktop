@@ -7,12 +7,16 @@
  *
  * options: { key, model, language ('de' | … | 'auto'), diarize, speakers (number | null),
  *            vocabulary (string[] – already trimmed to the provider's limits),
- *            proxy (Deepgram only), onStatus(text) }
+ *            onStatus(text) }
+ *
+ * UI metadata: description, icon (Material Symbols name), keyUrl (where to create a key),
+ * test(key) → { url, headers } for a cheap GET that proves the key works,
+ * autoLanguageOnly (the provider ignores the language setting).
  *
  * Optional: vocabularySupport(model) → { maxTerms, maxChars, maxWords, note } or null,
  * describing whether and how the model accepts technical terms (see vocabulary.js).
  *
- * limits({ proxy }) → { maxBytes, maxSeconds, source } – checked before a file is sent
+ * limits() → { maxBytes, maxSeconds } – checked before a file is sent
  * (see app.js), so a too-large or too-long file fails fast instead of after the upload.
  */
 window.Scribe = window.Scribe || {};

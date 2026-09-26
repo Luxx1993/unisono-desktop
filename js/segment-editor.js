@@ -175,12 +175,12 @@ window.Scribe = window.Scribe || {};
         const actions = el('div', 'seg-actions');
         if (!isLast) {
             const merge = el('button', '', { type: 'button', title: 'Mit nächstem Abschnitt zusammenführen' });
-            merge.append(el('i', 'fa-solid fa-arrow-down-short-wide'));
+            merge.append(el('span', 'material-symbols-outlined', { textContent: 'vertical_align_bottom' }));
             merge.addEventListener('click', () => S.state.mergeWithNext(seg.id));
             actions.append(merge);
         }
         const del = el('button', 'seg-delete', { type: 'button', title: 'Abschnitt löschen' });
-        del.append(el('i', 'fa-solid fa-trash-can'));
+        del.append(el('span', 'material-symbols-outlined', { textContent: 'delete' }));
         del.addEventListener('click', () => {
             if (confirm('Diesen Abschnitt löschen?')) S.state.deleteSegment(seg.id);
         });

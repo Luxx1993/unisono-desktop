@@ -1,6 +1,6 @@
 # Scribe Studio
 
-UI-Tool zum Hochladen, Transkribieren und Bearbeiten von Audioaufnahmen – komplett im Browser, ohne eigenen Server (BYOK: *Bring Your Own Key*).
+UI-Tool zum Aufnehmen, Transkribieren und Bearbeiten von Audioaufnahmen – komplett im Browser, ohne Installation und ohne eigenen Server (BYOK: *Bring Your Own Key*). Gestaltet im Stil „Deep Audio Precision“ von TranscribeLocal.
 
 - **Keine Zwischenserver:** Der Browser spricht direkt mit den APIs von Gladia, ElevenLabs und AssemblyAI.
 - **Keine laufenden Kosten:** Es fallen nur die API-Gebühren der Anbieter an.
@@ -9,8 +9,8 @@ UI-Tool zum Hochladen, Transkribieren und Bearbeiten von Audioaufnahmen – komp
 ## Nutzung
 
 1. Repository herunterladen (*Code → Download ZIP*) und `index.html` im Browser öffnen – Doppelklick genügt, ein Server ist nicht nötig.
-2. API-Schlüssel eintragen und speichern.
-3. Anbieter, Modell und Sprache wählen, optional Sprechererkennung und Sprecheranzahl einstellen, Audiodatei per Drag & Drop hinzufügen, **Transkription starten**.
+2. Unter **API-Einstellungen** die Keys eintragen und mit **Test-Ping** prüfen (zeigt auch, ob der Anbieter Anfragen aus dem Browser zulässt).
+3. Unter **Transkription** den Anbieter wählen, aufnehmen oder eine Datei ablegen, Modell, Sprache und Sprechererkennung einstellen, **Transkription starten**.
 4. Transkript im Segment-Editor korrigieren (siehe unten) und als TXT, SRT, VTT oder JSON exportieren.
 5. Optional: Mit einem Anthropic- oder OpenAI-Key per Klick Stichpunkte, eine Zusammenfassung oder ein Protokoll erzeugen lassen.
 
@@ -33,7 +33,6 @@ Vor dem Upload prüft Scribe Studio Dateigröße und Länge gegen die Grenzen de
 | Gladia | 1.000 MB | 2:15 h (Enterprise: 4:15 h) |
 | ElevenLabs | 3 GB | 10 h |
 | AssemblyAI | 2,2 GB | 10 h |
-| Deepgram | 2 GB, über Cloudflare-Worker-Proxy 100 MB | – |
 
 Beim HTML-Export mit eingebettetem Audio wird die Datei etwa ein Drittel größer als das Audio. Ab 25 MB Audio ist das Einbetten deshalb standardmäßig aus.
 
@@ -46,7 +45,7 @@ In der Karte **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwört
 | Gladia | `custom_vocabulary_config` | – |
 | ElevenLabs | `keyterms` (nur Scribe v2) | max. 100 Begriffe à 50 Zeichen, ca. 30 % Aufpreis |
 | AssemblyAI | `keyterms_prompt` (Universal-3.5 Pro), `word_boost` (Universal-2) | max. 1.000 Begriffe à 6 Wörter |
-| Deepgram | `keyterm` (Nova-3), `keywords` (Nova-2, nur Einzelwörter) | max. 100 Begriffe |
+| Mistral | `context_bias` | max. 100 Begriffe (für Deutsch laut Mistral noch experimentell) |
 
 Unter der Liste steht, wie viele Begriffe beim gewählten Anbieter ankommen und welche wegen der Grenzen übersprungen werden.
 
@@ -84,7 +83,7 @@ Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (a
 | Gladia (v2) | `solaria-3` (DE/EN/FR/ES/IT, feste Sprache nötig), `solaria-1` (100+ Sprachen) | Upload → `/v2/pre-recorded` → Polling |
 | ElevenLabs (Scribe) | `scribe_v2`, `scribe_v1` | Synchroner Upload an `/v1/speech-to-text` |
 | AssemblyAI (v2) | `universal-3-5-pro`, `universal-2` | Upload → `/v2/transcript` → Polling |
-| Deepgram | `nova-3`, `nova-2` | Synchroner Upload an `/v1/listen` (**nur über Proxy**, siehe unten) |
+| Mistral (Voxtral) | `voxtral-mini-latest` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
 
 Sprechererkennung (Diarization) ist bei allen Anbietern aktivierbar.
 
@@ -97,15 +96,6 @@ Sprechererkennung (Diarization) ist bei allen Anbietern aktivierbar.
 
 Zusammengefasst wird immer der aktuelle (ggf. von dir korrigierte) Text im Ergebnisfeld.
 
-## Deepgram-Proxy
-
-Deepgram erlaubt keine direkten Browser-Anfragen an seine REST-API (fehlende CORS-Header). Deshalb braucht Deepgram einen kleinen Proxy. Im Ordner [`deepgram-proxy/`](deepgram-proxy/worker.js) liegt eine fertige Vorlage für einen **Cloudflare Worker** (kostenloser Tarif reicht):
-
-1. Im Cloudflare-Dashboard unter *Workers & Pages* einen neuen Worker anlegen und den Inhalt von `worker.js` einfügen.
-2. Optional die Variable `ALLOWED_ORIGIN` setzen, damit nur deine Seite den Proxy nutzen darf.
-3. Die Worker-URL (z. B. `https://scribe-proxy.<dein-name>.workers.dev`) in Scribe Studio als *Deepgram Proxy-URL* eintragen.
-
-Der Proxy speichert nichts. Der API-Key bleibt in deinem Browser und wird nur durchgereicht.
 
 ## Projektstruktur
 
@@ -122,11 +112,20 @@ js/recording-backup.js  Laufende Sicherung der Aufnahme in IndexedDB, Wiederhers
 js/summary.js           KI-Zusammenfassung (Anthropic / OpenAI)
 js/app.js               Keys, Konfiguration, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP- und Polling-Helfer
-js/apis/*.js            Je ein Modul pro Anbieter (Gladia, ElevenLabs, AssemblyAI, Deepgram)
-deepgram-proxy/         Cloudflare-Worker-Vorlage für Deepgram
+js/apis/*.js            Je ein Modul pro Anbieter (Gladia, ElevenLabs, AssemblyAI, Mistral)
 ```
 
 Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und nicht als ES-Module: Browser blockieren ES-Module, wenn eine Seite per Doppelklick (`file://`) geöffnet wird. Die Module teilen sich das globale Objekt `window.Scribe`. Ein neuer Anbieter wird als Datei unter `js/apis/` angelegt, registriert sich in `Scribe.apis` und in `index.html` eingebunden.
+
+## Design anpassen
+
+Das Aussehen steckt in drei Dateien:
+
+- `tailwind.config.js` – Farbpalette und Schriftrollen („Deep Audio Precision“)
+- `css/styles.css` – Bausteine wie Panels, Buttons, Anbieter- und Key-Karten, Segmente, Rekorder, Exportmenü; Farben als CSS-Variablen in `:root`
+- `index.html` – Aufbau der drei Ansichten mit Tailwind-Klassen
+
+Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-list`, `vocab-text`) und die Klassennamen aus `styles.css` auf die Seite zu. Solange diese erhalten bleiben, lassen sich Layout, Farben und Schriften frei ändern.
 
 ## Tailwind-CSS neu erzeugen
 
@@ -139,6 +138,6 @@ npm run build:css
 
 ## Hinweise
 
-- Font Awesome (Symbole) wird per CDN geladen; ohne Internet fehlen nur die Symbole.
-- Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen oder der Key ist ungültig.
+- Schriften (Plus Jakarta Sans, Inter, JetBrains Mono) und Symbole (Material Symbols) kommen von Google Fonts. Ohne Internet greifen Standardschriften, und Symbole erscheinen als Wörter.
+- Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen. Der **Test-Ping** unter API-Einstellungen zeigt das vorab.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.
