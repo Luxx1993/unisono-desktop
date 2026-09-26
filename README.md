@@ -20,14 +20,14 @@ Das Zahnrad oben rechts öffnet ein Fenster mit allen dauerhaften Einstellungen.
 
 - **API-Schlüssel:** Keys für die Transkriptions-Anbieter und die KI-Zusammenfassung, jeweils mit **Test-Ping**.
 - **Fachbegriffe:** die Begriffsliste mit Import und Export (siehe unten). Auf der Startseite steht nur, wie viele Begriffe mitgeschickt werden.
-- **Darstellung:** Dunkel, Hell oder wie im Betriebssystem eingestellt, dazu sechs Designs. Jedes ist ein eigenes Designsystem mit eigener Schrift, Ecken, Rahmen, Schatten, Button-Stil, Effekten und Bewegung; die Karten zeigen eine kleine Live-Vorschau:
+- **Darstellung:** Dunkel, Hell oder wie im Betriebssystem eingestellt, dazu vier Designs. Jedes ist ein eigenes Designsystem mit eigener Schrift, Ecken, Rahmen, Schatten, Button-Stil, Effekten und Bewegung; die Karten zeigen eine kleine Live-Vorschau:
 
   | Design | Charakter | Schriften |
   |---|---|---|
   | Deep Audio Precision (Standard) | Tech-Glas: Nachtblau, Indigo-Verläufe, Leuchten, Milchglas, Shimmer, gleitende Übergänge | Plus Jakarta Sans, Inter, JetBrains Mono |
   | Graphit | Neo-Brutalismus: 2-px-Tuschrahmen, harte versetzte Schatten, Neon-Limette, Karopapier, Buttons drücken sich ein | Space Grotesk, Space Mono |
   | Bernstein | Analog und warm: Serifen, kursive Beschriftungen, Pillen-Buttons, sehr runde Karten ohne Rahmen, weiche warme Schatten, Filmkorn, federnde Bewegung | Fraunces, DM Sans, DM Mono |
-  | Swiss · Wald / Signalrot / Kobalt | Editorial nach dem Swiss-Stil aus dem Skill `code-motion-video`: eckig, flach, Punktraster, Eckklammern, Versalien, schnelle Wischer | Schibsted Grotesk + Martian Mono / Archivo + JetBrains Mono / Instrument Sans + IBM Plex Mono |
+  | Swiss | Editorial nach dem Swiss-Stil aus dem Skill `code-motion-video`: eckig, flach, Punktraster, Eckklammern, Versalien, schnelle Wischer. Hell: Papier, Waldgrün, Persimmon. Dunkel: Tinte, Papier, Gelb | Schibsted Grotesk, Martian Mono |
 - **Daten & Datenschutz:** Keys, das zuletzt bearbeitete Transkript und die Sicherung einer unterbrochenen Aufnahme einzeln löschen oder alles zurücksetzen.
 
 ## Mikrofonaufnahme

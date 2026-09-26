@@ -34,28 +34,16 @@ window.Scribe = window.Scribe || {};
         },
         {
             id: 'swiss',
-            label: 'Swiss · Wald',
-            description: 'Papier, Waldgrün, Persimmon. Eckig, Punktraster, harte Wischer.',
+            label: 'Swiss',
+            description: 'Editorial: eckig, flach, Punktraster, Versalien. Hell Papier und Waldgrün, dunkel Tinte und Gelb.',
             fonts: 'family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Martian+Mono:wght@400;500;600'
-        },
-        {
-            id: 'swiss-signal',
-            label: 'Swiss · Signalrot',
-            description: 'Tinte, Papier, Signalrot. Schwerste Headlines, maximaler Kontrast.',
-            fonts: 'family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600'
-        },
-        {
-            id: 'swiss-cobalt',
-            label: 'Swiss · Kobalt',
-            description: 'Papier und Kobalt, Flamme als Akzent. Dunkel wird der ganze Grund blau.',
-            fonts: 'family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600'
         }
     ];
     const MODES = ['dark', 'light', 'system'];
     // Dark by default: the default design was made for it. "system" follows the OS setting.
     const DEFAULTS = { mode: 'dark', theme: 'deep' };
     // Earlier ids, so a saved choice survives the rename.
-    const ALIASES = { amber: 'bernstein' };
+    const ALIASES = { amber: 'bernstein', 'swiss-signal': 'swiss', 'swiss-cobalt': 'swiss' };
 
     const listeners = new Set();
     const media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
