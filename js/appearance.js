@@ -35,7 +35,7 @@ window.Scribe = window.Scribe || {};
         {
             id: 'swiss',
             label: 'Swiss',
-            description: 'Editorial: eckig, flach, Punktraster, Versalien. Hell Papier und Waldgrün, dunkel Tinte und Gelb.',
+            description: 'Editorial: eckig, flach, Punktraster, Versalien. Papier, Tinte und Waldgrün.',
             fonts: 'family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Martian+Mono:wght@400;500;600'
         }
     ];

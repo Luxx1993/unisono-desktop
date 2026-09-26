@@ -4,7 +4,7 @@
  * against ink and paper, a dot system on the ground, a technical frame (corner brackets like a
  * HUD), no shadows, no blur. Heavy tight display type, uppercase mono labels and buttons.
  * Motion is metronomic: quick snaps and wipes, then hold.
- * Light is "Bone & forest" (persimmon accent), dark is "Ink" (yolk accent).
+ * Palette "Bone & forest" with forest green as the accent, in light and dark.
  * Schibsted Grotesk / Martian Mono.
  */
 
@@ -69,29 +69,31 @@
     --font-label: var(--font-mono);
 }
 
-/* ---------- Dark: ink and paper, yolk as the one accent ---------- */
+/* Both modes share one palette family: bone, forest ink and forest green as the one accent.
+   Dark is the same page with the lights turned down, not a different poster. */
+
+/* ---------- Dark: forest-tinted ink, bone text, light forest green ---------- */
 [data-theme="swiss"][data-mode="dark"] {
-    --c-bg: 18 18 18;
-    --c-surface-lowest: 10 10 10;
-    --c-surface-low: 26 26 25;
-    --c-surface: 33 33 32;
-    --c-surface-high: 43 43 41;
-    --c-surface-highest: 55 55 52;
-    --c-surface-bright: 64 64 60;
-    --c-on-surface: 236 232 224;
-    --c-on-surface-variant: 200 196 188;
-    --c-outline: 150 146 139;
-    --c-outline-variant: 82 80 76;
-    --c-primary: 242 197 61;
-    --c-on-primary: 18 18 18;
-    --c-primary-container: 242 197 61;
+    --c-bg: 22 28 25;
+    --c-surface-lowest: 16 21 18;
+    --c-surface-low: 28 35 31;
+    --c-surface: 34 42 38;
+    --c-surface-high: 43 52 47;
+    --c-surface-highest: 55 65 59;
+    --c-surface-bright: 64 75 68;
+    --c-on-surface: 237 234 227;
+    --c-on-surface-variant: 200 208 201;
+    --c-outline: 150 164 155;
+    --c-outline-variant: 78 92 84;
+    --c-primary: 140 200 164;
+    --c-on-primary: 16 21 18;
+    --c-primary-container: 127 186 150;
     --c-tertiary: 157 181 165;
-    --c-warning: 251 146 60;
-    --c-accent: 242 197 61;
-    --c-on-accent: 18 18 18;
+    --c-accent: 127 186 150;
+    --c-on-accent: 16 21 18;
 }
 
-/* ---------- Light: bone and forest, persimmon as the one accent ---------- */
+/* ---------- Light: bone, forest ink, forest green ---------- */
 [data-theme="swiss"][data-mode="light"] {
     --c-bg: 237 234 227;
     --c-surface-lowest: 246 244 239;
@@ -104,12 +106,12 @@
     --c-on-surface-variant: 60 84 71;
     --c-outline: 101 124 111;
     --c-outline-variant: 182 190 180;
-    --c-primary: 196 64 28;
-    --c-on-primary: 250 247 242;
-    --c-primary-container: 228 87 46;
+    --c-primary: 42 110 74;
+    --c-on-primary: 246 244 239;
+    --c-primary-container: 46 120 80;
     --c-tertiary: 45 96 72;
-    --c-accent: 214 76 36;
-    --c-on-accent: 250 247 242;
+    --c-accent: 46 120 80;
+    --c-on-accent: 246 244 239;
 }
 
 /* ---------- Page effects ---------- */

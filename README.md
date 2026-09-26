@@ -27,7 +27,7 @@ Das Zahnrad oben rechts öffnet ein Fenster mit allen dauerhaften Einstellungen.
   | Deep Audio Precision (Standard) | Tech-Glas: Nachtblau, Indigo-Verläufe, Leuchten, Milchglas, Shimmer, gleitende Übergänge | Plus Jakarta Sans, Inter, JetBrains Mono |
   | Graphit | Neo-Brutalismus: 2-px-Tuschrahmen, harte versetzte Schatten, Neon-Limette, Karopapier, Buttons drücken sich ein | Space Grotesk, Space Mono |
   | Bernstein | Analog und warm: Serifen, kursive Beschriftungen, Pillen-Buttons, sehr runde Karten ohne Rahmen, weiche warme Schatten, Filmkorn, federnde Bewegung | Fraunces, DM Sans, DM Mono |
-  | Swiss | Editorial nach dem Swiss-Stil aus dem Skill `code-motion-video`: eckig, flach, Punktraster, Eckklammern, Versalien, schnelle Wischer. Hell: Papier, Waldgrün, Persimmon. Dunkel: Tinte, Papier, Gelb | Schibsted Grotesk, Martian Mono |
+  | Swiss | Editorial nach dem Swiss-Stil aus dem Skill `code-motion-video`: eckig, flach, Punktraster, Eckklammern, Versalien, schnelle Wischer. Papier, Tinte und Waldgrün als Akzent, hell wie dunkel | Schibsted Grotesk, Martian Mono |
 - **Daten & Datenschutz:** Keys, das zuletzt bearbeitete Transkript und die Sicherung einer unterbrochenen Aufnahme einzeln löschen oder alles zurücksetzen.
 
 ## Mikrofonaufnahme
