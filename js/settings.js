@@ -92,18 +92,19 @@ window.Scribe = window.Scribe || {};
         }));
 
         $('theme-options').replaceChildren(...S.appearance.THEMES.map(t => {
-            const [bg, surface, accent] = t.swatch[resolved];
+            // A tiny page rendered in the design itself: its own data-theme/data-mode switch
+            // all tokens (colors, fonts, corners, shadows, buttons) for this element.
+            S.appearance.loadFonts(t.id);
             const preview = el('span', 'theme-preview');
-            preview.style.background = bg;
+            preview.dataset.theme = t.id;
+            preview.dataset.mode = resolved;
+            preview.setAttribute('aria-hidden', 'true');
             const panel = el('span', 'tp-panel');
-            panel.style.background = surface;
-            const line1 = el('span', 'tp-line');
-            line1.style.cssText = `top:38%;width:32%;background:${accent}`;
-            const line2 = el('span', 'tp-line');
-            line2.style.cssText = `top:56%;width:22%;background:${accent}`;
-            const dot = el('span', 'tp-accent');
-            dot.style.background = accent;
-            preview.append(panel, line1, line2, dot);
+            panel.append(el('span', 'tp-label', 'Schritt 1'), el('span', 'tp-title', 'Aa Sprecher'));
+            const buttons = el('span', 'tp-buttons');
+            buttons.append(el('span', 'tp-btn', 'Start'), el('span', 'tp-ghost', 'Export'));
+            panel.append(buttons);
+            preview.append(panel);
 
             const name = el('span', 'theme-name');
             name.append(el('strong', '', t.label));

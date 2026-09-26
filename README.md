@@ -20,7 +20,14 @@ Das Zahnrad oben rechts öffnet ein Fenster mit allen dauerhaften Einstellungen.
 
 - **API-Schlüssel:** Keys für die Transkriptions-Anbieter und die KI-Zusammenfassung, jeweils mit **Test-Ping**.
 - **Fachbegriffe:** die Begriffsliste mit Import und Export (siehe unten). Auf der Startseite steht nur, wie viele Begriffe mitgeschickt werden.
-- **Darstellung:** Dunkel, Hell oder wie im Betriebssystem eingestellt, dazu vier Designs: *Deep Audio Precision* (Standard, aus TranscribeLocal), *Graphit*, *Bernstein* und *Swiss* (Papier, Waldgrün und Signalrot, eckig und editorial, nach dem Swiss-Stil aus dem Skill `code-motion-video`).
+- **Darstellung:** Dunkel, Hell oder wie im Betriebssystem eingestellt, dazu sechs Designs. Jedes ist ein eigenes Designsystem mit eigener Schrift, Ecken, Rahmen, Schatten, Button-Stil, Effekten und Bewegung; die Karten zeigen eine kleine Live-Vorschau:
+
+  | Design | Charakter | Schriften |
+  |---|---|---|
+  | Deep Audio Precision (Standard) | Tech-Glas: Nachtblau, Indigo-Verläufe, Leuchten, Milchglas, Shimmer, gleitende Übergänge | Plus Jakarta Sans, Inter, JetBrains Mono |
+  | Graphit | Neo-Brutalismus: 2-px-Tuschrahmen, harte versetzte Schatten, Neon-Limette, Karopapier, Buttons drücken sich ein | Space Grotesk, Space Mono |
+  | Bernstein | Analog und warm: Serifen, kursive Beschriftungen, Pillen-Buttons, sehr runde Karten ohne Rahmen, weiche warme Schatten, Filmkorn, federnde Bewegung | Fraunces, DM Sans, DM Mono |
+  | Swiss · Wald / Signalrot / Kobalt | Editorial nach dem Swiss-Stil aus dem Skill `code-motion-video`: eckig, flach, Punktraster, Eckklammern, Versalien, schnelle Wischer | Schibsted Grotesk + Martian Mono / Archivo + JetBrains Mono / Instrument Sans + IBM Plex Mono |
 - **Daten & Datenschutz:** Keys, das zuletzt bearbeitete Transkript und die Sicherung einer unterbrochenen Aufnahme einzeln löschen oder alles zurücksetzen.
 
 ## Mikrofonaufnahme
@@ -110,7 +117,8 @@ Zusammengefasst wird immer der aktuelle (ggf. von dir korrigierte) Text im Ergeb
 
 ```
 index.html              Layout
-css/themes.css          Farben, Schriften und Eckenradien je Design und Hell/Dunkel (CSS-Variablen)
+css/themes.css          Design-Tokens: Standardwerte und gemeinsame Farben je Hell/Dunkel
+css/designs/*.css       Je Design eine Datei: Farben, Schrift, Ecken, Schatten, Buttons, Effekte, Bewegung
 css/styles.css          Komponenten-Styles (Karten, Felder, Segment-Editor, Einstellungsfenster)
 css/tailwind.css        Erzeugte Tailwind-Klassen (npm run build:css)
 js/state.js             Zentraler State: Segmente, Sprecher, Rohdaten, Autosave
@@ -133,12 +141,13 @@ Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und n
 
 Das Aussehen steckt in vier Dateien:
 
-- `css/themes.css` – alle Farben, Schriften und Eckenradien als CSS-Variablen, je Design ein Block für Dunkel und einer für Hell
-- `tailwind.config.js` – verbindet die Tailwind-Farben (`bg-primary`, `text-on-surface` …) mit diesen Variablen
-- `css/styles.css` – Bausteine wie Panels, Buttons, Anbieter- und Key-Karten, Segmente, Rekorder, Exportmenü, Einstellungsfenster
+- `css/themes.css` – alle Design-Tokens mit Standardwerten: Schriften, Ecken (`--r-panel`, `--r-btn` …), Rahmen (`--bw`), Schatten (`--shadow-panel`, `--shadow-btn` …), Button-Stil (`--btn-bg`, `--btn-case` …), Unschärfe und Bewegung (`--ease`, `--dur`, `--page-anim`)
+- `css/designs/*.css` – je Design eine Datei, die diese Tokens überschreibt, die Farben für Dunkel und Hell festlegt und eigene Effekte ergänzt (Hintergründe, Filmkorn, Eckklammern)
+- `tailwind.config.js` – verbindet die Tailwind-Farben (`bg-primary`, `text-on-surface` …) mit den Farb-Variablen
+- `css/styles.css` – Bausteine wie Panels, Buttons, Anbieter- und Key-Karten, Segmente, Rekorder, Exportmenü, Einstellungsfenster; sie lesen nur Tokens
 - `index.html` – Aufbau der Ansichten mit Tailwind-Klassen
 
-**Neues Design anlegen:** in `css/themes.css` die beiden Blöcke eines vorhandenen Designs kopieren (z. B. `[data-theme="graphit"][data-mode="dark"]` und `…[data-mode="light"]`), umbenennen und die Werte ändern (Farben als `R G B`). Dann in `js/appearance.js` einen Eintrag in `THEMES` ergänzen – er erscheint automatisch unter Einstellungen → Darstellung. Neu erzeugt werden muss dafür nichts.
+**Neues Design anlegen:** eine Datei in `css/designs/` kopieren (z. B. `graphit.css`), alle `graphit` durch den neuen Namen ersetzen und die Werte ändern (Farben als `R G B`). Tokens stehen auf `[data-theme="…"]`, seitenweite Effekte auf `html[data-theme="…"]`. Dann die Datei in `index.html` verlinken und in `js/appearance.js` einen Eintrag in `THEMES` ergänzen (mit den Google-Fonts-Familien) – das Design erscheint automatisch unter Einstellungen → Darstellung. Neu erzeugt werden muss dafür nichts.
 
 Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-list`, `vocab-text`) und die Klassennamen aus `styles.css` auf die Seite zu. Solange diese erhalten bleiben, lassen sich Layout, Farben und Schriften frei ändern.
 
@@ -153,6 +162,6 @@ npm run build:css
 
 ## Hinweise
 
-- Schriften (Plus Jakarta Sans, Inter, JetBrains Mono; im Swiss-Design Schibsted Grotesk und Martian Mono) und Symbole (Material Symbols) kommen von Google Fonts. Ohne Internet greifen Standardschriften, und Symbole erscheinen als Wörter.
+- Schriften und Symbole (Material Symbols) kommen von Google Fonts; die Schriften eines Designs werden erst geladen, wenn es gewählt oder in den Einstellungen angezeigt wird. Ohne Internet greifen Standardschriften, und Symbole erscheinen als Wörter.
 - Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen. Der **Test-Ping** in den Einstellungen zeigt das vorab.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.

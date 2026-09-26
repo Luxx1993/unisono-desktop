@@ -1,28 +1,110 @@
 /*
- * Color themes. Every color in the app comes from these variables, written as RGB channels
- * ("R G B") so both Tailwind (rgb(var(--c-x) / <alpha-value>)) and styles.css can add alpha.
+ * Design tokens. Every design decision the components use comes from these variables:
+ * colors, type, corners, borders, shadows, button style, blur and motion.
  *
- * <html data-mode="dark|light" data-theme="deep|graphit|amber"> selects the set; the small
- * script in index.html sets both attributes before the page paints (see js/appearance.js).
+ * - This file holds the defaults and the colors shared per light/dark mode.
+ * - Each design in css/designs/ overrides what makes it different, and may add effects
+ *   (backgrounds, grain, brackets) scoped to [data-theme="…"].
  *
- * Besides colors, a theme can change the fonts (--font-*) and corner radii (--r-*).
+ * <html data-mode="dark|light" data-theme="…"> selects the set; js/appearance.js sets both
+ * before the page paints. The defaults are declared on [data-theme] as well, so the small
+ * previews in the settings dialog (elements with their own data-theme) get a clean set.
  *
- * To add a theme: copy one theme's two blocks (dark + light), rename it, and add an entry to
- * THEMES in js/appearance.js.
+ * Colors are RGB channels ("R G B") so Tailwind (rgb(var(--c-x) / <alpha-value>)) and the CSS
+ * can add alpha.
  */
 
-/* ---------- Shared: type and shape (themes may override) ---------- */
-:root {
+/* ---------- Defaults (the look of "Deep Audio Precision") ---------- */
+:root,
+[data-theme] {
+    /* Type */
     --font-display: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
     --font-body: Inter, system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-label: var(--font-mono);
     --display-weight: 700;
     --display-tracking: -0.01em;
+    --display-style: normal;
+    --label-case: uppercase;
+    --label-tracking: 0.06em;
+    --label-size: 11px;
+    --label-style: normal;
+
+    /* Corners */
     --r-sm: 0.25rem;
     --r-md: 0.375rem;
     --r-lg: 0.5rem;
     --r-xl: 0.75rem;
     --r-2xl: 1rem;
+    --r-panel: var(--r-xl);
+    --r-card: var(--r-xl);
+    --r-field: var(--r-lg);
+    --r-btn: var(--r-lg);
+    --r-btn-lg: var(--r-xl);
+
+    /* Lines */
+    --bw: 1px;
+    --hairline: rgb(var(--c-outline-variant) / 0.25);
+    --panel-border: var(--hairline);
+    --card-border: var(--hairline);
+
+    /* Shading */
+    --shadow: rgb(0 0 0 / var(--shadow-alpha));
+    --shadow-panel: none;
+    --shadow-card: none;
+    --shadow-raised: 0 10px 20px -12px var(--shadow);
+    --shadow-pop: 0 16px 32px -8px var(--shadow);
+    --shadow-selected: 0 8px 20px -10px var(--shadow);
+    --blur: 12px;
+
+    /* Buttons */
+    --btn-bg: rgb(var(--c-primary));
+    --btn-bg-hover: rgb(var(--c-primary-container));
+    --on-btn: rgb(var(--c-on-primary));
+    --btn-font: var(--font-body);
+    --btn-weight: 600;
+    --btn-case: none;
+    --btn-tracking: normal;
+    --shadow-btn: none;
+    --shadow-btn-hover: none;
+    --shadow-btn-active: none;
+    --shadow-start: 0 10px 20px -8px rgb(var(--c-primary-container) / 0.4);
+    --ghost-bg: rgb(var(--c-surface-high));
+    --ghost-bg-hover: rgb(var(--c-surface-bright));
+    --ghost-border: rgb(var(--c-outline-variant) / 0.35);
+    --shadow-ghost: none;
+    --shadow-ghost-hover: none;
+    --btn-hover-transform: none;
+    --btn-active-transform: scale(0.98);
+    --shimmer: block;
+
+    /* Motion */
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur: 0.2s;
+    --page-anim: pageEntrance 0.4s var(--ease) both;
+    --dialog-anim: dialogIn 0.25s var(--ease);
+
+    /* Short names used in styles.css */
+    --bg: rgb(var(--c-bg));
+    --surface-lowest: rgb(var(--c-surface-lowest));
+    --surface-low: rgb(var(--c-surface-low));
+    --surface: rgb(var(--c-surface));
+    --surface-high: rgb(var(--c-surface-high));
+    --surface-highest: rgb(var(--c-surface-highest));
+    --surface-bright: rgb(var(--c-surface-bright));
+    --on-surface: rgb(var(--c-on-surface));
+    --on-surface-variant: rgb(var(--c-on-surface-variant));
+    --outline: rgb(var(--c-outline));
+    --outline-variant: rgb(var(--c-outline-variant));
+    --primary: rgb(var(--c-primary));
+    --on-primary: rgb(var(--c-on-primary));
+    --primary-container: rgb(var(--c-primary-container));
+    --secondary: rgb(var(--c-secondary));
+    --tertiary: rgb(var(--c-tertiary));
+    --error: rgb(var(--c-error));
+    --warning: rgb(var(--c-warning));
+    --danger: rgb(var(--c-danger));
+    --spk-none: rgb(var(--c-outline));
 }
 
 /* ---------- Shared per mode: semantic colors, speakers ---------- */
@@ -89,160 +171,3 @@
     --c-spk-7: 220 38 38;
 }
 
-/* ---------- Deep Audio Precision (default, from TranscribeLocal) ---------- */
-:root,
-[data-theme="deep"][data-mode="dark"] {
-    --c-bg: 10 18 42;
-    --c-surface-lowest: 5 13 37;
-    --c-surface-low: 19 26 51;
-    --c-surface: 23 30 55;
-    --c-surface-high: 33 41 66;
-    --c-surface-highest: 44 52 77;
-    --c-surface-bright: 49 56 82;
-    --c-on-surface: 219 225 255;
-    --c-on-surface-variant: 199 196 215;
-    --c-outline: 144 143 160;
-    --c-outline-variant: 70 69 84;
-    --c-primary: 192 193 255;
-    --c-on-primary: 16 0 169;
-    --c-primary-container: 128 131 255;
-}
-
-[data-theme="deep"][data-mode="light"] {
-    --c-bg: 246 247 252;
-    --c-surface-lowest: 255 255 255;
-    --c-surface-low: 240 242 250;
-    --c-surface: 233 236 248;
-    --c-surface-high: 224 228 244;
-    --c-surface-highest: 212 217 236;
-    --c-surface-bright: 255 255 255;
-    --c-on-surface: 20 26 51;
-    --c-on-surface-variant: 69 70 90;
-    --c-outline: 111 112 134;
-    --c-outline-variant: 197 198 216;
-    --c-primary: 79 70 229;
-    --c-on-primary: 255 255 255;
-    --c-primary-container: 99 102 241;
-}
-
-/* ---------- Graphit: neutral grey, sky-blue accent ---------- */
-[data-theme="graphit"][data-mode="dark"] {
-    --c-bg: 17 19 24;
-    --c-surface-lowest: 11 13 17;
-    --c-surface-low: 24 27 33;
-    --c-surface: 29 32 39;
-    --c-surface-high: 38 42 50;
-    --c-surface-highest: 50 54 63;
-    --c-surface-bright: 58 63 73;
-    --c-on-surface: 226 229 236;
-    --c-on-surface-variant: 196 199 208;
-    --c-outline: 139 144 155;
-    --c-outline-variant: 67 71 80;
-    --c-primary: 125 211 252;
-    --c-on-primary: 0 52 76;
-    --c-primary-container: 56 189 248;
-}
-
-[data-theme="graphit"][data-mode="light"] {
-    --c-bg: 246 247 249;
-    --c-surface-lowest: 255 255 255;
-    --c-surface-low: 240 242 245;
-    --c-surface: 233 236 240;
-    --c-surface-high: 223 227 233;
-    --c-surface-highest: 210 215 223;
-    --c-surface-bright: 255 255 255;
-    --c-on-surface: 23 26 32;
-    --c-on-surface-variant: 72 77 88;
-    --c-outline: 113 119 130;
-    --c-outline-variant: 198 203 211;
-    --c-primary: 2 132 199;
-    --c-on-primary: 255 255 255;
-    --c-primary-container: 14 165 233;
-}
-
-/* ---------- Bernstein: warm dark brown, amber accent ---------- */
-[data-theme="amber"][data-mode="dark"] {
-    --c-bg: 24 20 16;
-    --c-surface-lowest: 16 13 10;
-    --c-surface-low: 32 27 22;
-    --c-surface: 38 32 26;
-    --c-surface-high: 49 42 35;
-    --c-surface-highest: 62 54 45;
-    --c-surface-bright: 70 61 51;
-    --c-on-surface: 240 230 218;
-    --c-on-surface-variant: 214 202 188;
-    --c-outline: 158 146 132;
-    --c-outline-variant: 82 72 62;
-    --c-primary: 255 196 120;
-    --c-on-primary: 70 40 0;
-    --c-primary-container: 234 160 64;
-}
-
-[data-theme="amber"][data-mode="light"] {
-    --c-bg: 251 248 243;
-    --c-surface-lowest: 255 255 255;
-    --c-surface-low: 246 241 233;
-    --c-surface: 240 233 223;
-    --c-surface-high: 232 223 210;
-    --c-surface-highest: 220 209 194;
-    --c-surface-bright: 255 255 255;
-    --c-on-surface: 35 28 20;
-    --c-on-surface-variant: 88 76 62;
-    --c-outline: 128 115 99;
-    --c-outline-variant: 214 203 188;
-    --c-primary: 180 83 9;
-    --c-on-primary: 255 255 255;
-    --c-primary-container: 217 119 6;
-}
-
-/* ---------- Swiss (Bone & forest): editorial, hard edges, one hot accent ----------
-   From the Swiss / editorial style of the code-motion-video skill: bone #EDEAE3,
-   forest #1F3B2D, persimmon #E4572E, sage #9DB5A5; Schibsted Grotesk + Martian Mono. */
-[data-theme="swiss"] {
-    --font-display: "Schibsted Grotesk", Inter, system-ui, sans-serif;
-    --font-body: "Schibsted Grotesk", Inter, system-ui, sans-serif;
-    --font-mono: "Martian Mono", "JetBrains Mono", ui-monospace, monospace;
-    --display-weight: 800;
-    --display-tracking: -0.03em;
-    --r-sm: 0;
-    --r-md: 1px;
-    --r-lg: 2px;
-    --r-xl: 2px;
-    --r-2xl: 3px;
-}
-
-[data-theme="swiss"][data-mode="dark"] {
-    --c-bg: 31 59 45;
-    --c-surface-lowest: 25 49 37;
-    --c-surface-low: 36 67 51;
-    --c-surface: 42 75 58;
-    --c-surface-high: 50 85 67;
-    --c-surface-highest: 61 97 78;
-    --c-surface-bright: 70 107 87;
-    --c-on-surface: 237 234 227;
-    --c-on-surface-variant: 200 211 203;
-    --c-outline: 157 181 165;
-    --c-outline-variant: 88 118 101;
-    --c-primary: 240 122 86;
-    --c-on-primary: 22 40 31;
-    --c-primary-container: 228 87 46;
-    --c-tertiary: 157 181 165;
-}
-
-[data-theme="swiss"][data-mode="light"] {
-    --c-bg: 237 234 227;
-    --c-surface-lowest: 246 244 239;
-    --c-surface-low: 231 227 219;
-    --c-surface: 225 221 211;
-    --c-surface-high: 216 211 200;
-    --c-surface-highest: 205 199 187;
-    --c-surface-bright: 250 248 244;
-    --c-on-surface: 31 59 45;
-    --c-on-surface-variant: 60 84 71;
-    --c-outline: 101 124 111;
-    --c-outline-variant: 182 190 180;
-    --c-primary: 196 64 28;
-    --c-on-primary: 250 247 242;
-    --c-primary-container: 228 87 46;
-    --c-tertiary: 45 96 72;
-}

@@ -1,0 +1,269 @@
+/*
+ * Design: Swiss (editorial abstract), in three color variants
+ * From the Swiss / editorial style of the code-motion-video skill: hard edges, one hot accent
+ * against ink and paper, a dot system on the ground, a technical frame (corner brackets like a
+ * HUD), no shadows, no blur. Heavy tight display type, uppercase mono labels and buttons.
+ * Motion is metronomic: quick snaps and wipes, then hold.
+ *
+ *   swiss         Bone & forest     Schibsted Grotesk / Martian Mono
+ *   swiss-signal  Ink & signal red  Archivo / JetBrains Mono
+ *   swiss-cobalt  Paper & cobalt    Instrument Sans / IBM Plex Mono
+ */
+
+/* ---------- Shared by all Swiss variants ---------- */
+[data-theme^="swiss"] {
+    --display-weight: 800;
+    --display-tracking: -0.035em;
+    --label-tracking: 0.1em;
+
+    --r-sm: 0;
+    --r-md: 0;
+    --r-lg: 0;
+    --r-xl: 0;
+    --r-2xl: 0;
+    --r-panel: 0;
+    --r-card: 0;
+    --r-field: 0;
+    --r-btn: 0;
+    --r-btn-lg: 0;
+
+    --hairline: rgb(var(--c-on-surface) / 0.18);
+    --panel-border: rgb(var(--c-on-surface) / 0.28);
+
+    --shadow-panel: none;
+    --shadow-card: none;
+    --shadow-raised: none;
+    --shadow-pop: none;
+    --shadow-selected: inset 0 0 0 2px rgb(var(--c-on-surface));
+    --blur: 0px;
+
+    --btn-bg: rgb(var(--c-accent));
+    --btn-bg-hover: rgb(var(--c-on-surface));
+    --on-btn: rgb(var(--c-on-accent));
+    --btn-font: var(--font-mono);
+    --btn-weight: 600;
+    --btn-case: uppercase;
+    --btn-tracking: 0.08em;
+    --shadow-start: none;
+    --ghost-bg: transparent;
+    --ghost-bg-hover: rgb(var(--c-on-surface) / 0.08);
+    --ghost-border: rgb(var(--c-on-surface) / 0.6);
+    --btn-hover-transform: none;
+    --btn-active-transform: none;
+    --shimmer: none;
+
+    --ease: cubic-bezier(0.7, 0, 0.3, 1);
+    --dur: 0.16s;
+    --page-anim: wipeIn 0.5s cubic-bezier(0.7, 0, 0.3, 1) both;
+    --dialog-anim: wipeIn 0.35s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+@keyframes wipeIn {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+/* ---------- Bone & forest ---------- */
+[data-theme="swiss"] {
+    --font-display: "Schibsted Grotesk", Inter, system-ui, sans-serif;
+    --font-body: "Schibsted Grotesk", Inter, system-ui, sans-serif;
+    --font-mono: "Martian Mono", "JetBrains Mono", ui-monospace, monospace;
+    --font-label: var(--font-mono);
+}
+
+[data-theme="swiss"][data-mode="dark"] {
+    --c-bg: 31 59 45;
+    --c-surface-lowest: 25 49 37;
+    --c-surface-low: 36 67 51;
+    --c-surface: 42 75 58;
+    --c-surface-high: 50 85 67;
+    --c-surface-highest: 61 97 78;
+    --c-surface-bright: 70 107 87;
+    --c-on-surface: 237 234 227;
+    --c-on-surface-variant: 200 211 203;
+    --c-outline: 157 181 165;
+    --c-outline-variant: 88 118 101;
+    --c-primary: 240 122 86;
+    --c-on-primary: 22 40 31;
+    --c-primary-container: 228 87 46;
+    --c-tertiary: 157 181 165;
+    --c-accent: 228 87 46;
+    --c-on-accent: 22 40 31;
+}
+
+[data-theme="swiss"][data-mode="light"] {
+    --c-bg: 237 234 227;
+    --c-surface-lowest: 246 244 239;
+    --c-surface-low: 231 227 219;
+    --c-surface: 225 221 211;
+    --c-surface-high: 216 211 200;
+    --c-surface-highest: 205 199 187;
+    --c-surface-bright: 250 248 244;
+    --c-on-surface: 31 59 45;
+    --c-on-surface-variant: 60 84 71;
+    --c-outline: 101 124 111;
+    --c-outline-variant: 182 190 180;
+    --c-primary: 196 64 28;
+    --c-on-primary: 250 247 242;
+    --c-primary-container: 228 87 46;
+    --c-tertiary: 45 96 72;
+    --c-accent: 214 76 36;
+    --c-on-accent: 250 247 242;
+}
+
+/* ---------- Ink & signal red ---------- */
+[data-theme="swiss-signal"] {
+    --font-display: Archivo, Inter, system-ui, sans-serif;
+    --font-body: Archivo, Inter, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-label: var(--font-mono);
+    --display-weight: 900;
+}
+
+[data-theme="swiss-signal"][data-mode="dark"] {
+    --c-bg: 18 18 18;
+    --c-surface-lowest: 10 10 10;
+    --c-surface-low: 26 26 25;
+    --c-surface: 33 33 32;
+    --c-surface-high: 43 43 41;
+    --c-surface-highest: 55 55 52;
+    --c-surface-bright: 64 64 60;
+    --c-on-surface: 236 232 224;
+    --c-on-surface-variant: 200 196 188;
+    --c-outline: 150 146 139;
+    --c-outline-variant: 82 80 76;
+    --c-primary: 255 106 84;
+    --c-on-primary: 18 18 18;
+    --c-primary-container: 232 65 44;
+    --c-tertiary: 130 145 255;
+    --c-warning: 242 197 61;
+    --c-accent: 232 65 44;
+    --c-on-accent: 18 18 18;
+}
+
+[data-theme="swiss-signal"][data-mode="light"] {
+    --c-bg: 236 232 224;
+    --c-surface-lowest: 245 242 236;
+    --c-surface-low: 229 225 216;
+    --c-surface: 223 219 209;
+    --c-surface-high: 214 209 198;
+    --c-surface-highest: 202 197 185;
+    --c-surface-bright: 248 246 241;
+    --c-on-surface: 18 18 18;
+    --c-on-surface-variant: 64 62 58;
+    --c-outline: 108 104 98;
+    --c-outline-variant: 186 181 171;
+    --c-primary: 192 44 24;
+    --c-on-primary: 255 255 255;
+    --c-primary-container: 232 65 44;
+    --c-tertiary: 36 56 232;
+    --c-accent: 232 65 44;
+    --c-on-accent: 18 18 18;
+}
+
+/* ---------- Paper & cobalt ---------- */
+[data-theme="swiss-cobalt"] {
+    --font-display: "Instrument Sans", Inter, system-ui, sans-serif;
+    --font-body: "Instrument Sans", Inter, system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
+    --font-label: var(--font-mono);
+    --display-weight: 700;
+    --display-tracking: -0.04em;
+}
+
+/* Dark: the whole ground turns cobalt, like a colour-field poster. */
+[data-theme="swiss-cobalt"][data-mode="dark"] {
+    --c-bg: 30 44 176;
+    --c-surface-lowest: 22 34 146;
+    --c-surface-low: 36 52 190;
+    --c-surface: 42 59 200;
+    --c-surface-high: 52 70 212;
+    --c-surface-highest: 66 84 222;
+    --c-surface-bright: 78 96 228;
+    --c-on-surface: 243 240 232;
+    --c-on-surface-variant: 212 216 244;
+    --c-outline: 170 180 236;
+    --c-outline-variant: 100 116 224;
+    --c-primary: 255 184 162;
+    --c-on-primary: 26 26 26;
+    --c-primary-container: 255 90 54;
+    --c-tertiary: 255 205 186;
+    --c-accent: 255 90 54;
+    --c-on-accent: 26 26 26;
+}
+
+[data-theme="swiss-cobalt"][data-mode="light"] {
+    --c-bg: 243 240 232;
+    --c-surface-lowest: 250 248 243;
+    --c-surface-low: 236 233 224;
+    --c-surface: 230 227 217;
+    --c-surface-high: 221 217 206;
+    --c-surface-highest: 209 205 193;
+    --c-surface-bright: 252 251 247;
+    --c-on-surface: 26 26 26;
+    --c-on-surface-variant: 70 68 64;
+    --c-outline: 110 107 100;
+    --c-outline-variant: 190 186 176;
+    --c-primary: 36 56 232;
+    --c-on-primary: 243 240 232;
+    --c-primary-container: 36 56 232;
+    --c-tertiary: 196 58 26;
+    --c-accent: 36 56 232;
+    --c-on-accent: 243 240 232;
+}
+
+/* ---------- Page effects (all variants) ---------- */
+html[data-theme^="swiss"] body {
+    background-image: radial-gradient(rgb(var(--c-on-surface) / 0.22) 1px, transparent 1.3px);
+    background-size: 28px 28px;
+    background-attachment: fixed;
+}
+
+html[data-theme^="swiss"] .app-header {
+    background: rgb(var(--c-bg));
+    backdrop-filter: none;
+    box-shadow: none;
+    border-bottom: 1px solid rgb(var(--c-on-surface) / 0.8);
+}
+
+html[data-theme^="swiss"] .app-nav { border-radius: 0; background: transparent; border-color: rgb(var(--c-on-surface) / 0.8); }
+html[data-theme^="swiss"] .nav-item {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+html[data-theme^="swiss"] .nav-item.is-current {
+    background: rgb(var(--c-on-surface));
+    color: rgb(var(--c-bg));
+    box-shadow: none;
+}
+
+/* Technical frame: corner brackets on panels and bars */
+html[data-theme^="swiss"] :is(.panel, .bar) { position: relative; }
+html[data-theme^="swiss"] :is(.panel, .bar)::before,
+html[data-theme^="swiss"] :is(.panel, .bar)::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+    border: 0 solid rgb(var(--c-on-surface));
+}
+html[data-theme^="swiss"] :is(.panel, .bar)::before { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+html[data-theme^="swiss"] :is(.panel, .bar)::after { right: -1px; bottom: -1px; border-right-width: 2px; border-bottom-width: 2px; }
+
+html[data-theme^="swiss"] .btn-primary:hover:not(:disabled),
+html[data-theme^="swiss"] .btn-start:hover:not(:disabled) { color: rgb(var(--c-bg)); }
+html[data-theme^="swiss"] .btn-start { font-size: 13px; }
+html[data-theme^="swiss"] .settings-gear { border-radius: 0; border-color: rgb(var(--c-on-surface) / 0.8); }
+html[data-theme^="swiss"] .settings-gear:hover { background: rgb(var(--c-on-surface)); color: rgb(var(--c-bg)); transform: rotate(90deg); }
+html[data-theme^="swiss"] .provider-icon { background: rgb(var(--c-accent)); color: rgb(var(--c-on-accent)); }
+html[data-theme^="swiss"] .chip { text-transform: uppercase; letter-spacing: 0.08em; background: transparent; border: 1px solid currentColor; }
+html[data-theme^="swiss"] .key-badge { text-transform: uppercase; letter-spacing: 0.08em; }
+html[data-theme^="swiss"] :is(.dot, .rec-dot, .speaker-dot, .rounded-full) { border-radius: 0; }
+html[data-theme^="swiss"] .segment { border-left-width: 4px; }
+html[data-theme^="swiss"] .segment.is-active { background: rgb(var(--c-surface)); box-shadow: none; outline: 1px solid rgb(var(--c-on-surface)); }
+html[data-theme^="swiss"] .rec-btn-stop:hover:not(:disabled) { background: rgb(var(--c-accent)); color: rgb(var(--c-on-accent)); }
+html[data-theme^="swiss"] .field { background: rgb(var(--c-surface-lowest)); }
+html[data-theme^="swiss"] .field:focus { box-shadow: none; border-color: rgb(var(--c-on-surface)); }
