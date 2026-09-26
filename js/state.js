@@ -52,6 +52,33 @@ window.Scribe = window.Scribe || {};
         for (const fn of listeners) fn(type, detail);
     }
 
+    // Providers (Gladia in particular) often split speech at every comma or short pause:
+    // a 57-minute meeting came back as 1,366 fragments like "Ja," / "gut.". Consecutive
+    // fragments of the same speaker are joined into readable paragraphs. Nothing is lost:
+    // the text is concatenated and the time span covers both parts.
+    const MERGE_MAX_GAP = 2;       // seconds of silence between fragments
+    const MERGE_MAX_LENGTH = 60;   // seconds per resulting segment
+
+    function consolidate(segments) {
+        const out = [];
+        for (const s of segments) {
+            const prev = out[out.length - 1];
+            const joinable = prev
+                && prev.speaker === s.speaker
+                && s.start - prev.end <= MERGE_MAX_GAP
+                && s.end - prev.start <= MERGE_MAX_LENGTH;
+            if (joinable) {
+                prev.text = [prev.text, s.text].filter(Boolean).join(' ');
+                prev.end = Math.max(prev.end, s.end);
+            } else {
+                out.push({ ...s });
+            }
+        }
+        return out;
+    }
+
+    const roundMs = t => Math.round((Number.isFinite(t) ? t : 0) * 1000) / 1000;
+
     function newSegmentId() {
         return 'seg-' + (++seq);
     }
@@ -97,13 +124,13 @@ window.Scribe = window.Scribe || {};
             if (s.speaker != null && !ids.includes(s.speaker)) ids.push(s.speaker);
         }
         state.speakers = ids.map(id => ({ id, name: 'Sprecher ' + id }));
-        state.segments = segments.map(s => ({
-            id: newSegmentId(),
+        const normalized = segments.map(s => ({
             speaker: s.speaker ?? null,
-            start: s.start || 0,
-            end: s.end || 0,
-            text: s.text || ''
+            start: roundMs(s.start),
+            end: roundMs(s.end),
+            text: (s.text || '').trim()
         }));
+        state.segments = consolidate(normalized).map(s => ({ ...s, id: newSegmentId() }));
         state.raw = raw ?? null;
         state.provider = provider ?? null;
         state.fileName = fileName ?? null;
@@ -117,17 +144,16 @@ window.Scribe = window.Scribe || {};
         if (data?.format !== 'scribe-studio' || !Array.isArray(data.segments)) {
             throw new Error('Das ist keine Scribe-Studio-Projektdatei.');
         }
-        const num = v => (Number.isFinite(v) ? v : 0);
         state.speakers = (Array.isArray(data.speakers) ? data.speakers : [])
             .filter(s => s && typeof s.id === 'string')
             .map(s => ({ id: s.id, name: String(s.name ?? 'Sprecher ' + s.id) }));
-        state.segments = data.segments.map(s => ({
-            id: newSegmentId(),
+        // Also joins fragments in projects saved before consolidation existed.
+        state.segments = consolidate(data.segments.map(s => ({
             speaker: typeof s.speaker === 'string' ? s.speaker : null,
-            start: num(s.start),
-            end: num(s.end),
+            start: roundMs(s.start),
+            end: roundMs(s.end),
             text: String(s.text ?? '')
-        }));
+        }))).map(s => ({ ...s, id: newSegmentId() }));
         state.fileName = data.fileName || null;
         state.provider = data.provider || null;
         state.createdAt = data.createdAt || null;

@@ -52,7 +52,7 @@ Unter der Liste steht, wie viele Begriffe beim gewählten Anbieter ankommen und 
 
 ## Segment-Editor
 
-Das Transkript besteht aus Abschnitten (Segmenten) mit Sprecher, Zeitstempel und Text:
+Das Transkript besteht aus Abschnitten (Segmenten) mit Sprecher, Zeitstempel und Text. Viele Anbieter – besonders Gladia – liefern sehr kleine Bruchstücke („Ja,“ / „gut.“). Scribe Studio fasst direkt aufeinanderfolgende Bruchstücke desselben Sprechers automatisch zu Absätzen zusammen (Pause ≤ 2 s, Absatz ≤ 60 s); der Text bleibt dabei vollständig erhalten.
 
 - **Sprecher umbenennen:** In der Sprecherleiste über dem Transkript z. B. „Sprecher A“ in „Herr Müller“ ändern – alle Abschnitte dieses Sprechers ändern sich sofort mit.
 - **Sprecher zuordnen:** Pro Abschnitt über das Auswahlfeld einen anderen oder neuen Sprecher wählen.
