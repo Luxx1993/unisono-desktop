@@ -36,6 +36,9 @@
     <script src="js/recorder.js" defer></script>
     <script src="js/segment-editor.js" defer></script>
     <script src="js/summary.js" defer></script>
+    <script src="js/progress.js" defer></script>
+    <script src="js/player.js" defer></script>
+    <script src="js/search.js" defer></script>
     <script src="js/settings.js" defer></script>
     <script src="js/app.js" defer></script>
 </head>
@@ -105,7 +108,33 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Live progress while a transcription runs (replaces the form below) -->
+            <section id="progress-panel" class="panel progress-panel hidden" aria-live="polite" aria-labelledby="progress-file">
+                <div class="panel-head">
+                    <span class="step-label">Transkription läuft</span>
+                    <span class="font-code text-[12px] text-on-surface-variant flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">timer</span><span id="progress-elapsed">00:00</span></span>
+                </div>
+                <div class="flex items-center gap-3 min-w-0">
+                    <div id="progress-icon" class="provider-icon shrink-0"></div>
+                    <div class="min-w-0">
+                        <h2 id="progress-file" class="font-headline text-[18px] text-on-surface font-semibold truncate"></h2>
+                        <p id="progress-meta" class="font-code text-[11.5px] text-on-surface-variant"></p>
+                    </div>
+                </div>
+                <ol id="progress-steps" class="progress-steps">
+                    <li data-step="prepare"><span class="progress-dot"></span><span class="progress-label">Vorbereiten</span><span class="progress-detail"></span></li>
+                    <li data-step="upload"><span class="progress-dot"></span><span class="progress-label">Hochladen</span><span class="progress-detail"></span></li>
+                    <li data-step="process"><span class="progress-dot"></span><span class="progress-label">Verarbeiten</span><span class="progress-detail"></span></li>
+                    <li data-step="done"><span class="progress-dot"></span><span class="progress-label">Fertig</span><span class="progress-detail"></span></li>
+                </ol>
+                <div class="progress-track" aria-hidden="true"><div id="progress-bar" class="progress-bar"></div></div>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <p id="progress-text" class="text-[13px] text-on-surface-variant"></p>
+                    <button id="progress-cancel" class="btn-ghost btn-danger"><span class="material-symbols-outlined text-[16px]">close</span>Abbrechen</button>
+                </div>
+            </section>
+
+            <div id="start-form" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Left: provider & media -->
                 <div class="lg:col-span-8 flex flex-col gap-6">
                     <div class="panel">
@@ -297,17 +326,32 @@
                     </div>
                 </div>
 
-                <!-- Player -->
+                <!-- Player: controls + timeline (waveform colored by speaker) -->
                 <div id="player-bar" class="player-bar hidden">
-                    <audio id="audio-player" controls class="w-full h-10"></audio>
-                    <label class="flex items-center gap-2 font-label text-[11px] text-on-surface-variant shrink-0">
-                        <input type="checkbox" id="follow-playback" checked class="accent-primary-container"> Mitlaufen
-                    </label>
-                </div>
-                <div id="player-missing" class="hidden flex items-center gap-3 px-4 py-3 note-card bg-surface-container-low text-[13px] text-on-surface-variant">
-                    <span class="material-symbols-outlined text-tertiary">headphones</span>
-                    <span class="flex-1">Für den Player die Audiodatei erneut laden.</span>
-                    <button id="player-load" class="btn-ghost">Audiodatei laden</button>
+                    <audio id="audio-player" preload="metadata"></audio>
+                    <div class="player-controls">
+                        <button id="player-back" class="icon-btn" title="10 Sekunden zurück"><span class="material-symbols-outlined text-[22px]">replay_10</span></button>
+                        <button id="player-play" class="player-play" title="Abspielen"><span class="material-symbols-outlined text-[26px]">play_arrow</span></button>
+                        <button id="player-fwd" class="icon-btn" title="10 Sekunden vor"><span class="material-symbols-outlined text-[22px]">forward_10</span></button>
+                        <span id="player-time" class="player-time">00:00:00 / 00:00:00</span>
+                        <select id="player-rate" class="player-rate" title="Wiedergabegeschwindigkeit" aria-label="Wiedergabegeschwindigkeit">
+                            <option value="0.75">0,75×</option>
+                            <option value="1" selected>1×</option>
+                            <option value="1.25">1,25×</option>
+                            <option value="1.5">1,5×</option>
+                            <option value="1.75">1,75×</option>
+                            <option value="2">2×</option>
+                        </select>
+                        <button id="player-load" class="btn-ghost hidden"><span class="material-symbols-outlined text-[16px]">headphones</span>Audiodatei laden</button>
+                        <span id="player-note" class="player-note hidden"></span>
+                        <label class="ml-auto flex items-center gap-2 font-label text-[11px] text-on-surface-variant shrink-0">
+                            <input type="checkbox" id="follow-playback" checked class="accent-primary-container"> Mitlaufen
+                        </label>
+                    </div>
+                    <div id="timeline" class="timeline" role="slider" tabindex="0" aria-label="Position im Audio – wer spricht wann" aria-valuemin="0">
+                        <canvas id="timeline-canvas"></canvas>
+                        <div id="timeline-hover" class="timeline-hover hidden"></div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -315,7 +359,7 @@
                     <div class="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-24">
                         <div class="panel gap-3">
                             <div class="panel-head">
-                                <h2 class="font-headline text-[17px] text-on-surface font-semibold">Sprecher</h2>
+                                <h2 class="font-headline text-[17px] text-on-surface font-semibold">Sprecher &amp; Redezeit</h2>
                                 <span class="font-label text-[11px] text-primary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span>Namen anpassen</span>
                             </div>
                             <div id="speaker-panel" class="speaker-panel hidden" aria-label="Sprecher"></div>
@@ -358,6 +402,23 @@
 
                     <!-- Segments -->
                     <div class="lg:col-span-8 order-first lg:order-none flex flex-col gap-3">
+                        <div id="search-bar" class="search-bar" role="search">
+                            <div class="search-row">
+                                <span class="material-symbols-outlined text-[20px] text-outline">search</span>
+                                <input id="search-input" type="search" class="search-input" placeholder="Im Transkript suchen (Strg+F)" aria-label="Im Transkript suchen" autocomplete="off" spellcheck="false">
+                                <span id="search-count" class="search-count" aria-live="polite"></span>
+                                <button id="search-prev" class="icon-btn" title="Vorheriger Treffer (Umschalt+Enter)" disabled><span class="material-symbols-outlined text-[20px]">keyboard_arrow_up</span></button>
+                                <button id="search-next" class="icon-btn" title="Nächster Treffer (Enter)" disabled><span class="material-symbols-outlined text-[20px]">keyboard_arrow_down</span></button>
+                                <button id="search-only" class="icon-btn search-toggle" aria-pressed="false" title="Nur Abschnitte mit Treffern zeigen"><span class="material-symbols-outlined text-[20px]">filter_list</span></button>
+                                <button id="search-replace-toggle" class="icon-btn search-toggle" aria-expanded="false" aria-controls="replace-row" title="Ersetzen"><span class="material-symbols-outlined text-[20px]">find_replace</span></button>
+                            </div>
+                            <div id="replace-row" class="search-row hidden">
+                                <span class="material-symbols-outlined text-[20px] text-outline">edit</span>
+                                <input id="replace-input" class="search-input" placeholder="Ersetzen durch" aria-label="Ersetzen durch" autocomplete="off" spellcheck="false">
+                                <button id="replace-one" class="btn-ghost" disabled>Ersetzen</button>
+                                <button id="replace-all" class="btn-ghost" disabled>Alle ersetzen</button>
+                            </div>
+                        </div>
                         <div id="segment-list" class="segment-list"></div>
                     </div>
                 </div>

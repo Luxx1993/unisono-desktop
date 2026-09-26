@@ -2,7 +2,7 @@
 
 Audioaufnahmen aufnehmen, transkribieren und bearbeiten – komplett im Browser, ohne Installation und ohne eigenen Server. Du bringst deine eigenen API-Schlüssel mit (BYOK: *Bring Your Own Key*), die Audiodatei geht direkt vom Browser zum gewählten Anbieter.
 
-<img src="docs/screenshots/transcript.png" alt="Transkript mit Sprechern, Player und KI-Zusammenfassung" width="100%">
+<img src="docs/screenshots/transcript.png" alt="Transkript mit Sprecher-Zeitleiste, Redezeit und Suche" width="100%">
 
 ## Auf einen Blick
 
@@ -10,6 +10,10 @@ Audioaufnahmen aufnehmen, transkribieren und bearbeiten – komplett im Browser,
 - **Vier Anbieter:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral), jeweils mit Sprechererkennung.
 - **Aufnehmen im Browser:** Mikrofonaufnahme mit Pause, Pegelanzeige und Absturzsicherung.
 - **Fachbegriffe:** eine Liste mit Namen und Fachwörtern, die in passender Form an jeden Anbieter geht.
+- **Live-Fortschritt:** Hochladen mit echtem Prozentwert und Tempo, Verarbeitungszeit, jederzeit abbrechbar.
+- **Player mit Zeitleiste:** Wellenform in den Farben der Sprecher – auf einen Blick, wer wann spricht; klicken oder ziehen zum Springen.
+- **Redezeit:** Anteil und Minuten je Sprecher, dazu die Pausen.
+- **Suchen & Ersetzen:** Treffer markiert im Text, nur Treffer anzeigen, einzeln oder alle ersetzen.
 - **Segment-Editor:** Sprecher umbenennen und zuordnen, Text korrigieren, Abschnitte zusammenführen, mitlaufender Player.
 - **Export:** HTML-Seite (mit Audio, als PDF druckbar), Markdown, Text, SRT/VTT und Projektdatei zum Weiterbearbeiten.
 - **KI-Zusammenfassung:** Stichpunkte, Zusammenfassung oder Protokoll mit Aufgaben über Anthropic (Claude) oder OpenAI.
@@ -63,6 +67,35 @@ Jedes Design ist ein eigenes Designsystem mit eigener Schrift, Farben, Ecken, Ra
     <td><img src="docs/screenshots/design-bernstein-light.png" alt="Bernstein, hell"><br><sub>Bernstein · hell</sub></td>
   </tr>
 </table>
+
+## Fortschritt während der Transkription
+
+Nach **Transkription starten** zeigt Scribe Studio die Schritte *Vorbereiten → Hochladen → Verarbeiten → Fertig*:
+
+- **Hochladen** mit echtem Prozentwert, übertragenen MB, Tempo und geschätzter Restzeit – bei 50-MB-Besprechungen sieht man, dass es vorangeht.
+- **Verarbeiten** mit der Zeit, die der Anbieter schon rechnet.
+- **Abbrechen** stoppt Upload oder Warten sofort. Was schon beim Anbieter liegt, löscht er nach seinen eigenen Regeln.
+- Solange eine Transkription läuft, warnt der Browser vor dem Schließen des Tabs.
+
+<img src="docs/screenshots/progress.png" alt="Fortschrittsanzeige beim Hochladen" width="100%">
+
+## Player, Zeitleiste und Redezeit
+
+- **Zeitleiste:** Die Wellenform der Aufnahme, jeder Balken in der Farbe des Sprechers, der gerade redet. Klicken oder ziehen springt an die Stelle, beim Überfahren stehen Zeit und Sprecher; mit dem Fokus auf der Zeitleiste springen ← / → um 5 Sekunden.
+- **Bedienung:** Abspielen/Pause, 10 Sekunden zurück/vor, Geschwindigkeit 0,75× bis 2×, **Mitlaufen** scrollt zum gerade gesprochenen Abschnitt.
+- **Ohne Audiodatei** (etwa nach dem Neuladen oder beim Öffnen einer Projektdatei) zeigt die Zeitleiste die Sprecher als farbige Blöcke; ein Klick springt zum passenden Abschnitt im Text.
+- **Redezeit:** Die Sprecherleiste zeigt je Sprecher Anteil und Dauer mit einem Balken, dazu die **Pausen**. Das zeigt, wer die Besprechung geprägt hat – und verrät, wenn die Erkennung eine Person in zwei Sprecher aufgeteilt hat (ein „Sprecher“ mit 1 %).
+- **Wellenform auch bei langen Aufnahmen:** WAV wird blockweise gelesen, MP3 stückweise dekodiert (2:40 h WAV in etwa 1 s, 70 min MP3 in etwa 4 s). M4A, WebM und OGG müssten Browser komplett in den Speicher dekodieren; dort gibt es die Wellenform bis 20 Minuten, bei längeren Dateien die Sprecher-Zeitleiste.
+
+## Suchen & Ersetzen
+
+Über dem Transkript (oder mit **Strg+F** bzw. **⌘F**):
+
+- Treffer werden direkt im Text markiert, **Enter** / **Umschalt+Enter** springt zum nächsten / vorigen.
+- **Nur Treffer** blendet alle anderen Abschnitte aus.
+- **Ersetzen** ändert den aktuellen Treffer, **Alle ersetzen** alle – praktisch, wenn der Anbieter einen Namen immer gleich falsch schreibt. Groß- und Kleinschreibung spielt beim Suchen keine Rolle.
+
+<img src="docs/screenshots/search.png" alt="Suchen und Ersetzen im Transkript" width="100%">
 
 ## Mikrofonaufnahme
 
@@ -174,7 +207,10 @@ css/designs/*.css       Je Design eine Datei: Farben, Schrift, Ecken, Schatten, 
 css/styles.css          Komponenten-Styles (Karten, Felder, Segment-Editor, Einstellungsfenster)
 css/tailwind.css        Erzeugte Tailwind-Klassen (npm run build:css)
 js/state.js             Zentraler State: Segmente, Sprecher, Rohdaten, Autosave
-js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Player-Sync
+js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Redezeit, Player-Sync
+js/player.js            Player-Bedienung und Zeitleiste (Wellenform nach Sprechern eingefärbt)
+js/search.js            Suchen & Ersetzen mit Markierung im Text
+js/progress.js          Fortschrittsanzeige mit Upload-Prozent und Abbrechen
 js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem bearbeiteten Stand
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
 js/recorder.js          Mikrofonaufnahme (MediaRecorder), Pegel, Pause, Bildschirm-wach-halten
@@ -183,7 +219,7 @@ js/summary.js           KI-Zusammenfassung (Anthropic / OpenAI)
 js/appearance.js        Hell/Dunkel und Design, wird vor dem ersten Zeichnen gesetzt
 js/settings.js          Einstellungsfenster: Kategorien, Darstellung, Daten löschen
 js/app.js               Keys, Konfiguration, Datei-Upload, Ablauf der Transkription
-js/apis/common.js       Gemeinsame HTTP- und Polling-Helfer
+js/apis/common.js       Gemeinsame HTTP-Helfer: Upload mit Fortschritt, Polling, Abbrechen
 js/apis/*.js            Je ein Modul pro Anbieter (Gladia, ElevenLabs, AssemblyAI, Mistral)
 docs/screenshots/       Bilder für diese README
 ```
@@ -220,5 +256,4 @@ npm run build:css
 
 ## Ausblick
 
-- **Etappe 2:** Fortschrittsanzeige während der Transkription, Player mit Wellenform, Suche im Transkript, Verteilung der Redezeit auf die Sprecher.
 - **Etappe 3:** Verlauf/Archiv früherer Transkripte im Browser und Kennzahlen.

@@ -59,16 +59,50 @@ window.Scribe = window.Scribe || {};
         return node;
     }
 
+    // --- Talk time ---
+    // Seconds per speaker, and the pauses: the part of the recording nobody speaks in.
+    function talkTime() {
+        const { segments } = S.state.get();
+        const perSpeaker = {};
+        for (const seg of segments) {
+            if (!(seg.end > seg.start)) continue;
+            const key = seg.speaker || '';
+            perSpeaker[key] = (perSpeaker[key] || 0) + (seg.end - seg.start);
+        }
+        // Union of all spoken intervals (overlapping speech counts once).
+        const spans = segments.filter(s => s.end > s.start).map(s => [s.start, s.end]).sort((a, b) => a[0] - b[0]);
+        let spoken = 0, curStart = null, curEnd = null;
+        for (const [a, b] of spans) {
+            if (curEnd == null || a > curEnd) {
+                if (curEnd != null) spoken += curEnd - curStart;
+                curStart = a;
+                curEnd = b;
+            } else curEnd = Math.max(curEnd, b);
+        }
+        if (curEnd != null) spoken += curEnd - curStart;
+        const total = S.player?.duration() || (spans.length ? spans[spans.length - 1][1] : 0);
+        return { perSpeaker, total, pauses: Math.max(0, total - spoken) };
+    }
+
+    function shareText(seconds, total) {
+        const pct = total ? Math.round((seconds / total) * 100) : 0;
+        return `${pct} % · ${S.format.clock(seconds).replace(/^00:/, '')}`;
+    }
+
     // --- Speaker panel ---
     function renderSpeakers() {
         const { speakers, segments } = S.state.get();
         speakersEl.replaceChildren();
         speakersEl.classList.toggle('hidden', !segments.length);
         if (!segments.length) return;
+        const withTimes = S.state.hasTimes();
+        const time = withTimes ? talkTime() : null;
 
         for (const spk of speakers) {
             const count = segments.filter(s => s.speaker === spk.id).length;
-            const chip = el('label', 'speaker-chip ' + colorClass(spk.id), { title: 'Name für alle Abschnitte dieses Sprechers ändern' });
+            const seconds = time?.perSpeaker[spk.id] || 0;
+            const chip = el('label', 'speaker-chip ' + colorClass(spk.id), { title: `${count} Abschnitt${count === 1 ? '' : 'e'} – Name ändern gilt für alle Abschnitte dieses Sprechers` });
+            if (time?.total) chip.style.setProperty('--share', (seconds / time.total * 100).toFixed(1) + '%');
             chip.append(el('span', 'speaker-dot'));
             const input = el('input', 'speaker-name', { value: spk.name, spellcheck: false });
             input.setAttribute('aria-label', `Name für Sprecher ${spk.id}`);
@@ -80,8 +114,16 @@ window.Scribe = window.Scribe || {};
                     S.state.renameSpeaker(spk.id, input.value);
                 }
             });
-            chip.append(input, el('span', 'speaker-count', { textContent: String(count) }));
+            chip.append(input, el('span', 'speaker-count', { textContent: time ? shareText(seconds, time.total) : String(count) }));
             speakersEl.append(chip);
+        }
+
+        if (time?.total) {
+            const pause = el('div', 'speaker-chip speaker-pause', { title: 'Zeit, in der niemand spricht' });
+            pause.style.setProperty('--share', (time.pauses / time.total * 100).toFixed(1) + '%');
+            pause.append(el('span', 'speaker-dot'), el('span', 'speaker-name', { textContent: 'Pausen' }),
+                el('span', 'speaker-count', { textContent: shareText(time.pauses, time.total) }));
+            speakersEl.append(pause);
         }
 
         const add = el('button', 'speaker-add', { type: 'button', textContent: '+ Sprecher' });
@@ -198,7 +240,10 @@ window.Scribe = window.Scribe || {};
             S.state.updateText(seg.id, text.value);
         });
 
-        row.append(meta, text);
+        // Search hits are drawn in a layer behind the (transparent) textarea, see search.js.
+        const wrap = el('div', 'seg-text-wrap');
+        wrap.append(el('div', 'seg-marks'), text);
+        row.append(meta, wrap);
         return row;
     }
 
@@ -243,5 +288,26 @@ window.Scribe = window.Scribe || {};
         if (followEl.checked && !player.paused && !editing) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
 
-    S.editor = { init };
+    // Scrolls a segment into view and flashes it (used by the timeline and the search).
+    function reveal(id, { flash = true } = {}) {
+        const row = listEl.querySelector(`.segment[data-id="${CSS.escape(id)}"]`);
+        if (!row) return;
+        row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        if (!flash) return;
+        row.classList.remove('is-flash');
+        void row.offsetWidth;
+        row.classList.add('is-flash');
+    }
+
+    // Replaces a segment's text from outside the textarea (search & replace).
+    function setText(id, value) {
+        const text = listEl.querySelector(`.segment[data-id="${CSS.escape(id)}"] .seg-text`);
+        if (text) {
+            text.value = value;
+            fitHeight(text);
+        }
+        S.state.updateText(id, value);
+    }
+
+    S.editor = { init, reveal, setText, refreshSpeakers: () => renderSpeakers() };
 })(window.Scribe);
