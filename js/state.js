@@ -10,6 +10,7 @@
  * Events passed to subscribers:
  *   'reset'            whole transcript replaced
  *   'segments'         segments added, removed, merged or reassigned
+ *                      (detail: { changed: [ids], removed: [ids] } when only those rows changed)
  *   'speakers'         speaker added
  *   'speaker-renamed'  (detail: speaker id) name changed
  *   'text'             (detail: segment id) text of one segment changed
@@ -165,7 +166,7 @@ window.Scribe = window.Scribe || {};
         const seg = state.segments[findSegmentIndex(segmentId)];
         if (!seg) return;
         seg.speaker = speakerId || null;
-        emit('segments');
+        emit('segments', { changed: [segmentId], removed: [] });
     }
 
     function mergeWithNext(segmentId) {
@@ -176,14 +177,14 @@ window.Scribe = window.Scribe || {};
         cur.text = [cur.text.trim(), next.text.trim()].filter(Boolean).join(' ');
         cur.end = Math.max(cur.end, next.end);
         state.segments.splice(i + 1, 1);
-        emit('segments');
+        emit('segments', { changed: [cur.id], removed: [next.id] });
     }
 
     function deleteSegment(segmentId) {
         const i = findSegmentIndex(segmentId);
         if (i < 0) return;
-        state.segments.splice(i, 1);
-        emit('segments');
+        const [removed] = state.segments.splice(i, 1);
+        emit('segments', { changed: [], removed: [removed.id] });
     }
 
     // --- Persistence: edits survive a page reload (without the audio file itself) ---

@@ -237,6 +237,14 @@
     transition: background 0.15s;
 }
 
+/* Let the browser skip layout and painting of segments far outside the viewport.
+   Only with native textarea sizing: the JS fallback measures every textarea, which would
+   force the skipped segments to be laid out anyway. */
+.native-autosize .segment {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 5rem;
+}
+
 .segment.is-active {
     background: color-mix(in srgb, var(--spk) 14%, var(--bg-field));
 }
@@ -306,6 +314,7 @@
 }
 
 .seg-text:hover { border-color: var(--border); }
+.native-autosize .seg-text { field-sizing: content; }
 
 /* Touch devices have no hover: keep the actions visible */
 @media (hover: none) {

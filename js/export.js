@@ -144,6 +144,21 @@ window.Scribe = window.Scribe || {};
         });
     }
 
+    // Turns a long ASCII string (the base64 data URL) into byte chunks, yielding to the browser
+    // between chunks. Encoding 80 MB in one go froze the page for seconds.
+    async function asciiChunks(str, size = 4 * 1024 * 1024) {
+        const encoder = new TextEncoder();
+        const parts = [];
+        for (let i = 0; i < str.length; i += size) {
+            parts.push(encoder.encode(str.slice(i, i + size)));
+            await new Promise(r => setTimeout(r));
+        }
+        return parts;
+    }
+
+    const AUDIO_PLACEHOLDER = '__SCRIBE_AUDIO_SRC__';
+
+    // Returns a string, or a Blob when audio is embedded (assembled from chunks, see above).
     async function toHtml({ includeSummary = true, audioFile = null } = {}) {
         const m = meta();
         const withTimes = S.state.hasTimes();
@@ -175,7 +190,7 @@ window.Scribe = window.Scribe || {};
   </article>`;
         }).join('\n  ');
 
-        return `<!DOCTYPE html>
+        const html = `<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -215,7 +230,7 @@ window.Scribe = window.Scribe || {};
 <main>
   <h1>${escapeHtml(m.title)}</h1>
   <dl>${facts.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join('')}</dl>
-  ${audioSrc ? `<div class="player"><audio id="audio" controls preload="metadata" src="${audioSrc}"></audio></div>` : ''}
+  ${audioSrc ? `<div class="player"><audio id="audio" controls preload="metadata" src="${AUDIO_PLACEHOLDER}"></audio></div>` : ''}
   ${summary ? `<h2>Zusammenfassung</h2>\n  <div class="summary">${escapeHtml(summary)}</div>` : ''}
   <h2>Transkript</h2>
   ${segmentsHtml}
@@ -243,6 +258,9 @@ ${audioSrc ? `<script>
 </body>
 </html>
 `;
+        if (!audioSrc) return html;
+        const [before, after] = html.split(AUDIO_PLACEHOLDER);
+        return new Blob([before, ...(await asciiChunks(audioSrc)), after], { type: 'text/html;charset=utf-8' });
     }
 
     // --- Download ---
