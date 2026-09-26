@@ -142,5 +142,10 @@ window.Scribe = window.Scribe || {};
         window.addEventListener('pagehide', save);
     }
 
-    S.vocabulary = { init, getTerms, prepare, describe, onChange, parse };
+    // Number of terms in the list, whether or not sending is switched on.
+    function count() {
+        return parse($('vocab-text').value).length;
+    }
+
+    S.vocabulary = { init, getTerms, prepare, describe, onChange, parse, count, isEnabled };
 })(window.Scribe);

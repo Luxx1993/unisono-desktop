@@ -1,14 +1,27 @@
 <!DOCTYPE html>
-<html lang="de" class="dark">
+<html lang="de" data-mode="dark" data-theme="deep">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scribe Studio</title>
-    <!-- Prebuilt Tailwind (npm run build:css). The Tailwind play CDN re-generated CSS on every
-         DOM change, which made long transcripts sluggish. -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%23171e37'/%3E%3Crect x='10' y='20' width='4' height='8' rx='2' fill='%23818CF8'/%3E%3Crect x='17' y='14' width='4' height='20' rx='2' fill='%236366F1'/%3E%3Crect x='24' y='9' width='4' height='30' rx='2' fill='%234F46E5'/%3E%3Crect x='31' y='16' width='4' height='16' rx='2' fill='%236366F1'/%3E%3C/svg%3E">
+    <!-- Fonts and icons of the "Deep Audio Precision" design. Without internet the app falls
+         back to system fonts; icons then show as their names. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet">
+    <!-- Prebuilt Tailwind (npm run build:css) -->
     <link href="css/tailwind.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link href="css/themes.css" rel="stylesheet">
     <link href="css/styles.css" rel="stylesheet">
+    <!-- Designs (Einstellungen → Darstellung); each file is one complete design system -->
+    <link href="css/designs/deep.css" rel="stylesheet">
+    <link href="css/designs/graphit.css" rel="stylesheet">
+    <link href="css/designs/bernstein.css" rel="stylesheet">
+    <link href="css/designs/swiss.css" rel="stylesheet">
+    <!-- Not deferred: sets light/dark mode and design before the page paints, loads its fonts -->
+    <script src="js/appearance.js"></script>
 
     <!-- Classic scripts (no ES modules) so the app also runs when opened directly via file:// -->
     <script src="js/state.js" defer></script>
@@ -16,158 +29,254 @@
     <script src="js/apis/gladia.js" defer></script>
     <script src="js/apis/elevenlabs.js" defer></script>
     <script src="js/apis/assembly.js" defer></script>
-    <script src="js/apis/deepgram.js" defer></script>
+    <script src="js/apis/mistral.js" defer></script>
     <script src="js/export.js" defer></script>
     <script src="js/vocabulary.js" defer></script>
     <script src="js/recording-backup.js" defer></script>
     <script src="js/recorder.js" defer></script>
     <script src="js/segment-editor.js" defer></script>
     <script src="js/summary.js" defer></script>
+    <script src="js/settings.js" defer></script>
     <script src="js/app.js" defer></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
+<body class="bg-background text-on-surface font-body text-[14px] min-h-screen flex flex-col selection:bg-primary/30 selection:text-on-surface">
 
-    <header class="border-b border-slate-800 bg-slate-950/50 backdrop-blur py-4 px-6 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-            <i class="fa-solid fa-wave-square text-brand-500 text-2xl"></i>
-            <h1 class="text-xl font-bold tracking-wide">Scribe Studio</h1>
+    <!-- Header -->
+    <header id="app-header" class="app-header sticky top-0 w-full z-50 bg-surface-container-low/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.12)] border-b border-outline-variant/20">
+        <div class="min-h-16 w-full px-4 md:px-8 py-2 flex flex-wrap md:flex-nowrap items-center justify-between gap-x-4 gap-y-2">
+            <div class="flex items-center gap-3 shrink-0">
+                <svg class="h-8 w-8 shrink-0" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                    <rect width="48" height="48" rx="12" class="fill-primary-container/15"/>
+                    <rect x="1" y="1" width="46" height="46" rx="11" fill="none" class="stroke-primary-container/30" stroke-width="1.5"/>
+                    <rect x="10" y="20" width="4" height="8" rx="2" class="fill-primary"/>
+                    <rect x="17" y="14" width="4" height="20" rx="2" class="fill-primary-container"/>
+                    <rect x="24" y="9" width="4" height="30" rx="2" class="fill-primary-container"/>
+                    <rect x="31" y="16" width="4" height="16" rx="2" class="fill-primary-container"/>
+                    <rect x="38" y="22" width="4" height="4" rx="2" class="fill-primary"/>
+                    <circle cx="26" cy="11" r="1.5" class="fill-tertiary"/>
+                </svg>
+                <span class="font-headline text-[18px] text-on-surface font-semibold tracking-tight">Scribe Studio</span>
+                <span class="flex max-md:hidden items-center gap-1.5 px-2.5 py-0.5 rounded bg-surface-container text-secondary font-label text-[11px] border border-outline-variant/30">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>Läuft im Browser
+                </span>
+            </div>
+
+            <nav class="app-nav order-last md:order-none w-full md:w-auto flex items-center gap-1 bg-surface-container-lowest p-1 rounded-xl border border-outline-variant/20 overflow-x-auto text-[13px] font-medium" aria-label="Ansichten">
+                <button id="nav-start" class="nav-item" data-view="start">Transkription</button>
+                <button id="nav-transcript" class="nav-item" data-view="transcript">Transkript &amp; Export</button>
+            </nav>
+
+            <div class="flex items-center gap-3 shrink-0">
+                <button id="key-status" class="flex max-xl:hidden items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-lowest font-label text-[11px] border border-outline-variant/30 hover:border-primary/50 transition-colors" data-settings="keys" title="API-Schlüssel verwalten"></button>
+                <button id="settings-open" class="settings-gear" data-settings="keys" title="Einstellungen" aria-haspopup="dialog" aria-controls="settings-dialog">
+                    <span class="material-symbols-outlined text-[22px]">settings</span>
+                </button>
+            </div>
         </div>
-        <span class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">100% Client-Side / Local Storage</span>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-        <!-- Left column: settings & upload -->
-        <div class="lg:col-span-4 space-y-6">
-
-            <details id="keys-panel" class="card group">
-                <summary class="card-title cursor-pointer list-none flex justify-between items-center">
-                    <span><i class="fa-solid fa-key text-brand-500 mr-2"></i> API-Schlüssel</span>
-                    <i class="fa-solid fa-chevron-down text-xs text-slate-500 transition group-open:rotate-180"></i>
-                </summary>
-                <div class="space-y-4 mt-4">
-                    <div><label for="key-gladia" class="field-label">Gladia</label><input type="password" id="key-gladia" autocomplete="off" class="field"></div>
-                    <div><label for="key-elevenlabs" class="field-label">ElevenLabs</label><input type="password" id="key-elevenlabs" autocomplete="off" class="field"></div>
-                    <div><label for="key-assembly" class="field-label">AssemblyAI</label><input type="password" id="key-assembly" autocomplete="off" class="field"></div>
-                    <div><label for="key-deepgram" class="field-label">Deepgram</label><input type="password" id="key-deepgram" autocomplete="off" class="field"></div>
-                    <div>
-                        <label for="deepgram-proxy" class="field-label">Deepgram Proxy-URL <span class="text-slate-500">(nötig – Deepgram blockiert Browser-Anfragen)</span></label>
-                        <input type="url" id="deepgram-proxy" placeholder="https://mein-proxy.workers.dev" autocomplete="off" class="field">
-                    </div>
-                    <div class="border-t border-slate-700 pt-4"><label for="key-anthropic" class="field-label">Anthropic <span class="text-slate-500">(Zusammenfassungen)</span></label><input type="password" id="key-anthropic" autocomplete="off" class="field"></div>
-                    <div><label for="key-openai" class="field-label">OpenAI <span class="text-slate-500">(Zusammenfassungen)</span></label><input type="password" id="key-openai" autocomplete="off" class="field"></div>
-                    <div class="flex gap-2">
-                        <button id="save-keys" class="btn flex-1">Keys speichern</button>
-                        <button id="clear-keys" class="btn btn-danger" title="Gespeicherte Keys aus diesem Browser löschen">Löschen</button>
-                    </div>
-                    <p class="text-xs text-slate-500">Keys werden nur in diesem Browser gespeichert und direkt an den jeweiligen Anbieter geschickt.</p>
-                </div>
-            </details>
-
-            <section class="card">
-                <h2 class="card-title mb-4"><i class="fa-solid fa-file-audio text-brand-500 mr-2"></i> Audio</h2>
-
-                <div id="rec-recovery" class="rec-recovery hidden" role="alert">
-                    <p><i class="fa-solid fa-life-ring mr-2"></i><span id="rec-recovery-text"></span></p>
-                    <div class="flex gap-2">
-                        <button id="rec-restore" class="btn btn-sm">Wiederherstellen</button>
-                        <button id="rec-discard" class="btn btn-sm btn-danger">Verwerfen</button>
-                    </div>
-                </div>
-
-                <div id="recorder" class="recorder">
-                    <div class="flex items-center gap-2">
-                        <button id="rec-start" class="rec-btn rec-btn-record"><i class="fa-solid fa-microphone mr-2"></i> Aufnehmen</button>
-                        <button id="rec-pause" class="rec-btn hidden"><i class="fa-solid fa-pause mr-2"></i> Pause</button>
-                        <button id="rec-resume" class="rec-btn hidden"><i class="fa-solid fa-play mr-2"></i> Weiter</button>
-                        <button id="rec-stop" class="rec-btn rec-btn-stop hidden"><i class="fa-solid fa-stop mr-2"></i> Stopp</button>
-                        <button id="rec-save" class="btn btn-sm ml-auto hidden" title="Aufnahme als Audiodatei speichern"><i class="fa-solid fa-download mr-1"></i> Sichern</button>
-                    </div>
-                    <div id="rec-live" class="rec-live hidden" aria-live="polite">
-                        <span class="rec-dot" aria-hidden="true"></span>
-                        <span id="rec-state" class="text-xs text-slate-300"></span>
-                        <span id="rec-time" class="rec-time">00:00:00</span>
-                        <div class="rec-level" aria-hidden="true"><div id="rec-level-bar" class="rec-level-bar"></div></div>
-                    </div>
-                    <p id="rec-unsupported" class="hidden text-xs text-amber-300/90">Dieser Browser unterstützt keine Aufnahme über das Mikrofon.</p>
-                </div>
-
-                <p class="or-divider"><span>oder Datei hochladen</span></p>
-
-                <div id="drop-zone" role="button" tabindex="0" class="drop-zone">
-                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-500 mb-2"></i>
-                    <p class="text-sm font-medium text-slate-300">Datei hierher ziehen oder klicken</p>
-                    <p class="text-xs text-slate-500 mt-1">MP3, WAV, M4A, FLAC, OGG, MP4 …</p>
-                    <input type="file" id="file-input" accept="audio/*,video/*" class="hidden">
-                </div>
-                <div id="file-info" class="hidden mt-4 flex justify-between items-center gap-2 bg-slate-900 rounded-lg px-3 py-2 border border-slate-700">
-                    <span id="file-name" class="text-xs font-medium truncate text-slate-300"></span>
-                    <span id="file-size" class="text-xs text-slate-500 shrink-0"></span>
-                </div>
-                <button id="start-btn" disabled class="btn-primary w-full mt-4">Transkription starten</button>
-            </section>
-
-            <section class="card space-y-4">
-                <h2 class="card-title"><i class="fa-solid fa-sliders text-brand-500 mr-2"></i> Konfiguration</h2>
-                <div><label for="provider-select" class="field-label">Anbieter</label><select id="provider-select" class="field"></select></div>
-                <div><label for="model-select" class="field-label">Modell</label><select id="model-select" class="field"></select></div>
-                <div>
-                    <label for="language-select" class="field-label">Sprache</label>
-                    <select id="language-select" class="field">
-                        <option value="de">Deutsch</option>
-                        <option value="en">Englisch</option>
-                        <option value="fr">Französisch</option>
-                        <option value="es">Spanisch</option>
-                        <option value="it">Italienisch</option>
-                        <option value="auto">Automatisch erkennen</option>
-                    </select>
-                </div>
-                <div class="rounded-lg border border-slate-700 bg-slate-900/40 p-3 space-y-3">
-                    <label class="flex items-center gap-2 text-sm text-slate-300">
-                        <input type="checkbox" id="diarize" checked class="accent-sky-500"> Sprechererkennung
-                    </label>
-                    <div id="speaker-options">
-                        <label for="num-speakers" class="field-label">Anzahl Sprecher <span class="text-slate-500">(optional)</span></label>
-                        <input type="number" id="num-speakers" min="1" max="32" placeholder="automatisch" class="field">
-                    </div>
-                </div>
-                <p id="model-hint" class="hidden text-xs text-amber-300/90"></p>
-            </section>
-
-            <section class="card space-y-3">
-                <div class="flex justify-between items-center gap-2">
-                    <h2 class="card-title"><i class="fa-solid fa-spell-check text-brand-500 mr-2"></i> Fachbegriffe</h2>
-                    <span id="vocab-count" class="text-xs text-slate-500"></span>
-                </div>
-                <label class="flex items-center gap-2 text-sm text-slate-300">
-                    <input type="checkbox" id="vocab-enabled" checked class="accent-sky-500"> Bei der Transkription mitschicken
-                </label>
-                <div>
-                    <label for="vocab-text" class="field-label">Ein Begriff pro Zeile – Namen, Firmen, Fachwörter, Abkürzungen. Zeilen mit # sind Kommentare.</label>
-                    <textarea id="vocab-text" rows="7" spellcheck="false" class="field font-mono resize-y" placeholder="# Projekt Neubau Musterstraße&#10;Brandschottung&#10;Deckendurchführung&#10;Estrichleger&#10;Fa. Mustermann Elektro"></textarea>
-                </div>
-                <p id="vocab-hint" class="hidden text-xs text-slate-400"></p>
-                <div class="flex gap-2">
-                    <button id="vocab-import" class="btn flex-1"><i class="fa-solid fa-file-import mr-1"></i> Importieren</button>
-                    <button id="vocab-export" class="btn flex-1"><i class="fa-solid fa-file-export mr-1"></i> Exportieren</button>
-                    <input type="file" id="vocab-file" accept=".txt,.csv,text/plain,text/csv" class="hidden">
-                </div>
-            </section>
-
+    <main class="w-full flex-1">
+        <!-- Global status toast, visible in every view -->
+        <div class="status-dock">
+            <div id="status-banner" class="status-banner hidden" role="status">
+                <span id="status-icon" class="material-symbols-outlined text-[18px]"></span>
+                <span id="status-text" class="flex-1"></span>
+                <button id="status-close" class="status-close" title="Meldung schließen"><span class="material-symbols-outlined text-[16px]">close</span></button>
+            </div>
         </div>
 
-        <!-- Right column: editor & summary -->
-        <div class="lg:col-span-8 flex flex-col space-y-6">
-            <section class="card flex-1 flex flex-col">
-                <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
-                    <h2 class="card-title"><i class="fa-solid fa-align-left text-brand-500 mr-2"></i> Transkript</h2>
-                    <div class="flex flex-wrap gap-2">
-                        <button id="copy-transcript" class="btn btn-sm" data-needs-transcript><i class="fa-solid fa-copy mr-1"></i> Kopieren</button>
-                        <button id="open-project" class="btn btn-sm" title="Gespeicherte Projektdatei (.scribe.json) öffnen"><i class="fa-solid fa-folder-open mr-1"></i> Öffnen</button>
+        <!-- ================= VIEW: Transkription starten ================= -->
+        <section id="view-start" class="view page-entrance w-full max-w-7xl mx-auto px-4 md:px-8 py-8 flex flex-col gap-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div class="flex flex-col gap-1 max-w-3xl">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded bg-primary/10 text-primary font-label text-[11px] uppercase tracking-wider">BYOK</span>
+                        <span class="text-outline font-label text-[12px]">Direkt vom Browser zum Anbieter</span>
+                    </div>
+                    <h1 class="font-display text-[28px] md:text-[32px] leading-tight text-on-surface tracking-tight font-bold">Neue Audio- oder Videodatei transkribieren</h1>
+                    <p class="text-on-surface-variant text-[15px]">Keine Installation, kein eigener Server. Die Datei geht nur an den Anbieter, den du auswählst.</p>
+                </div>
+                <div class="flex items-center gap-3 note-card self-start md:self-auto bg-surface-container-low px-3.5 py-2">
+                    <span class="material-symbols-outlined text-secondary text-[20px]">shield</span>
+                    <div class="flex flex-col">
+                        <span class="font-label text-on-surface font-medium text-[11px]">Keys bleiben lokal</span>
+                        <span class="font-code text-outline text-[10px]">nur in diesem Browser gespeichert</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left: provider & media -->
+                <div class="lg:col-span-8 flex flex-col gap-6">
+                    <div class="panel">
+                        <div class="panel-head">
+                            <span class="step-label">Schritt 1: Anbieter</span>
+                            <button id="provider-key-note" class="font-code text-[11px] hover:underline" data-settings="keys" title="API-Schlüssel verwalten"></button>
+                        </div>
+                        <div id="provider-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1" role="radiogroup" aria-label="Anbieter"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-head">
+                            <span class="step-label">Schritt 2: Audio aufnehmen oder Datei wählen</span>
+                            <button id="open-project-start" class="link-btn"><span class="material-symbols-outlined text-[15px]">folder_open</span>Projekt öffnen</button>
+                        </div>
+
+                        <div id="rec-recovery" class="rec-recovery hidden" role="alert">
+                            <p class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px]">history</span><span id="rec-recovery-text"></span></p>
+                            <div class="flex gap-2">
+                                <button id="rec-restore" class="btn-ghost">Wiederherstellen</button>
+                                <button id="rec-discard" class="btn-ghost btn-danger">Verwerfen</button>
+                            </div>
+                        </div>
+
+                        <div id="recorder" class="recorder">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button id="rec-start" class="rec-btn rec-btn-record"><span class="material-symbols-outlined text-[18px]">mic</span>Aufnehmen</button>
+                                <button id="rec-pause" class="rec-btn hidden"><span class="material-symbols-outlined text-[18px]">pause</span>Pause</button>
+                                <button id="rec-resume" class="rec-btn hidden"><span class="material-symbols-outlined text-[18px]">play_arrow</span>Weiter</button>
+                                <button id="rec-stop" class="rec-btn rec-btn-stop hidden"><span class="material-symbols-outlined text-[18px]">stop</span>Stopp</button>
+                                <button id="rec-save" class="btn-ghost ml-auto hidden" title="Aufnahme als Audiodatei speichern"><span class="material-symbols-outlined text-[16px]">download</span>Aufnahme sichern</button>
+                            </div>
+                            <div id="rec-live" class="rec-live hidden" aria-live="polite">
+                                <span class="rec-dot" aria-hidden="true"></span>
+                                <span id="rec-state" class="font-label text-[12px] text-on-surface-variant"></span>
+                                <span id="rec-time" class="rec-time">00:00:00</span>
+                                <div class="rec-level" aria-hidden="true"><div id="rec-level-bar" class="rec-level-bar"></div></div>
+                            </div>
+                            <p id="rec-unsupported" class="hidden text-[12px] text-error">Dieser Browser unterstützt keine Aufnahme über das Mikrofon.</p>
+                        </div>
+
+                        <p class="or-divider"><span>oder</span></p>
+
+                        <div id="drop-zone" role="button" tabindex="0" class="drop-zone group">
+                            <input type="file" id="file-input" accept="audio/*,video/*" class="hidden">
+                            <div class="group-hover-float w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all duration-300 mb-3 shadow-md">
+                                <span class="material-symbols-outlined text-[30px]">cloud_upload</span>
+                            </div>
+                            <h4 class="font-headline text-[17px] text-on-surface font-semibold mb-1">Mediendatei hier ablegen</h4>
+                            <p class="text-on-surface-variant max-w-md text-[13px] mb-4">MP3, WAV, M4A, FLAC, OGG, WEBM sowie Videos (MP4, MOV)</p>
+                            <span class="btn-primary pointer-events-none"><span class="material-symbols-outlined text-[18px]">folder_open</span>Datei auswählen</span>
+                        </div>
+
+                        <div id="file-info" class="hidden file-card">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-11 h-11 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary shrink-0">
+                                    <span class="material-symbols-outlined text-[24px]">audio_file</span>
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span id="file-name" class="font-label text-on-surface font-semibold truncate text-[13px]"></span>
+                                        <span class="px-1.5 rounded bg-secondary/15 text-secondary font-label text-[10px] font-semibold shrink-0">BEREIT</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 font-code text-outline text-[11px] mt-0.5">
+                                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">save</span><span id="file-size"></span></span>
+                                        <span id="file-duration-wrap" class="hidden items-center gap-1"><span class="material-symbols-outlined text-[13px]">schedule</span><span id="file-duration"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="file-clear" class="icon-btn" title="Auswahl aufheben"><span class="material-symbols-outlined text-[20px]">close</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: parameters, start, vocabulary -->
+                <div class="lg:col-span-4 flex flex-col gap-6">
+                    <div class="panel gap-4">
+                        <div class="panel-head">
+                            <span class="step-label">Schritt 3: Einstellungen</span>
+                            <span class="material-symbols-outlined text-outline text-[18px]">tune</span>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <label for="model-select" class="field-label">Modell</label>
+                            <select id="model-select" class="field"></select>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <label for="language-select" class="field-label">Sprache</label>
+                            <select id="language-select" class="field">
+                                <option value="de">Deutsch</option>
+                                <option value="en">Englisch</option>
+                                <option value="fr">Französisch</option>
+                                <option value="es">Spanisch</option>
+                                <option value="it">Italienisch</option>
+                                <option value="auto">Automatisch erkennen</option>
+                            </select>
+                        </div>
+                        <div class="sub-panel">
+                            <div class="flex items-start justify-between gap-2">
+                                <label class="flex items-center gap-2 text-[13px] font-medium text-on-surface cursor-pointer">
+                                    <input type="checkbox" id="diarize" checked class="w-4 h-4 accent-primary-container">
+                                    Sprecher erkennen
+                                </label>
+                                <span class="px-1.5 py-0.5 rounded bg-primary/20 text-primary font-label text-[10px]">Diarisation</span>
+                            </div>
+                            <div id="speaker-options" class="flex flex-col gap-1 pl-6">
+                                <label for="num-speakers" class="field-label">Anzahl Sprecher <span class="text-outline">(optional)</span></label>
+                                <input type="number" id="num-speakers" min="1" max="32" placeholder="automatisch" class="field">
+                            </div>
+                        </div>
+                        <p id="model-hint" class="hidden hint-warning"></p>
+
+                        <div class="pt-1">
+                            <button id="start-btn" disabled class="btn-start btn-shimmer-effect">
+                                <span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+                                <span id="start-btn-text">Transkription starten</span>
+                            </button>
+                            <p id="start-hint" class="font-label text-[11px] text-outline px-1 pt-2">Zuerst eine Datei wählen oder aufnehmen.</p>
+                        </div>
+                    </div>
+
+                    <div class="panel gap-2">
+                        <div class="panel-head">
+                            <span class="step-label">Fachbegriffe</span>
+                            <button class="link-btn" data-settings="vocab"><span class="material-symbols-outlined text-[15px]">edit</span>Bearbeiten</button>
+                        </div>
+                        <p id="vocab-hint" class="text-[12px] text-on-surface-variant leading-relaxed"></p>
+                    </div>
+
+                    <div class="note-card flex items-start gap-3 p-4 bg-surface-container-lowest">
+                        <span class="material-symbols-outlined text-tertiary text-[20px] shrink-0">lock_clock</span>
+                        <div class="flex flex-col gap-0.5">
+                            <span class="font-label text-on-surface font-medium text-[12px]">Datenschutz</span>
+                            <p class="text-on-surface-variant text-[12px]">Audio und Keys gehen nur an den gewählten Anbieter. Bearbeitete Transkripte bleiben in diesem Browser, bis du sie exportierst.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW: Transkript & Export ================= -->
+        <section id="view-transcript" class="view page-entrance hidden w-full max-w-[1600px] mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
+            <div id="transcript-empty" class="flex flex-col items-center justify-center p-12 md:p-16 text-center panel max-w-2xl mx-auto my-12">
+                <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-outline mb-4">
+                    <span class="material-symbols-outlined text-[32px]">graphic_eq</span>
+                </div>
+                <h2 class="font-headline text-on-surface font-semibold text-[18px]">Noch kein Transkript geladen</h2>
+                <p class="text-on-surface-variant text-[13px] mt-2 max-w-md">Starte eine Transkription oder öffne eine gespeicherte Projektdatei. Das Ergebnis erscheint hier.</p>
+                <div class="mt-6 flex flex-wrap gap-3 justify-center">
+                    <button class="btn-primary" data-view="start"><span class="material-symbols-outlined text-[18px]">add_circle</span>Transkription beginnen</button>
+                    <button id="open-project-empty" class="btn-ghost"><span class="material-symbols-outlined text-[16px]">folder_open</span>Projekt öffnen</button>
+                </div>
+            </div>
+
+            <div id="transcript-content" class="hidden flex flex-col gap-6">
+                <!-- Command & export bar -->
+                <div class="bar flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+                    <div class="flex flex-col gap-2 min-w-0">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="material-symbols-outlined text-primary text-[28px]">audio_file</span>
+                            <h1 id="transcript-title" class="font-headline text-[22px] text-on-surface truncate tracking-tight font-bold"></h1>
+                            <span class="inline max-sm:hidden px-2.5 py-0.5 rounded-full bg-surface-container text-secondary font-label text-[11px] font-semibold uppercase tracking-wider border border-secondary/30 shrink-0">Im Browser</span>
+                        </div>
+                        <div id="transcript-meta" class="flex flex-wrap items-center gap-x-4 gap-y-1 font-code text-[12px] text-on-surface-variant"></div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button id="copy-transcript" class="btn-ghost" data-needs-transcript><span class="material-symbols-outlined text-[16px]">content_copy</span>Kopieren</button>
+                        <button id="open-project" class="btn-ghost" title="Gespeicherte Projektdatei (.scribe.json) öffnen"><span class="material-symbols-outlined text-[16px]">folder_open</span>Öffnen</button>
                         <input type="file" id="project-file" accept=".json,application/json" class="hidden">
                         <div class="export-wrap">
-                            <button id="export-toggle" class="btn btn-sm" aria-haspopup="true" aria-expanded="false" aria-controls="export-menu" data-needs-transcript>
-                                <i class="fa-solid fa-download mr-1"></i> Exportieren <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i>
+                            <button id="export-toggle" class="btn-primary" aria-haspopup="true" aria-expanded="false" aria-controls="export-menu" data-needs-transcript>
+                                <span class="material-symbols-outlined text-[18px]">download</span>Exportieren<span class="material-symbols-outlined text-[16px]">expand_more</span>
                             </button>
                             <div id="export-menu" class="export-menu hidden" role="menu">
                                 <button role="menuitem" data-export="html"><strong>HTML-Seite</strong><span>Zum Lesen und Teilen, im Browser als PDF druckbar</span></button>
@@ -177,66 +286,203 @@
                                 <button role="menuitem" data-export="vtt"><strong>Untertitel VTT</strong><span>Für Web-Player, mit Sprechernamen</span></button>
                                 <button role="menuitem" data-export="json"><strong>Projektdatei</strong><span>Später hier öffnen und weiterbearbeiten</span></button>
                                 <div class="export-options">
-                                    <label><input type="checkbox" id="export-summary" checked class="accent-sky-500"> Zusammenfassung einbeziehen</label>
-                                    <label><input type="checkbox" id="export-audio" checked class="accent-sky-500"> Audio in HTML-Seite einbetten</label>
+                                    <label><input type="checkbox" id="export-summary" checked class="accent-primary-container"> Zusammenfassung einbeziehen</label>
+                                    <label><input type="checkbox" id="export-audio" checked class="accent-primary-container"> Audio in HTML-Seite einbetten</label>
                                     <span id="export-audio-note" class="export-note"></span>
                                 </div>
                             </div>
                         </div>
-                        <button id="clear-transcript" class="btn btn-sm btn-danger" data-needs-transcript title="Transkript verwerfen"><i class="fa-solid fa-xmark"></i></button>
+                        <button class="btn-ghost" data-view="start" title="Neue Transkription"><span class="material-symbols-outlined text-[16px]">add_circle</span>Neu</button>
+                        <button id="clear-transcript" class="icon-btn" data-needs-transcript title="Transkript verwerfen"><span class="material-symbols-outlined text-[20px]">delete</span></button>
                     </div>
                 </div>
 
-                <div id="status-banner" class="status-banner hidden" role="status">
-                    <i id="status-icon"></i>
-                    <span id="status-text"></span>
-                </div>
-
+                <!-- Player -->
                 <div id="player-bar" class="player-bar hidden">
-                    <audio id="audio-player" controls class="w-full h-9"></audio>
-                    <label class="flex items-center gap-2 text-xs text-slate-400 shrink-0">
-                        <input type="checkbox" id="follow-playback" checked class="accent-sky-500"> Mitlaufen
+                    <audio id="audio-player" controls class="w-full h-10"></audio>
+                    <label class="flex items-center gap-2 font-label text-[11px] text-on-surface-variant shrink-0">
+                        <input type="checkbox" id="follow-playback" checked class="accent-primary-container"> Mitlaufen
                     </label>
                 </div>
+                <div id="player-missing" class="hidden flex items-center gap-3 px-4 py-3 note-card bg-surface-container-low text-[13px] text-on-surface-variant">
+                    <span class="material-symbols-outlined text-tertiary">headphones</span>
+                    <span class="flex-1">Für den Player die Audiodatei erneut laden.</span>
+                    <button id="player-load" class="btn-ghost">Audiodatei laden</button>
+                </div>
 
-                <div id="speaker-panel" class="speaker-panel hidden" aria-label="Sprecher"></div>
-                <div id="segment-list" class="segment-list"></div>
-            </section>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- Speakers & summary -->
+                    <div class="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-24">
+                        <div class="panel gap-3">
+                            <div class="panel-head">
+                                <h2 class="font-headline text-[17px] text-on-surface font-semibold">Sprecher</h2>
+                                <span class="font-label text-[11px] text-primary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span>Namen anpassen</span>
+                            </div>
+                            <div id="speaker-panel" class="speaker-panel hidden" aria-label="Sprecher"></div>
+                        </div>
 
-            <section class="card">
-                <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
-                    <h2 class="card-title"><i class="fa-solid fa-wand-magic-sparkles text-brand-500 mr-2"></i> KI-Zusammenfassung <span class="ml-2 text-xs font-normal text-slate-500">optional</span></h2>
-                    <div class="flex flex-wrap gap-2">
-                        <button id="summary-copy" class="btn btn-sm"><i class="fa-solid fa-copy mr-1"></i> Kopieren</button>
-                        <button id="summary-download" class="btn btn-sm"><i class="fa-solid fa-download mr-1"></i> .MD</button>
+                        <div class="panel gap-3">
+                            <div class="panel-head">
+                                <h2 class="font-headline text-[17px] text-on-surface font-semibold flex items-center gap-2"><span class="material-symbols-outlined text-tertiary text-[20px]">auto_awesome</span>KI-Zusammenfassung</h2>
+                                <div class="flex gap-1">
+                                    <button id="summary-copy" class="icon-btn" title="Kopieren"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
+                                    <button id="summary-download" class="icon-btn" title="Als Markdown speichern"><span class="material-symbols-outlined text-[18px]">download</span></button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="flex flex-col gap-1">
+                                    <label for="llm-provider" class="field-label">Anbieter</label>
+                                    <select id="llm-provider" class="field">
+                                        <option value="anthropic">Anthropic (Claude)</option>
+                                        <option value="openai">OpenAI</option>
+                                    </select>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <label for="summary-mode" class="field-label">Art</label>
+                                    <select id="summary-mode" class="field">
+                                        <option value="bullets">Stichpunkte</option>
+                                        <option value="summary">Zusammenfassung</option>
+                                        <option value="minutes">Protokoll mit Aufgaben</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label for="llm-model" class="field-label">Modell</label>
+                                <input id="llm-model" list="llm-model-list" autocomplete="off" class="field font-code text-[12px]">
+                                <datalist id="llm-model-list"></datalist>
+                            </div>
+                            <button id="summary-btn" disabled class="btn-primary justify-center"><span class="material-symbols-outlined text-[18px]">auto_awesome</span>Zusammenfassung erstellen</button>
+                            <textarea id="summary-text" placeholder="Die Zusammenfassung erscheint hier …" class="field min-h-[200px] resize-y text-[13px] leading-relaxed"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Segments -->
+                    <div class="lg:col-span-8 order-first lg:order-none flex flex-col gap-3">
+                        <div id="segment-list" class="segment-list"></div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                    <div>
-                        <label for="llm-provider" class="field-label">Anbieter</label>
-                        <select id="llm-provider" class="field">
-                            <option value="anthropic">Anthropic (Claude)</option>
-                            <option value="openai">OpenAI</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="llm-model" class="field-label">Modell</label>
-                        <input id="llm-model" list="llm-model-list" autocomplete="off" class="field">
-                        <datalist id="llm-model-list"></datalist>
-                    </div>
-                    <div>
-                        <label for="summary-mode" class="field-label">Art</label>
-                        <select id="summary-mode" class="field">
-                            <option value="bullets">Stichpunkte</option>
-                            <option value="summary">Zusammenfassung</option>
-                            <option value="minutes">Protokoll mit Aufgaben</option>
-                        </select>
-                    </div>
-                </div>
-                <button id="summary-btn" disabled class="btn-primary w-full mb-4">Zusammenfassung erstellen</button>
-                <textarea id="summary-text" placeholder="Die Zusammenfassung erscheint hier …" class="field min-h-[220px] p-4 resize-y"></textarea>
-            </section>
-        </div>
+            </div>
+        </section>
+
     </main>
+
+    <!-- ================= Settings dialog (gear button, top right) ================= -->
+    <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
+        <div class="settings-shell" tabindex="-1">
+            <div class="settings-head">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="material-symbols-outlined text-primary text-[24px]">settings</span>
+                    <h2 id="settings-title" class="font-headline text-[20px] text-on-surface font-bold tracking-tight">Einstellungen</h2>
+                </div>
+                <button id="settings-close" class="icon-btn" title="Schließen (Esc)"><span class="material-symbols-outlined text-[22px]">close</span></button>
+            </div>
+
+            <div class="settings-body">
+                <nav class="settings-nav" role="tablist" aria-label="Kategorien" aria-orientation="vertical">
+                    <button role="tab" id="settings-tab-keys" data-settings-tab="keys" aria-controls="settings-keys"><span class="material-symbols-outlined">key</span>API-Schlüssel</button>
+                    <button role="tab" id="settings-tab-vocab" data-settings-tab="vocab" aria-controls="settings-vocab"><span class="material-symbols-outlined">menu_book</span>Fachbegriffe</button>
+                    <button role="tab" id="settings-tab-appearance" data-settings-tab="appearance" aria-controls="settings-appearance"><span class="material-symbols-outlined">palette</span>Darstellung</button>
+                    <button role="tab" id="settings-tab-data" data-settings-tab="data" aria-controls="settings-data"><span class="material-symbols-outlined">shield</span>Daten &amp; Datenschutz</button>
+                </nav>
+
+                <div class="settings-panels">
+                    <!-- API keys -->
+                    <section id="settings-keys" class="settings-panel" role="tabpanel" aria-labelledby="settings-tab-keys">
+                        <div class="settings-intro">
+                            <h3 class="font-headline text-[18px] text-on-surface font-semibold">API-Schlüssel</h3>
+                            <p>Die Schlüssel werden nur in diesem Browser gespeichert und direkt an den jeweiligen Anbieter geschickt. <strong class="text-on-surface font-medium">Test-Ping</strong> prüft, ob der Key gilt und ob der Anbieter Anfragen aus dem Browser zulässt.</p>
+                        </div>
+                        <h4 class="step-label">Transkription</h4>
+                        <div id="key-cards-stt" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+                        <h4 class="step-label pt-2">KI-Zusammenfassung</h4>
+                        <div id="key-cards-llm" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+                    </section>
+
+                    <!-- Vocabulary -->
+                    <section id="settings-vocab" class="settings-panel hidden" role="tabpanel" aria-labelledby="settings-tab-vocab">
+                        <div class="settings-intro">
+                            <div class="flex items-center justify-between gap-3">
+                                <h3 class="font-headline text-[18px] text-on-surface font-semibold">Fachbegriffe</h3>
+                                <span id="vocab-count" class="font-code text-[11px] text-outline"></span>
+                            </div>
+                            <p>Namen, Firmen und Fachwörter, die der Anbieter richtig schreiben soll. Die Liste gilt für alle Transkriptionen und bleibt in diesem Browser gespeichert.</p>
+                        </div>
+                        <label class="flex items-center gap-2 text-[13px] text-on-surface cursor-pointer">
+                            <input type="checkbox" id="vocab-enabled" checked class="w-4 h-4 accent-primary-container"> Bei der Transkription mitschicken
+                        </label>
+                        <div class="flex flex-col gap-1.5">
+                            <label for="vocab-text" class="field-label">Ein Begriff pro Zeile. Zeilen mit # sind Kommentare.</label>
+                            <textarea id="vocab-text" rows="12" spellcheck="false" class="field font-code text-[12px] resize-y" placeholder="# Projekt Neubau Musterstraße&#10;Brandschottung&#10;Deckendurchführung&#10;Estrichleger&#10;Fa. Mustermann Elektro"></textarea>
+                        </div>
+                        <p id="vocab-hint-settings" class="hidden text-[12px] text-on-surface-variant"></p>
+                        <div class="flex flex-wrap gap-2">
+                            <button id="vocab-import" class="btn-ghost"><span class="material-symbols-outlined text-[16px]">upload_file</span>Importieren (.txt, .csv)</button>
+                            <button id="vocab-export" class="btn-ghost"><span class="material-symbols-outlined text-[16px]">download</span>Exportieren</button>
+                            <input type="file" id="vocab-file" accept=".txt,.csv,text/plain,text/csv" class="hidden">
+                        </div>
+                    </section>
+
+                    <!-- Appearance -->
+                    <section id="settings-appearance" class="settings-panel hidden" role="tabpanel" aria-labelledby="settings-tab-appearance">
+                        <div class="settings-intro">
+                            <h3 class="font-headline text-[18px] text-on-surface font-semibold">Darstellung</h3>
+                            <p>Wird sofort übernommen und in diesem Browser gespeichert.</p>
+                        </div>
+                        <h4 class="step-label">Modus</h4>
+                        <div id="mode-options" class="segmented" role="radiogroup" aria-label="Hell oder dunkel"></div>
+                        <h4 class="step-label pt-2">Design</h4>
+                        <div id="theme-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Design"></div>
+                    </section>
+
+                    <!-- Data & privacy -->
+                    <section id="settings-data" class="settings-panel hidden" role="tabpanel" aria-labelledby="settings-tab-data">
+                        <div class="settings-intro">
+                            <h3 class="font-headline text-[18px] text-on-surface font-semibold">Daten &amp; Datenschutz</h3>
+                            <p>Scribe Studio hat keinen eigenen Server. Audio und Keys gehen nur an den Anbieter, den du auswählst. Alles andere bleibt in diesem Browser – hier kannst du es löschen.</p>
+                        </div>
+                        <div class="data-row">
+                            <span class="material-symbols-outlined">key</span>
+                            <div class="flex-1 min-w-0">
+                                <strong>API-Keys</strong>
+                                <p id="data-keys-info"></p>
+                            </div>
+                            <button id="clear-keys" class="btn-ghost btn-danger"><span class="material-symbols-outlined text-[16px]">delete</span>Löschen</button>
+                        </div>
+                        <div class="data-row">
+                            <span class="material-symbols-outlined">description</span>
+                            <div class="flex-1 min-w-0">
+                                <strong>Zuletzt bearbeitetes Transkript</strong>
+                                <p id="data-session-info"></p>
+                            </div>
+                            <button id="clear-session" class="btn-ghost btn-danger"><span class="material-symbols-outlined text-[16px]">delete</span>Löschen</button>
+                        </div>
+                        <div class="data-row">
+                            <span class="material-symbols-outlined">mic</span>
+                            <div class="flex-1 min-w-0">
+                                <strong>Sicherung unterbrochener Aufnahmen</strong>
+                                <p id="data-recording-info"></p>
+                            </div>
+                            <button id="clear-recordings" class="btn-ghost btn-danger"><span class="material-symbols-outlined text-[16px]">delete</span>Löschen</button>
+                        </div>
+                        <div class="data-row">
+                            <span class="material-symbols-outlined">restart_alt</span>
+                            <div class="flex-1 min-w-0">
+                                <strong>Alles zurücksetzen</strong>
+                                <p>Löscht Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe und alle Einstellungen. Die Seite lädt danach neu.</p>
+                            </div>
+                            <button id="reset-all" class="btn-ghost btn-danger"><span class="material-symbols-outlined text-[16px]">delete_forever</span>Zurücksetzen</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <footer class="w-full bg-surface-container-lowest py-5 border-t border-outline-variant/10 mt-8">
+        <div class="w-full px-4 md:px-8 flex items-center justify-between text-on-surface-variant font-label text-[11px] flex-wrap gap-2">
+            <span>Scribe Studio · Transkription im Browser (BYOK)</span>
+            <span class="text-outline">Gladia · ElevenLabs · AssemblyAI · Mistral Voxtral</span>
+        </div>
+    </footer>
 </body>
 </html>

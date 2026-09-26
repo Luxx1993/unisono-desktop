@@ -50,7 +50,11 @@ window.Scribe = window.Scribe || {};
     }
 
     S.apis.gladia = {
-        label: 'Gladia (v2)',
+        label: 'Gladia',
+        description: 'Hohe Präzision für europäische Sprachen, gute Sprechertrennung.',
+        icon: 'record_voice_over',
+        keyUrl: 'https://app.gladia.io/apikeys',
+        test: key => ({ url: 'https://api.gladia.io/v2/pre-recorded?limit=1', headers: { 'x-gladia-key': key } }),
         models: [
             { id: 'solaria-3', name: 'Solaria 3 (höchste Präzision, DE/EN/FR/ES/IT)' },
             { id: 'solaria-1', name: 'Solaria 1 (100+ Sprachen)' }

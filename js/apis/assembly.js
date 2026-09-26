@@ -45,7 +45,11 @@ window.Scribe = window.Scribe || {};
     }
 
     S.apis.assembly = {
-        label: 'AssemblyAI (v2)',
+        label: 'AssemblyAI',
+        description: 'Bewährte Sprechertrennung für lange Meetings, bis 10 Stunden.',
+        icon: 'groups',
+        keyUrl: 'https://www.assemblyai.com/app/api-keys',
+        test: key => ({ url: 'https://api.assemblyai.com/v2/transcript?limit=1', headers: { 'authorization': key } }),
         models: [
             { id: 'universal-3-5-pro', name: 'Universal-3.5 Pro (höchste Genauigkeit)' },
             { id: 'universal-2', name: 'Universal-2 (99 Sprachen, günstiger)' }

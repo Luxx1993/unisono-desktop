@@ -1,0 +1,173 @@
+/*
+ * Design tokens. Every design decision the components use comes from these variables:
+ * colors, type, corners, borders, shadows, button style, blur and motion.
+ *
+ * - This file holds the defaults and the colors shared per light/dark mode.
+ * - Each design in css/designs/ overrides what makes it different, and may add effects
+ *   (backgrounds, grain, brackets) scoped to [data-theme="…"].
+ *
+ * <html data-mode="dark|light" data-theme="…"> selects the set; js/appearance.js sets both
+ * before the page paints. The defaults are declared on [data-theme] as well, so the small
+ * previews in the settings dialog (elements with their own data-theme) get a clean set.
+ *
+ * Colors are RGB channels ("R G B") so Tailwind (rgb(var(--c-x) / <alpha-value>)) and the CSS
+ * can add alpha.
+ */
+
+/* ---------- Defaults (the look of "Deep Audio Precision") ---------- */
+:root,
+[data-theme] {
+    /* Type */
+    --font-display: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+    --font-body: Inter, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-label: var(--font-mono);
+    --display-weight: 700;
+    --display-tracking: -0.01em;
+    --display-style: normal;
+    --label-case: uppercase;
+    --label-tracking: 0.06em;
+    --label-size: 11px;
+    --label-style: normal;
+
+    /* Corners */
+    --r-sm: 0.25rem;
+    --r-md: 0.375rem;
+    --r-lg: 0.5rem;
+    --r-xl: 0.75rem;
+    --r-2xl: 1rem;
+    --r-panel: var(--r-xl);
+    --r-card: var(--r-xl);
+    --r-field: var(--r-lg);
+    --r-btn: var(--r-lg);
+    --r-btn-lg: var(--r-xl);
+
+    /* Lines */
+    --bw: 1px;
+    --hairline: rgb(var(--c-outline-variant) / 0.25);
+    --panel-border: var(--hairline);
+    --card-border: var(--hairline);
+
+    /* Shading */
+    --shadow: rgb(0 0 0 / var(--shadow-alpha));
+    --shadow-panel: none;
+    --shadow-card: none;
+    --shadow-raised: 0 10px 20px -12px var(--shadow);
+    --shadow-pop: 0 16px 32px -8px var(--shadow);
+    --shadow-selected: 0 8px 20px -10px var(--shadow);
+    --blur: 12px;
+
+    /* Buttons */
+    --btn-bg: rgb(var(--c-primary));
+    --btn-bg-hover: rgb(var(--c-primary-container));
+    --on-btn: rgb(var(--c-on-primary));
+    --btn-font: var(--font-body);
+    --btn-weight: 600;
+    --btn-case: none;
+    --btn-tracking: normal;
+    --shadow-btn: none;
+    --shadow-btn-hover: none;
+    --shadow-btn-active: none;
+    --shadow-start: 0 10px 20px -8px rgb(var(--c-primary-container) / 0.4);
+    --ghost-bg: rgb(var(--c-surface-high));
+    --ghost-bg-hover: rgb(var(--c-surface-bright));
+    --ghost-border: rgb(var(--c-outline-variant) / 0.35);
+    --shadow-ghost: none;
+    --shadow-ghost-hover: none;
+    --btn-hover-transform: none;
+    --btn-active-transform: scale(0.98);
+    --shimmer: block;
+
+    /* Motion */
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur: 0.2s;
+    --page-anim: pageEntrance 0.4s var(--ease) both;
+    --dialog-anim: dialogIn 0.25s var(--ease);
+
+    /* Short names used in styles.css */
+    --bg: rgb(var(--c-bg));
+    --surface-lowest: rgb(var(--c-surface-lowest));
+    --surface-low: rgb(var(--c-surface-low));
+    --surface: rgb(var(--c-surface));
+    --surface-high: rgb(var(--c-surface-high));
+    --surface-highest: rgb(var(--c-surface-highest));
+    --surface-bright: rgb(var(--c-surface-bright));
+    --on-surface: rgb(var(--c-on-surface));
+    --on-surface-variant: rgb(var(--c-on-surface-variant));
+    --outline: rgb(var(--c-outline));
+    --outline-variant: rgb(var(--c-outline-variant));
+    --primary: rgb(var(--c-primary));
+    --on-primary: rgb(var(--c-on-primary));
+    --primary-container: rgb(var(--c-primary-container));
+    --secondary: rgb(var(--c-secondary));
+    --tertiary: rgb(var(--c-tertiary));
+    --error: rgb(var(--c-error));
+    --warning: rgb(var(--c-warning));
+    --danger: rgb(var(--c-danger));
+    --spk-none: rgb(var(--c-outline));
+}
+
+/* ---------- Shared per mode: semantic colors, speakers ---------- */
+:root,
+[data-mode="dark"] {
+    color-scheme: dark;
+    --c-secondary: 78 222 163;
+    --c-on-secondary: 0 56 36;
+    --c-secondary-container: 0 165 114;
+    --c-on-secondary-container: 0 49 31;
+    --c-tertiary: 123 208 255;
+    --c-error: 255 180 171;
+    --c-on-error: 105 0 5;
+    --c-error-container: 147 0 10;
+    --c-on-error-container: 255 218 214;
+    --c-warning: 251 191 36;
+    --c-danger: 179 38 30;
+    --c-success-bg: 0 49 31;
+    --c-success-fg: 201 248 226;
+    --c-error-bg: 60 8 12;
+    --c-error-fg: 255 218 214;
+    --c-warn-bg: 69 26 3;
+    --c-warn-fg: 253 230 138;
+    --shadow-alpha: 0.5;
+
+    --c-spk-0: 165 180 252;
+    --c-spk-1: 56 189 248;
+    --c-spk-2: 244 114 182;
+    --c-spk-3: 251 191 36;
+    --c-spk-4: 78 222 163;
+    --c-spk-5: 251 146 60;
+    --c-spk-6: 192 132 252;
+    --c-spk-7: 248 113 113;
+}
+
+[data-mode="light"] {
+    color-scheme: light;
+    --c-secondary: 4 120 87;
+    --c-on-secondary: 255 255 255;
+    --c-secondary-container: 209 250 229;
+    --c-on-secondary-container: 6 78 59;
+    --c-tertiary: 3 105 161;
+    --c-error: 179 38 30;
+    --c-on-error: 255 255 255;
+    --c-error-container: 253 226 223;
+    --c-on-error-container: 92 10 6;
+    --c-warning: 180 83 9;
+    --c-danger: 185 28 28;
+    --c-success-bg: 220 252 235;
+    --c-success-fg: 6 78 59;
+    --c-error-bg: 254 232 229;
+    --c-error-fg: 92 10 6;
+    --c-warn-bg: 254 243 199;
+    --c-warn-fg: 120 53 15;
+    --shadow-alpha: 0.12;
+
+    --c-spk-0: 79 70 229;
+    --c-spk-1: 2 132 199;
+    --c-spk-2: 219 39 119;
+    --c-spk-3: 180 83 9;
+    --c-spk-4: 4 120 87;
+    --c-spk-5: 234 88 12;
+    --c-spk-6: 147 51 234;
+    --c-spk-7: 220 38 38;
+}
+

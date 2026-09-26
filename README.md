@@ -1,18 +1,34 @@
 # Scribe Studio
 
-UI-Tool zum Hochladen, Transkribieren und Bearbeiten von Audioaufnahmen – komplett im Browser, ohne eigenen Server (BYOK: *Bring Your Own Key*).
+UI-Tool zum Aufnehmen, Transkribieren und Bearbeiten von Audioaufnahmen – komplett im Browser, ohne Installation und ohne eigenen Server (BYOK: *Bring Your Own Key*). Gestaltet im Stil „Deep Audio Precision“ von TranscribeLocal.
 
-- **Keine Zwischenserver:** Der Browser spricht direkt mit den APIs von Gladia, ElevenLabs und AssemblyAI.
+- **Keine Zwischenserver:** Der Browser spricht direkt mit den APIs von Gladia, ElevenLabs, AssemblyAI und Mistral.
 - **Keine laufenden Kosten:** Es fallen nur die API-Gebühren der Anbieter an.
 - **Datenschutz:** API-Schlüssel liegen ausschließlich im `localStorage` deines Browsers (per Button löschbar).
 
 ## Nutzung
 
 1. Repository herunterladen (*Code → Download ZIP*) und `index.html` im Browser öffnen – Doppelklick genügt, ein Server ist nicht nötig.
-2. API-Schlüssel eintragen und speichern.
-3. Anbieter, Modell und Sprache wählen, optional Sprechererkennung und Sprecheranzahl einstellen, Audiodatei per Drag & Drop hinzufügen, **Transkription starten**.
+2. Über das **Zahnrad ⚙️ oben rechts** die Einstellungen öffnen, unter **API-Schlüssel** die Keys eintragen und mit **Test-Ping** prüfen (zeigt auch, ob der Anbieter Anfragen aus dem Browser zulässt).
+3. Unter **Transkription** den Anbieter wählen, aufnehmen oder eine Datei ablegen, Modell, Sprache und Sprechererkennung einstellen, **Transkription starten**.
 4. Transkript im Segment-Editor korrigieren (siehe unten) und als TXT, SRT, VTT oder JSON exportieren.
 5. Optional: Mit einem Anthropic- oder OpenAI-Key per Klick Stichpunkte, eine Zusammenfassung oder ein Protokoll erzeugen lassen.
+
+## Einstellungen
+
+Das Zahnrad oben rechts öffnet ein Fenster mit allen dauerhaften Einstellungen. Alles wird nur in diesem Browser gespeichert.
+
+- **API-Schlüssel:** Keys für die Transkriptions-Anbieter und die KI-Zusammenfassung, jeweils mit **Test-Ping**.
+- **Fachbegriffe:** die Begriffsliste mit Import und Export (siehe unten). Auf der Startseite steht nur, wie viele Begriffe mitgeschickt werden.
+- **Darstellung:** Dunkel, Hell oder wie im Betriebssystem eingestellt, dazu vier Designs. Jedes ist ein eigenes Designsystem mit eigener Schrift, Ecken, Rahmen, Schatten, Button-Stil, Effekten und Bewegung; die Karten zeigen eine kleine Live-Vorschau:
+
+  | Design | Charakter | Schriften |
+  |---|---|---|
+  | Deep Audio Precision (Standard) | Tech-Glas: Nachtblau, Indigo-Verläufe, Leuchten, Milchglas, Shimmer, gleitende Übergänge | Plus Jakarta Sans, Inter, JetBrains Mono |
+  | Graphit | Neo-Brutalismus: 2-px-Tuschrahmen, harte versetzte Schatten, Neon-Limette, Karopapier, Buttons drücken sich ein | Space Grotesk, Space Mono |
+  | Bernstein | Analog und warm: Serifen, kursive Beschriftungen, Pillen-Buttons, sehr runde Karten ohne Rahmen, weiche warme Schatten, Filmkorn, federnde Bewegung | Fraunces, DM Sans, DM Mono |
+  | Swiss | Editorial nach dem Swiss-Stil (Palette „Bone & forest“) aus dem Skill `code-motion-video`: Inhalt offen auf Papier unter kräftigen Linien, Eckklammern am Bildrand, feines Punktraster und Korn, Versalien, schnelle Wischer. Hell Papier und Waldgrün, dunkel Schwarz und Salbei | Schibsted Grotesk, Martian Mono |
+- **Daten & Datenschutz:** Keys, das zuletzt bearbeitete Transkript und die Sicherung einer unterbrochenen Aufnahme einzeln löschen oder alles zurücksetzen.
 
 ## Mikrofonaufnahme
 
@@ -33,20 +49,19 @@ Vor dem Upload prüft Scribe Studio Dateigröße und Länge gegen die Grenzen de
 | Gladia | 1.000 MB | 2:15 h (Enterprise: 4:15 h) |
 | ElevenLabs | 3 GB | 10 h |
 | AssemblyAI | 2,2 GB | 10 h |
-| Deepgram | 2 GB, über Cloudflare-Worker-Proxy 100 MB | – |
 
 Beim HTML-Export mit eingebettetem Audio wird die Datei etwa ein Drittel größer als das Audio. Ab 25 MB Audio ist das Einbetten deshalb standardmäßig aus.
 
 ## Fachbegriffe
 
-In der Karte **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und Abkürzungen (ein Begriff pro Zeile, Zeilen mit `#` sind Kommentare). Die Liste bleibt im Browser gespeichert, lässt sich als `.txt` exportieren und aus `.txt`/`.csv` importieren. Bei jeder Transkription wird sie im jeweils passenden Format mitgeschickt:
+In den Einstellungen unter **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und Abkürzungen (ein Begriff pro Zeile, Zeilen mit `#` sind Kommentare). Die Liste bleibt im Browser gespeichert, lässt sich als `.txt` exportieren und aus `.txt`/`.csv` importieren. Bei jeder Transkription wird sie im jeweils passenden Format mitgeschickt:
 
 | Anbieter | Parameter | Grenzen |
 |---|---|---|
 | Gladia | `custom_vocabulary_config` | – |
 | ElevenLabs | `keyterms` (nur Scribe v2) | max. 100 Begriffe à 50 Zeichen, ca. 30 % Aufpreis |
 | AssemblyAI | `keyterms_prompt` (Universal-3.5 Pro), `word_boost` (Universal-2) | max. 1.000 Begriffe à 6 Wörter |
-| Deepgram | `keyterm` (Nova-3), `keywords` (Nova-2, nur Einzelwörter) | max. 100 Begriffe |
+| Mistral | `context_bias` | max. 100 Begriffe (für Deutsch laut Mistral noch experimentell) |
 
 Unter der Liste steht, wie viele Begriffe beim gewählten Anbieter ankommen und welche wegen der Grenzen übersprungen werden.
 
@@ -84,7 +99,7 @@ Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (a
 | Gladia (v2) | `solaria-3` (DE/EN/FR/ES/IT, feste Sprache nötig), `solaria-1` (100+ Sprachen) | Upload → `/v2/pre-recorded` → Polling |
 | ElevenLabs (Scribe) | `scribe_v2`, `scribe_v1` | Synchroner Upload an `/v1/speech-to-text` |
 | AssemblyAI (v2) | `universal-3-5-pro`, `universal-2` | Upload → `/v2/transcript` → Polling |
-| Deepgram | `nova-3`, `nova-2` | Synchroner Upload an `/v1/listen` (**nur über Proxy**, siehe unten) |
+| Mistral (Voxtral) | `voxtral-mini-latest` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
 
 Sprechererkennung (Diarization) ist bei allen Anbietern aktivierbar.
 
@@ -97,21 +112,14 @@ Sprechererkennung (Diarization) ist bei allen Anbietern aktivierbar.
 
 Zusammengefasst wird immer der aktuelle (ggf. von dir korrigierte) Text im Ergebnisfeld.
 
-## Deepgram-Proxy
-
-Deepgram erlaubt keine direkten Browser-Anfragen an seine REST-API (fehlende CORS-Header). Deshalb braucht Deepgram einen kleinen Proxy. Im Ordner [`deepgram-proxy/`](deepgram-proxy/worker.js) liegt eine fertige Vorlage für einen **Cloudflare Worker** (kostenloser Tarif reicht):
-
-1. Im Cloudflare-Dashboard unter *Workers & Pages* einen neuen Worker anlegen und den Inhalt von `worker.js` einfügen.
-2. Optional die Variable `ALLOWED_ORIGIN` setzen, damit nur deine Seite den Proxy nutzen darf.
-3. Die Worker-URL (z. B. `https://scribe-proxy.<dein-name>.workers.dev`) in Scribe Studio als *Deepgram Proxy-URL* eintragen.
-
-Der Proxy speichert nichts. Der API-Key bleibt in deinem Browser und wird nur durchgereicht.
 
 ## Projektstruktur
 
 ```
 index.html              Layout
-css/styles.css          Komponenten-Styles (Karten, Felder, Segment-Editor, Sprecherfarben)
+css/themes.css          Design-Tokens: Standardwerte und gemeinsame Farben je Hell/Dunkel
+css/designs/*.css       Je Design eine Datei: Farben, Schrift, Ecken, Schatten, Buttons, Effekte, Bewegung
+css/styles.css          Komponenten-Styles (Karten, Felder, Segment-Editor, Einstellungsfenster)
 css/tailwind.css        Erzeugte Tailwind-Klassen (npm run build:css)
 js/state.js             Zentraler State: Segmente, Sprecher, Rohdaten, Autosave
 js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Player-Sync
@@ -120,13 +128,28 @@ js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, A
 js/recorder.js          Mikrofonaufnahme (MediaRecorder), Pegel, Pause, Bildschirm-wach-halten
 js/recording-backup.js  Laufende Sicherung der Aufnahme in IndexedDB, Wiederherstellung
 js/summary.js           KI-Zusammenfassung (Anthropic / OpenAI)
+js/appearance.js        Hell/Dunkel und Design, wird vor dem ersten Zeichnen gesetzt
+js/settings.js          Einstellungsfenster: Kategorien, Darstellung, Daten löschen
 js/app.js               Keys, Konfiguration, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP- und Polling-Helfer
-js/apis/*.js            Je ein Modul pro Anbieter (Gladia, ElevenLabs, AssemblyAI, Deepgram)
-deepgram-proxy/         Cloudflare-Worker-Vorlage für Deepgram
+js/apis/*.js            Je ein Modul pro Anbieter (Gladia, ElevenLabs, AssemblyAI, Mistral)
 ```
 
 Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und nicht als ES-Module: Browser blockieren ES-Module, wenn eine Seite per Doppelklick (`file://`) geöffnet wird. Die Module teilen sich das globale Objekt `window.Scribe`. Ein neuer Anbieter wird als Datei unter `js/apis/` angelegt, registriert sich in `Scribe.apis` und in `index.html` eingebunden.
+
+## Design anpassen
+
+Das Aussehen steckt in vier Dateien:
+
+- `css/themes.css` – alle Design-Tokens mit Standardwerten: Schriften, Ecken (`--r-panel`, `--r-btn` …), Rahmen (`--bw`), Schatten (`--shadow-panel`, `--shadow-btn` …), Button-Stil (`--btn-bg`, `--btn-case` …), Unschärfe und Bewegung (`--ease`, `--dur`, `--page-anim`)
+- `css/designs/*.css` – je Design eine Datei, die diese Tokens überschreibt, die Farben für Dunkel und Hell festlegt und eigene Effekte ergänzt (Hintergründe, Filmkorn, Eckklammern)
+- `tailwind.config.js` – verbindet die Tailwind-Farben (`bg-primary`, `text-on-surface` …) mit den Farb-Variablen
+- `css/styles.css` – Bausteine wie Panels, Buttons, Anbieter- und Key-Karten, Segmente, Rekorder, Exportmenü, Einstellungsfenster; sie lesen nur Tokens
+- `index.html` – Aufbau der Ansichten mit Tailwind-Klassen
+
+**Neues Design anlegen:** eine Datei in `css/designs/` kopieren (z. B. `graphit.css`), alle `graphit` durch den neuen Namen ersetzen und die Werte ändern (Farben als `R G B`). Tokens stehen auf `[data-theme="…"]`, seitenweite Effekte auf `html[data-theme="…"]`. Dann die Datei in `index.html` verlinken und in `js/appearance.js` einen Eintrag in `THEMES` ergänzen (mit den Google-Fonts-Familien) – das Design erscheint automatisch unter Einstellungen → Darstellung. Neu erzeugt werden muss dafür nichts.
+
+Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-list`, `vocab-text`) und die Klassennamen aus `styles.css` auf die Seite zu. Solange diese erhalten bleiben, lassen sich Layout, Farben und Schriften frei ändern.
 
 ## Tailwind-CSS neu erzeugen
 
@@ -139,6 +162,6 @@ npm run build:css
 
 ## Hinweise
 
-- Font Awesome (Symbole) wird per CDN geladen; ohne Internet fehlen nur die Symbole.
-- Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen oder der Key ist ungültig.
+- Schriften und Symbole (Material Symbols) kommen von Google Fonts; die Schriften eines Designs werden erst geladen, wenn es gewählt oder in den Einstellungen angezeigt wird. Ohne Internet greifen Standardschriften, und Symbole erscheinen als Wörter.
+- Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen. Der **Test-Ping** in den Einstellungen zeigt das vorab.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.

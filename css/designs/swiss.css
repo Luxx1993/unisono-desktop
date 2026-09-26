@@ -1,0 +1,221 @@
+/*
+ * Design: Swiss (editorial abstract)
+ * From the Swiss / editorial style of the code-motion-video skill: hard edges, one hot accent
+ * against ink and paper, a dot system on the ground, a technical frame (corner brackets like a
+ * HUD), no shadows, no blur. Heavy tight display type, uppercase mono labels and buttons.
+ * Motion is metronomic: quick snaps and wipes, then hold.
+ * Palette "Bone & forest" of the skill: bone #EDEAE3, forest #1F3B2D, sage #9DB5A5.
+ * Forest green is the one accent (sage on black in dark mode). Content sits directly on the
+ * paper under heavy rules, the page carries a HUD frame with corner brackets, a wide fine dot
+ * grid and fine grain. Schibsted Grotesk / Martian Mono.
+ */
+
+/* ---------- Tokens ---------- */
+[data-theme="swiss"] {
+    --display-weight: 800;
+    --display-tracking: -0.035em;
+    --label-tracking: 0.1em;
+
+    --r-sm: 0;
+    --r-md: 0;
+    --r-lg: 0;
+    --r-xl: 0;
+    --r-2xl: 0;
+    --r-panel: 0;
+    --r-card: 0;
+    --r-field: 0;
+    --r-btn: 0;
+    --r-btn-lg: 0;
+
+    --hairline: rgb(var(--c-on-surface) / 0.18);
+    --panel-border: transparent;
+
+    --shadow-panel: none;
+    --shadow-card: none;
+    --shadow-raised: none;
+    --shadow-pop: none;
+    --shadow-selected: inset 0 0 0 2px rgb(var(--c-on-surface));
+    --blur: 0px;
+
+    --btn-bg: rgb(var(--c-accent));
+    --btn-bg-hover: rgb(var(--c-accent-hover));
+    --on-btn: rgb(var(--c-on-accent));
+    --btn-font: var(--font-mono);
+    --btn-weight: 600;
+    --btn-case: uppercase;
+    --btn-tracking: 0.08em;
+    --shadow-start: none;
+    --ghost-bg: transparent;
+    --ghost-bg-hover: rgb(var(--c-on-surface) / 0.08);
+    --ghost-border: rgb(var(--c-on-surface) / 0.6);
+    --btn-hover-transform: none;
+    --btn-active-transform: none;
+    --shimmer: none;
+
+    --ease: cubic-bezier(0.7, 0, 0.3, 1);
+    --dur: 0.16s;
+    --page-anim: wipeIn 0.5s cubic-bezier(0.7, 0, 0.3, 1) both;
+    --dialog-anim: wipeIn 0.35s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+@keyframes wipeIn {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+/* ---------- Type ---------- */
+[data-theme="swiss"] {
+    --font-display: "Schibsted Grotesk", Inter, system-ui, sans-serif;
+    --font-body: "Schibsted Grotesk", Inter, system-ui, sans-serif;
+    --font-mono: "Martian Mono", "JetBrains Mono", ui-monospace, monospace;
+    --font-label: var(--font-mono);
+}
+
+/* ---------- Light: bone paper, forest ink, forest as the accent ---------- */
+[data-theme="swiss"][data-mode="light"] {
+    --c-bg: 237 234 227;
+    --c-surface-lowest: 246 244 239;
+    --c-surface-low: 231 228 220;
+    --c-surface: 226 223 214;
+    --c-surface-high: 218 214 204;
+    --c-surface-highest: 207 202 191;
+    --c-surface-bright: 250 248 244;
+    --c-on-surface: 31 59 45;
+    --c-on-surface-variant: 74 96 84;
+    --c-outline: 110 132 119;
+    --c-outline-variant: 157 181 165;
+    --c-primary: 31 59 45;
+    --c-on-primary: 237 234 227;
+    --c-primary-container: 31 59 45;
+    --c-tertiary: 31 59 45;
+    --c-accent: 31 59 45;
+    --c-accent-hover: 52 88 69;
+    --c-on-accent: 237 234 227;
+
+    /* Speakers: the persimmon spot of the original first, then the other Swiss poster
+       colors of the skill (cobalt, yolk), darkened enough to read on paper. */
+    --c-spk-0: 214 76 36;
+    --c-spk-1: 36 56 232;
+    --c-spk-2: 168 118 0;
+    --c-spk-3: 46 120 80;
+    --c-spk-4: 190 44 92;
+    --c-spk-5: 0 116 128;
+    --c-spk-6: 112 62 170;
+    --c-spk-7: 122 84 52;
+}
+
+/* ---------- Dark: the same page on black, bone text, sage as the accent ---------- */
+[data-theme="swiss"][data-mode="dark"] {
+    --c-bg: 0 0 0;
+    --c-surface-lowest: 0 0 0;
+    --c-surface-low: 12 13 12;
+    --c-surface: 20 22 21;
+    --c-surface-high: 31 34 32;
+    --c-surface-highest: 43 47 45;
+    --c-surface-bright: 54 58 56;
+    --c-on-surface: 237 234 227;
+    --c-on-surface-variant: 157 181 165;
+    --c-outline: 128 146 135;
+    --c-outline-variant: 66 76 70;
+    --c-primary: 157 181 165;
+    --c-on-primary: 0 0 0;
+    --c-primary-container: 157 181 165;
+    --c-tertiary: 157 181 165;
+    --c-accent: 157 181 165;
+    --c-accent-hover: 237 234 227;
+    --c-on-accent: 0 0 0;
+
+    --c-spk-0: 240 112 72;
+    --c-spk-1: 124 142 255;
+    --c-spk-2: 242 197 61;
+    --c-spk-3: 112 208 142;
+    --c-spk-4: 240 112 152;
+    --c-spk-5: 84 192 204;
+    --c-spk-6: 184 152 240;
+    --c-spk-7: 212 172 132;
+}
+
+/* ---------- Page effects ---------- */
+/* Wide, fine dot grid (skill: gap 44, r 1.8, 18 %) */
+html[data-theme="swiss"] body {
+    background-image: radial-gradient(rgb(var(--c-on-surface) / 0.2) 1.2px, transparent 1.5px);
+    background-size: 36px 36px;
+    background-position: 18px 18px;
+    background-attachment: fixed;
+}
+
+/* HUD frame: corner brackets at the edges of the window */
+html[data-theme="swiss"] body::before {
+    content: '';
+    position: fixed;
+    inset: 10px;
+    z-index: 80;
+    pointer-events: none;
+    --arm: 22px;
+    --c: rgb(var(--c-on-surface) / 0.85);
+    background:
+        linear-gradient(var(--c), var(--c)) top left / var(--arm) 2px,
+        linear-gradient(var(--c), var(--c)) top left / 2px var(--arm),
+        linear-gradient(var(--c), var(--c)) top right / var(--arm) 2px,
+        linear-gradient(var(--c), var(--c)) top right / 2px var(--arm),
+        linear-gradient(var(--c), var(--c)) bottom left / var(--arm) 2px,
+        linear-gradient(var(--c), var(--c)) bottom left / 2px var(--arm),
+        linear-gradient(var(--c), var(--c)) bottom right / var(--arm) 2px,
+        linear-gradient(var(--c), var(--c)) bottom right / 2px var(--arm);
+    background-repeat: no-repeat;
+}
+
+/* Fine grain (skill: M.grain 0.06–0.08) */
+html[data-theme="swiss"] body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="swiss"][data-mode="dark"] body::after { opacity: 0.09; filter: invert(1); }
+
+html[data-theme="swiss"] .app-header {
+    background: rgb(var(--c-bg));
+    backdrop-filter: none;
+    box-shadow: none;
+    border-bottom: 1px solid rgb(var(--c-on-surface) / 0.8);
+}
+
+html[data-theme="swiss"] .app-nav { border-radius: 0; background: transparent; border-color: rgb(var(--c-on-surface) / 0.8); }
+html[data-theme="swiss"] .nav-item {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+html[data-theme="swiss"] .nav-item.is-current {
+    background: rgb(var(--c-on-surface));
+    color: rgb(var(--c-bg));
+    box-shadow: none;
+}
+
+/* Open, editorial panels: content on the paper under a heavy rule, no boxes */
+html[data-theme="swiss"] :is(.panel, .bar) {
+    background: transparent;
+    border: 0;
+    border-top: 3px solid rgb(var(--c-on-surface));
+    padding-left: 0;
+    padding-right: 0;
+}
+html[data-theme="swiss"] .step-label { color: rgb(var(--c-on-surface)); }
+
+html[data-theme="swiss"] .btn-start { font-size: 12px; letter-spacing: 0.04em; }
+html[data-theme="swiss"] .settings-gear { border-radius: 0; border-color: rgb(var(--c-on-surface) / 0.8); }
+html[data-theme="swiss"] .settings-gear:hover { background: rgb(var(--c-on-surface)); color: rgb(var(--c-bg)); transform: rotate(90deg); }
+html[data-theme="swiss"] .provider-icon { background: rgb(var(--c-accent)); color: rgb(var(--c-on-accent)); }
+html[data-theme="swiss"] .chip { text-transform: uppercase; letter-spacing: 0.08em; background: transparent; border: 1px solid currentColor; }
+html[data-theme="swiss"] .key-badge { text-transform: uppercase; letter-spacing: 0.08em; }
+html[data-theme="swiss"] :is(.dot, .rec-dot, .speaker-dot, .rounded-full) { border-radius: 0; }
+html[data-theme="swiss"] .segment { border-left-width: 4px; }
+html[data-theme="swiss"] .segment.is-active { background: rgb(var(--c-surface)); box-shadow: none; outline: 1px solid rgb(var(--c-on-surface)); }
+html[data-theme="swiss"] .rec-btn-stop:hover:not(:disabled) { background: rgb(var(--c-accent)); color: rgb(var(--c-on-accent)); }
+html[data-theme="swiss"] .field { background: rgb(var(--c-surface-lowest)); }
+html[data-theme="swiss"] .field:focus { box-shadow: none; border-color: rgb(var(--c-on-surface)); }
