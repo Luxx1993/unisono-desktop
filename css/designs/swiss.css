@@ -4,8 +4,10 @@
  * against ink and paper, a dot system on the ground, a technical frame (corner brackets like a
  * HUD), no shadows, no blur. Heavy tight display type, uppercase mono labels and buttons.
  * Motion is metronomic: quick snaps and wipes, then hold.
- * Palette "Bone & forest" with forest green as the accent, in light and dark.
- * Schibsted Grotesk / Martian Mono.
+ * Palette "Bone & forest" of the skill: bone #EDEAE3, forest #1F3B2D, sage #9DB5A5.
+ * Forest green is the one accent (sage on black in dark mode). Content sits directly on the
+ * paper under heavy rules, the page carries a HUD frame with corner brackets, a wide fine dot
+ * grid and fine grain. Schibsted Grotesk / Martian Mono.
  */
 
 /* ---------- Tokens ---------- */
@@ -26,7 +28,7 @@
     --r-btn-lg: 0;
 
     --hairline: rgb(var(--c-on-surface) / 0.18);
-    --panel-border: rgb(var(--c-on-surface) / 0.28);
+    --panel-border: transparent;
 
     --shadow-panel: none;
     --shadow-card: none;
@@ -36,7 +38,7 @@
     --blur: 0px;
 
     --btn-bg: rgb(var(--c-accent));
-    --btn-bg-hover: rgb(var(--c-on-surface));
+    --btn-bg-hover: rgb(var(--c-accent-hover));
     --on-btn: rgb(var(--c-on-accent));
     --btn-font: var(--font-mono);
     --btn-weight: 600;
@@ -69,57 +71,91 @@
     --font-label: var(--font-mono);
 }
 
-/* Both modes share one palette family: bone, forest ink and forest green as the one accent.
-   Dark is the same page on black instead of paper. */
-
-/* ---------- Dark: pure black ground, bone text, light forest green ---------- */
-[data-theme="swiss"][data-mode="dark"] {
-    --c-bg: 0 0 0;
-    --c-surface-lowest: 0 0 0;
-    --c-surface-low: 12 12 12;
-    --c-surface: 20 20 20;
-    --c-surface-high: 30 30 30;
-    --c-surface-highest: 42 42 42;
-    --c-surface-bright: 52 52 52;
-    --c-on-surface: 237 234 227;
-    --c-on-surface-variant: 200 208 201;
-    --c-outline: 150 156 152;
-    --c-outline-variant: 70 72 70;
-    --c-primary: 140 200 164;
-    --c-on-primary: 16 21 18;
-    --c-primary-container: 127 186 150;
-    --c-tertiary: 157 181 165;
-    --c-accent: 127 186 150;
-    --c-on-accent: 16 21 18;
-}
-
-/* ---------- Light: bone, forest ink, forest green ---------- */
+/* ---------- Light: bone paper, forest ink, forest as the accent ---------- */
 [data-theme="swiss"][data-mode="light"] {
     --c-bg: 237 234 227;
     --c-surface-lowest: 246 244 239;
-    --c-surface-low: 231 227 219;
-    --c-surface: 225 221 211;
-    --c-surface-high: 216 211 200;
-    --c-surface-highest: 205 199 187;
+    --c-surface-low: 231 228 220;
+    --c-surface: 226 223 214;
+    --c-surface-high: 218 214 204;
+    --c-surface-highest: 207 202 191;
     --c-surface-bright: 250 248 244;
     --c-on-surface: 31 59 45;
-    --c-on-surface-variant: 60 84 71;
-    --c-outline: 101 124 111;
-    --c-outline-variant: 182 190 180;
-    --c-primary: 42 110 74;
-    --c-on-primary: 246 244 239;
-    --c-primary-container: 46 120 80;
-    --c-tertiary: 45 96 72;
-    --c-accent: 46 120 80;
-    --c-on-accent: 246 244 239;
+    --c-on-surface-variant: 74 96 84;
+    --c-outline: 110 132 119;
+    --c-outline-variant: 157 181 165;
+    --c-primary: 31 59 45;
+    --c-on-primary: 237 234 227;
+    --c-primary-container: 31 59 45;
+    --c-tertiary: 31 59 45;
+    --c-accent: 31 59 45;
+    --c-accent-hover: 52 88 69;
+    --c-on-accent: 237 234 227;
+}
+
+/* ---------- Dark: the same page on black, bone text, sage as the accent ---------- */
+[data-theme="swiss"][data-mode="dark"] {
+    --c-bg: 0 0 0;
+    --c-surface-lowest: 0 0 0;
+    --c-surface-low: 12 13 12;
+    --c-surface: 20 22 21;
+    --c-surface-high: 31 34 32;
+    --c-surface-highest: 43 47 45;
+    --c-surface-bright: 54 58 56;
+    --c-on-surface: 237 234 227;
+    --c-on-surface-variant: 157 181 165;
+    --c-outline: 128 146 135;
+    --c-outline-variant: 66 76 70;
+    --c-primary: 157 181 165;
+    --c-on-primary: 0 0 0;
+    --c-primary-container: 157 181 165;
+    --c-tertiary: 157 181 165;
+    --c-accent: 157 181 165;
+    --c-accent-hover: 237 234 227;
+    --c-on-accent: 0 0 0;
 }
 
 /* ---------- Page effects ---------- */
+/* Wide, fine dot grid (skill: gap 44, r 1.8, 18 %) */
 html[data-theme="swiss"] body {
-    background-image: radial-gradient(rgb(var(--c-on-surface) / 0.22) 1px, transparent 1.3px);
-    background-size: 28px 28px;
+    background-image: radial-gradient(rgb(var(--c-on-surface) / 0.2) 1.2px, transparent 1.5px);
+    background-size: 36px 36px;
+    background-position: 18px 18px;
     background-attachment: fixed;
 }
+
+/* HUD frame: corner brackets at the edges of the window */
+html[data-theme="swiss"] body::before {
+    content: '';
+    position: fixed;
+    inset: 10px;
+    z-index: 80;
+    pointer-events: none;
+    --arm: 22px;
+    --c: rgb(var(--c-on-surface) / 0.85);
+    background:
+        linear-gradient(var(--c), var(--c)) top left / var(--arm) 2px,
+        linear-gradient(var(--c), var(--c)) top left / 2px var(--arm),
+        linear-gradient(var(--c), var(--c)) top right / var(--arm) 2px,
+        linear-gradient(var(--c), var(--c)) top right / 2px var(--arm),
+        linear-gradient(var(--c), var(--c)) bottom left / var(--arm) 2px,
+        linear-gradient(var(--c), var(--c)) bottom left / 2px var(--arm),
+        linear-gradient(var(--c), var(--c)) bottom right / var(--arm) 2px,
+        linear-gradient(var(--c), var(--c)) bottom right / 2px var(--arm);
+    background-repeat: no-repeat;
+}
+
+/* Fine grain (skill: M.grain 0.06–0.08) */
+html[data-theme="swiss"] body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="swiss"][data-mode="dark"] body::after { opacity: 0.09; filter: invert(1); }
 
 html[data-theme="swiss"] .app-header {
     background: rgb(var(--c-bg));
@@ -141,22 +177,16 @@ html[data-theme="swiss"] .nav-item.is-current {
     box-shadow: none;
 }
 
-/* Technical frame: corner brackets on panels and bars */
-html[data-theme="swiss"] :is(.panel, .bar) { position: relative; }
-html[data-theme="swiss"] :is(.panel, .bar)::before,
-html[data-theme="swiss"] :is(.panel, .bar)::after {
-    content: '';
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    pointer-events: none;
-    border: 0 solid rgb(var(--c-on-surface));
+/* Open, editorial panels: content on the paper under a heavy rule, no boxes */
+html[data-theme="swiss"] :is(.panel, .bar) {
+    background: transparent;
+    border: 0;
+    border-top: 3px solid rgb(var(--c-on-surface));
+    padding-left: 0;
+    padding-right: 0;
 }
-html[data-theme="swiss"] :is(.panel, .bar)::before { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
-html[data-theme="swiss"] :is(.panel, .bar)::after { right: -1px; bottom: -1px; border-right-width: 2px; border-bottom-width: 2px; }
+html[data-theme="swiss"] .step-label { color: rgb(var(--c-on-surface)); }
 
-html[data-theme="swiss"] .btn-primary:hover:not(:disabled),
-html[data-theme="swiss"] .btn-start:hover:not(:disabled) { color: rgb(var(--c-bg)); }
 html[data-theme="swiss"] .btn-start { font-size: 12px; letter-spacing: 0.04em; }
 html[data-theme="swiss"] .settings-gear { border-radius: 0; border-color: rgb(var(--c-on-surface) / 0.8); }
 html[data-theme="swiss"] .settings-gear:hover { background: rgb(var(--c-on-surface)); color: rgb(var(--c-bg)); transform: rotate(90deg); }
