@@ -91,6 +91,17 @@
     --c-accent: 31 59 45;
     --c-accent-hover: 52 88 69;
     --c-on-accent: 237 234 227;
+
+    /* Speakers: the persimmon spot of the original first, then the other Swiss poster
+       colors of the skill (cobalt, yolk), darkened enough to read on paper. */
+    --c-spk-0: 214 76 36;
+    --c-spk-1: 36 56 232;
+    --c-spk-2: 168 118 0;
+    --c-spk-3: 46 120 80;
+    --c-spk-4: 190 44 92;
+    --c-spk-5: 0 116 128;
+    --c-spk-6: 112 62 170;
+    --c-spk-7: 122 84 52;
 }
 
 /* ---------- Dark: the same page on black, bone text, sage as the accent ---------- */
@@ -113,6 +124,15 @@
     --c-accent: 157 181 165;
     --c-accent-hover: 237 234 227;
     --c-on-accent: 0 0 0;
+
+    --c-spk-0: 240 112 72;
+    --c-spk-1: 124 142 255;
+    --c-spk-2: 242 197 61;
+    --c-spk-3: 112 208 142;
+    --c-spk-4: 240 112 152;
+    --c-spk-5: 84 192 204;
+    --c-spk-6: 184 152 240;
+    --c-spk-7: 212 172 132;
 }
 
 /* ---------- Page effects ---------- */
