@@ -51,6 +51,14 @@ window.Scribe = window.Scribe || {};
         description: 'Bewährte Sprechertrennung für lange Meetings, bis 10 Stunden.',
         icon: 'groups',
         keyUrl: 'https://www.assemblyai.com/app/api-keys',
+        keyGuide: {
+            steps: [
+                'Auf assemblyai.com ein Konto anlegen.',
+                'Im Dashboard „API Keys“ öffnen – ein Key ist meist schon angelegt.',
+                'Den Key kopieren und hier einfügen.'
+            ],
+            note: 'Neue Konten bekommen ein Startguthaben zum Testen. Für die EU-Datenverarbeitung bietet AssemblyAI eine eigene EU-Region an.'
+        },
         test: key => ({ url: 'https://api.assemblyai.com/v2/transcript?limit=1', headers: { 'authorization': key } }),
         models: [
             { id: 'universal-3-5-pro', name: 'Universal-3.5 Pro (höchste Genauigkeit)' },

@@ -454,10 +454,20 @@
                             <h3 class="font-headline text-[18px] text-on-surface font-semibold">API-Schlüssel</h3>
                             <p>Die Schlüssel werden nur in diesem Browser gespeichert und direkt an den jeweiligen Anbieter geschickt. <strong class="text-on-surface font-medium">Test-Ping</strong> prüft, ob der Key gilt und ob der Anbieter Anfragen aus dem Browser zulässt.</p>
                         </div>
+                        <details class="key-guide key-guide-general">
+                            <summary><span class="material-symbols-outlined text-[16px]">lightbulb</span>Allgemeine Tipps zu API-Keys</summary>
+                            <ul>
+                                <li><strong>Ein Anbieter genügt</strong> zum Start. Für die KI-Zusammenfassung brauchst du zusätzlich einen Key von Anthropic oder OpenAI – das ist optional.</li>
+                                <li><strong>Key sofort kopieren:</strong> Die meisten Anbieter zeigen ihn nur einmal an. Verloren? Einfach einen neuen erzeugen und den alten löschen.</li>
+                                <li><strong>Kosten im Griff:</strong> Abgerechnet wird beim Anbieter nach Verbrauch. Wo möglich, ein monatliches Ausgabenlimit setzen.</li>
+                                <li><strong>Nicht weitergeben:</strong> Wer den Key hat, kann auf deine Rechnung transkribieren. Nicht in E-Mails, Chats oder Dokumente kopieren.</li>
+                                <li><strong>Im Dienst:</strong> Vor der Nutzung mit dienstlichen Aufnahmen klären, ob der Anbieter datenschutzrechtlich freigegeben ist (Auftragsverarbeitungsvertrag, Serverstandort EU).</li>
+                            </ul>
+                        </details>
                         <h4 class="step-label">Transkription</h4>
-                        <div id="key-cards-stt" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+                        <div id="key-cards-stt" class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"></div>
                         <h4 class="step-label pt-2">KI-Zusammenfassung</h4>
-                        <div id="key-cards-llm" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+                        <div id="key-cards-llm" class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"></div>
                     </section>
 
                     <!-- Vocabulary -->

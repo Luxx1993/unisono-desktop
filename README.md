@@ -33,7 +33,7 @@ Audioaufnahmen aufnehmen, transkribieren und bearbeiten – komplett im Browser,
 
 Das Zahnrad ⚙️ oben rechts öffnet ein Fenster mit allen dauerhaften Einstellungen. Alles wird nur in diesem Browser gespeichert.
 
-- **API-Schlüssel:** Keys für die Transkriptions-Anbieter und die KI-Zusammenfassung, jeweils mit **Test-Ping** und Link zum Erstellen eines Keys.
+- **API-Schlüssel:** Keys für die Transkriptions-Anbieter und die KI-Zusammenfassung, jeweils mit **Test-Ping**. Jede Karte hat eine aufklappbare Anleitung **„So bekommst du einen Key“** mit den Schritten beim Anbieter und einem direkten Link; oben stehen allgemeine Tipps (Key sofort kopieren, Ausgabenlimit, Datenschutz im Dienst).
 - **Fachbegriffe:** die Begriffsliste mit Import und Export (siehe unten).
 - **Darstellung:** Dunkel, Hell oder wie im Betriebssystem eingestellt, dazu die Wahl des Designs (siehe unten).
 - **Daten & Datenschutz:** Keys, das zuletzt bearbeitete Transkript und die Sicherung einer unterbrochenen Aufnahme einzeln löschen oder alles zurücksetzen.
@@ -260,3 +260,5 @@ npm run build:css
 ## Ausblick
 
 - **Etappe 3:** Verlauf/Archiv früherer Transkripte im Browser und Kennzahlen.
+- **Etappe 4 – Meeting-Aufnahme ohne Bot (zuschaltbares Modul):** Ton eines Web-Meetings (Browser-Tab mit Ton, unter Windows auch Systemton der Desktop-App) plus eigenes Mikrofon aufnehmen und danach wie gewohnt transkribieren; das eigene Mikrofon wird als „Ich“ erkannt. Vor dem Start muss bestätigt werden, dass alle Teilnehmer informiert sind und zustimmen (§ 201 StGB). Das Modul wird erst beim Einschalten in den Einstellungen bzw. beim ersten Klick nachgeladen – wer es nicht nutzt, lädt keinen zusätzlichen Code.
+- **Danach:** Protokoll-Vorlagen (Baubesprechung, Begehung, Telefonnotiz, Aktenvermerk), Aufgabenliste mit Verantwortlichen und Fristen, wiederkehrende Personen pro Projekt.
