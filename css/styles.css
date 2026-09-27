@@ -385,6 +385,15 @@ body { font-family: var(--font-body); }
 
 .dot { width: 0.4rem; height: 0.4rem; border-radius: 9999px; background: currentColor; display: inline-block; }
 
+/* Brand marks (js/brand-logos.js) – single color, they follow the design's colors. */
+.brand-logo { width: 1em; height: 1em; flex-shrink: 0; display: inline-block; }
+.provider-icon .brand-logo { width: 18px; height: 18px; }
+.key-status-logo { width: 12px; height: 12px; }
+.key-status-item.is-unset .key-status-logo { opacity: 0.6; }
+.footer-providers { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 1rem; }
+.footer-providers .brand-logo { width: 13px; height: 13px; }
+#transcript-meta .brand-logo { width: 14px; height: 14px; }
+
 /* --- Drop zone & selected file --- */
 .drop-zone {
     display: flex;

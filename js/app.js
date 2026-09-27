@@ -157,7 +157,7 @@ window.Scribe = window.Scribe || {};
         const items = Object.entries(S.apis).flatMap(([id, api], i) => [
             i ? h('span', { class: 'text-outline-variant', text: '|' }) : null,
             h('span', { class: 'key-status-item ' + (keys[id] ? 'is-set' : 'is-unset'), title: keys[id] ? 'Key hinterlegt' : 'Kein Key' },
-                h('span', { class: 'dot' }), api.label.split(' ')[0])
+                S.brandLogo(id, 'key-status-logo') || h('span', { class: 'dot' }), api.label.split(' ')[0])
         ]);
         $('key-status').replaceChildren(...items.filter(Boolean));
     }
@@ -209,7 +209,7 @@ window.Scribe = window.Scribe || {};
                 h('div', { class: 'flex flex-col gap-3' },
                     h('div', { class: 'flex flex-col gap-2' },
                         h('div', { class: 'flex items-center gap-3' },
-                            h('div', { class: 'provider-icon shrink-0' }, icon(meta.icon)),
+                            h('div', { class: 'provider-icon shrink-0' }, S.brandLogo(id) || icon(meta.icon)),
                             h('h3', { class: 'flex-1 min-w-0 font-headline text-on-surface font-semibold text-[15px]', text: meta.label }),
                             badge),
                         h('p', { class: 'text-on-surface-variant text-[12px] leading-relaxed', text: meta.description })),
@@ -268,7 +268,7 @@ window.Scribe = window.Scribe || {};
             },
                 h('div', { class: 'flex items-center justify-between gap-2' },
                     h('div', { class: 'flex items-center gap-2.5 min-w-0' },
-                        h('span', { class: 'provider-icon' }, icon(api.icon)),
+                        h('span', { class: 'provider-icon' }, S.brandLogo(id) || icon(api.icon)),
                         h('div', { class: 'min-w-0' },
                             h('h3', { class: 'font-headline text-[16px] text-on-surface font-semibold', text: api.label }),
                             h('p', { class: 'font-code text-outline text-[11px] truncate', text: api.models[0].name }))),
@@ -568,7 +568,9 @@ window.Scribe = window.Scribe || {};
                 duration > 0 ? item('schedule', S.format.clock(duration)) : null,
                 speakers ? item('groups', `${speakers} Sprecher`) : null,
                 item('notes', `${words.toLocaleString('de-DE')} Wörter`),
-                provider && S.apis[provider] ? item('graphic_eq', S.apis[provider].label) : null
+                provider && S.apis[provider]
+                    ? h('span', { class: 'flex items-center gap-1.5' }, S.brandLogo(provider, 'text-outline') || icon('graphic_eq', 'text-[15px] text-outline'), S.apis[provider].label)
+                    : null
             );
         });
     }
@@ -665,6 +667,9 @@ window.Scribe = window.Scribe || {};
             if (confirm('Transkript und alle Änderungen verwerfen?')) S.state.clear();
         });
 
+        // Footer: the providers with their marks.
+        $('footer-providers').replaceChildren(...Object.entries(S.apis).map(([id, api]) =>
+            h('span', { class: 'flex items-center gap-1.5' }, S.brandLogo(id), api.label.replace(' (Scribe)', '').replace(' (Voxtral)', ' Voxtral'))));
         S.player.init();
         S.editor.init({
             list: $('segment-list'),
@@ -674,6 +679,9 @@ window.Scribe = window.Scribe || {};
         });
         S.search.init();
         S.summary.init();
+        const showLlmLogo = () => $('llm-logo').replaceChildren(...[S.brandLogo($('llm-provider').value)].filter(Boolean));
+        $('llm-provider').addEventListener('change', showLlmLogo);
+        showLlmLogo();
         S.state.subscribe(type => { if (type !== 'text') updateTranscriptView(); });
 
         const firstVisit = !Object.keys(S.apis).some(id => keys[id]);

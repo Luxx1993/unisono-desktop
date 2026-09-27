@@ -63,7 +63,7 @@ window.Scribe = window.Scribe || {};
         current = null;
         STEPS.forEach(step => detail(step, ''));
 
-        $('progress-icon').replaceChildren(Object.assign(document.createElement('span'), { className: 'material-symbols-outlined', textContent: api.icon }));
+        $('progress-icon').replaceChildren(S.brandLogo(provider) || Object.assign(document.createElement('span'), { className: 'material-symbols-outlined', textContent: api.icon }));
         $('progress-file').textContent = file.name;
         const modelName = api.models.find(m => m.id === model)?.name.split(' (')[0] || model;
         $('progress-meta').textContent = [api.label, modelName, `${mb(file.size)} MB`, duration ? S.format.clock(duration) : null].filter(Boolean).join(' · ');

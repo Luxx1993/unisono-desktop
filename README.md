@@ -176,6 +176,8 @@ Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (a
 
 Sprechererkennung (Diarization) ist bei allen Anbietern aktivierbar.
 
+Die Anbieter erscheinen in der Oberfläche mit ihren Logos (Zeichenmarken), einfarbig in den Farben des gewählten Designs. Die Marken gehören ihren Inhabern und kennzeichnen hier nur den jeweiligen Dienst; Quellen stehen in `js/brand-logos.js`.
+
 ### KI-Zusammenfassung
 
 | Anbieter | Modelle (frei änderbar) | Hinweis |
@@ -211,6 +213,7 @@ js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Redezeit, Play
 js/player.js            Player-Bedienung und Zeitleiste (Wellenform nach Sprechern eingefärbt)
 js/search.js            Suchen & Ersetzen mit Markierung im Text
 js/progress.js          Fortschrittsanzeige mit Upload-Prozent und Abbrechen
+js/brand-logos.js       Logos der Anbieter als SVG, einfarbig in der Farbe des Designs
 js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem bearbeiteten Stand
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
 js/recorder.js          Mikrofonaufnahme (MediaRecorder), Pegel, Pause, Bildschirm-wach-halten
