@@ -56,6 +56,15 @@ window.Scribe = window.Scribe || {};
         description: 'Hohe Präzision für europäische Sprachen, gute Sprechertrennung.',
         icon: 'record_voice_over',
         keyUrl: 'https://app.gladia.io/apikeys',
+        keyGuide: {
+            steps: [
+                'Auf app.gladia.io ein Konto anlegen (E-Mail oder Google-Konto).',
+                'Im Menü links „API Keys“ öffnen.',
+                'Einen Key erzeugen und sofort kopieren.',
+                'Hier einfügen und mit Test-Ping prüfen.'
+            ],
+            note: 'Gladia sitzt in Frankreich (EU). Zum Ausprobieren gibt es ein kostenloses Kontingent, danach wird nach Audio-Stunden abgerechnet.'
+        },
         test: key => ({ url: 'https://api.gladia.io/v2/pre-recorded?limit=1', headers: { 'x-gladia-key': key } }),
         models: [
             { id: 'solaria-3', name: 'Solaria 3 (höchste Präzision, DE/EN/FR/ES/IT)' },

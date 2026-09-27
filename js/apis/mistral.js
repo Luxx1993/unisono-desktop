@@ -46,6 +46,15 @@ window.Scribe = window.Scribe || {};
             { id: 'voxtral-mini-latest', name: 'Voxtral Mini Transcribe (aktuell)' }
         ],
         keyUrl: 'https://console.mistral.ai/api-keys',
+        keyGuide: {
+            steps: [
+                'Auf console.mistral.ai ein Konto anlegen.',
+                'Einen Plan wählen: „Experiment“ ist kostenlos (Telefonnummer wird bestätigt), „Scale“ wird nach Verbrauch abgerechnet.',
+                '„API Keys“ öffnen, „Create new key“ wählen und den Key sofort kopieren.',
+                'Hier einfügen. Ein neuer Key ist manchmal erst nach wenigen Minuten aktiv.'
+            ],
+            note: 'Mistral sitzt in Frankreich (EU).'
+        },
         // Language can't be combined with timestamps on Mistral's side.
         autoLanguageOnly: true,
         vocabularySupport: () => ({ maxTerms: 100, note: 'Hinweis: Mistral optimiert Fachbegriffe vor allem für Englisch; für Deutsch ist das noch experimentell.' }),

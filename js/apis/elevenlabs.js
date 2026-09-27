@@ -53,6 +53,15 @@ window.Scribe = window.Scribe || {};
         description: 'Sehr genaue Wortzeiten und bis zu 32 Sprecher. Ergebnis kommt in einem Schritt.',
         icon: 'waves',
         keyUrl: 'https://elevenlabs.io/app/settings/api-keys',
+        keyGuide: {
+            steps: [
+                'Auf elevenlabs.io ein Konto anlegen.',
+                'Über das Profil bzw. „Developers“ die Seite „API Keys“ öffnen.',
+                '„Create API Key“ wählen und bei den Berechtigungen mindestens „Speech to Text“ erlauben.',
+                'Den Key sofort kopieren – er wird nur einmal angezeigt – und hier einfügen.'
+            ],
+            note: 'Der kostenlose Plan enthält ein kleines monatliches Kontingent; Scribe v2 mit Fachbegriffen kostet etwas mehr.'
+        },
         test: key => ({ url: 'https://api.elevenlabs.io/v1/models', headers: { 'xi-api-key': key } }),
         models: [
             { id: 'scribe_v2', name: 'Scribe v2 (neuestes Modell)' },

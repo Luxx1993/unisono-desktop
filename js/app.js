@@ -17,6 +17,15 @@ window.Scribe = window.Scribe || {};
             description: 'Für Zusammenfassungen, Stichpunkte und Protokolle.',
             icon: 'auto_awesome',
             keyUrl: 'https://console.anthropic.com/settings/keys',
+            keyGuide: {
+                steps: [
+                    'In der Anthropic Console (console.anthropic.com) ein Konto anlegen.',
+                    'Unter „Billing“ Guthaben aufladen – die API wird vorab bezahlt, ein Claude-Abo gilt hier nicht.',
+                    'Unter „Settings → API Keys“ auf „Create Key“ klicken und den Key sofort kopieren.',
+                    'Hier einfügen und mit Test-Ping prüfen.'
+                ],
+                note: 'Unter „Limits“ lässt sich eine monatliche Obergrenze setzen.'
+            },
             test: key => ({
                 url: 'https://api.anthropic.com/v1/models',
                 headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }
@@ -27,6 +36,15 @@ window.Scribe = window.Scribe || {};
             description: 'Alternative für Zusammenfassungen.',
             icon: 'psychology',
             keyUrl: 'https://platform.openai.com/api-keys',
+            keyGuide: {
+                steps: [
+                    'Auf platform.openai.com ein Konto anlegen.',
+                    'Unter „Billing“ Guthaben aufladen – ein ChatGPT-Abo gilt für die API nicht.',
+                    'Unter „API keys“ auf „Create new secret key“ klicken und den Key sofort kopieren.',
+                    'Hier einfügen und mit Test-Ping prüfen.'
+                ],
+                note: 'Unter „Limits“ lässt sich eine monatliche Obergrenze setzen.'
+            },
             test: key => ({ url: 'https://api.openai.com/v1/models', headers: { 'Authorization': 'Bearer ' + key } })
         }
     };
@@ -216,7 +234,8 @@ window.Scribe = window.Scribe || {};
                     h('div', { class: 'flex flex-col gap-1.5' },
                         h('label', { class: 'field-label', for: inputId, text: 'API-Key' }),
                         h('div', { class: 'key-input-wrap' }, input, mask)),
-                    feedback),
+                    feedback,
+                    keyGuide(meta)),
                 h('div', { class: 'flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-outline-variant/20' },
                     h('div', { class: 'flex gap-2' },
                         h('button', { class: 'btn-primary', onclick: () => save() }, 'Speichern'),
@@ -226,6 +245,19 @@ window.Scribe = window.Scribe || {};
         };
         $('key-cards-stt').replaceChildren(...Object.keys(S.apis).map(card));
         $('key-cards-llm').replaceChildren(...Object.keys(LLM_KEYS).map(card));
+    }
+
+    // Step-by-step guide to getting a key, folded away until asked for.
+    function keyGuide(meta) {
+        const guide = meta.keyGuide;
+        if (!guide) return null;
+        const host = new URL(meta.keyUrl).hostname.replace(/^www\./, '');
+        return h('details', { class: 'key-guide' },
+            h('summary', {}, icon('help', 'text-[16px]'), 'So bekommst du einen Key'),
+            h('ol', {}, ...guide.steps.map(step => h('li', { text: step }))),
+            guide.note ? h('p', { class: 'key-guide-note', text: guide.note }) : null,
+            h('a', { href: meta.keyUrl, target: '_blank', rel: 'noopener noreferrer', class: 'link-btn' },
+                `Key-Seite öffnen (${host})`, icon('open_in_new', 'text-[13px]')));
     }
 
     // A cheap GET that proves the key works – and that the provider accepts browser requests.
