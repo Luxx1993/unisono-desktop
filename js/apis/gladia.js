@@ -3,21 +3,22 @@ window.Scribe = window.Scribe || {};
 (function (S) {
     const BASE = 'https://api.gladia.io/v2';
 
-    async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, onStatus }) {
+    async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, signal, onStage, onUpload }) {
         if (model === 'solaria-3' && language === 'auto') {
             throw new Error('Solaria 3 benötigt eine feste Sprache.');
         }
 
-        onStatus('Lade Datei zu Gladia hoch …');
+        onStage('upload', 'Lade Datei zu Gladia hoch …');
         const form = new FormData();
         form.append('audio', file);
-        const upload = await S.http.fetchJson(`${BASE}/upload`, {
-            method: 'POST',
+        const upload = await S.http.send(`${BASE}/upload`, {
             headers: { 'x-gladia-key': key },
-            body: form
+            body: form,
+            signal,
+            onUpload
         }, 'Gladia Upload');
 
-        onStatus(`Starte Gladia-Transkription (${model}) …`);
+        onStage('start', `Starte Gladia-Transkription (${model}) …`);
         const body = { audio_url: upload.audio_url, model, diarization: diarize };
         if (speakers) body.diarization_config = { number_of_speakers: speakers };
         if (language !== 'auto') body.language_config = { languages: [language], code_switching: false };
@@ -28,15 +29,16 @@ window.Scribe = window.Scribe || {};
         const job = await S.http.fetchJson(`${BASE}/pre-recorded`, {
             method: 'POST',
             headers: { 'x-gladia-key': key, 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            signal
         }, 'Gladia Start');
 
         const resultUrl = job.result_url || `${BASE}/pre-recorded/${job.id}`;
-        const raw = await S.http.poll('Gladia', onStatus, async () => {
-            const d = await S.http.fetchJson(resultUrl, { headers: { 'x-gladia-key': key } }, 'Gladia Status');
+        const raw = await S.http.poll('Gladia', onStage, async () => {
+            const d = await S.http.fetchJson(resultUrl, { headers: { 'x-gladia-key': key }, signal }, 'Gladia Status');
             if (d.status === 'error') throw new Error('Gladia: ' + (d.error_code || 'Verarbeitung fehlgeschlagen.'));
             return d.status === 'done' ? d : null;
-        });
+        }, signal);
 
         const t = raw.result?.transcription || {};
         let segments = (t.utterances || []).map(u => ({

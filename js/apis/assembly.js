@@ -3,15 +3,16 @@ window.Scribe = window.Scribe || {};
 (function (S) {
     const BASE = 'https://api.assemblyai.com/v2';
 
-    async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, onStatus }) {
-        onStatus('Lade Datei zu AssemblyAI hoch …');
-        const upload = await S.http.fetchJson(`${BASE}/upload`, {
-            method: 'POST',
+    async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, signal, onStage, onUpload }) {
+        onStage('upload', 'Lade Datei zu AssemblyAI hoch …');
+        const upload = await S.http.send(`${BASE}/upload`, {
             headers: { 'authorization': key, 'Content-Type': 'application/octet-stream' },
-            body: file
+            body: file,
+            signal,
+            onUpload
         }, 'AssemblyAI Upload');
 
-        onStatus(`Starte AssemblyAI-Transkription (${model}) …`);
+        onStage('start', `Starte AssemblyAI-Transkription (${model}) …`);
         const body = { audio_url: upload.upload_url, speech_models: [model], speaker_labels: diarize };
         if (speakers) body.speakers_expected = speakers;
         if (vocabulary?.length) {
@@ -24,14 +25,15 @@ window.Scribe = window.Scribe || {};
         const job = await S.http.fetchJson(`${BASE}/transcript`, {
             method: 'POST',
             headers: { 'authorization': key, 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            signal
         }, 'AssemblyAI Start');
 
-        const raw = await S.http.poll('AssemblyAI', onStatus, async () => {
-            const d = await S.http.fetchJson(`${BASE}/transcript/${job.id}`, { headers: { 'authorization': key } }, 'AssemblyAI Status');
+        const raw = await S.http.poll('AssemblyAI', onStage, async () => {
+            const d = await S.http.fetchJson(`${BASE}/transcript/${job.id}`, { headers: { 'authorization': key }, signal }, 'AssemblyAI Status');
             if (d.status === 'error') throw new Error('AssemblyAI: ' + (d.error || 'Verarbeitung fehlgeschlagen.'));
             return d.status === 'completed' ? d : null;
-        });
+        }, signal);
 
         // AssemblyAI already labels speakers 'A', 'B', … and reports milliseconds.
         let segments = (raw.utterances || []).map(u => ({

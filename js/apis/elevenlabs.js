@@ -1,8 +1,8 @@
 /* ElevenLabs Scribe: one synchronous multipart request. */
 window.Scribe = window.Scribe || {};
 (function (S) {
-    async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, onStatus }) {
-        onStatus('Sende Audio an ElevenLabs Scribe … (kann bei langen Dateien dauern)');
+    async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, signal, onStage, onUpload }) {
+        onStage('upload', 'Sende Audio an ElevenLabs Scribe …');
         const form = new FormData();
         form.append('file', file);
         form.append('model_id', model);
@@ -12,10 +12,13 @@ window.Scribe = window.Scribe || {};
         if (language !== 'auto') form.append('language_code', language);
         for (const term of vocabulary || []) form.append('keyterms', term);
 
-        const raw = await S.http.fetchJson('https://api.elevenlabs.io/v1/speech-to-text', {
-            method: 'POST',
+        // Synchronous: the answer arrives once ElevenLabs has processed the whole file.
+        const raw = await S.http.send('https://api.elevenlabs.io/v1/speech-to-text', {
             headers: { 'xi-api-key': key },
-            body: form
+            body: form,
+            signal,
+            onUpload,
+            onUploaded: () => onStage('process', 'ElevenLabs verarbeitet das Audio …')
         }, 'ElevenLabs');
 
         let segments = groupWords(raw.words || [], diarize);

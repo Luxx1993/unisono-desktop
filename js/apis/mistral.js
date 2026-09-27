@@ -7,8 +7,8 @@
  */
 window.Scribe = window.Scribe || {};
 (function (S) {
-    async function transcribe(file, { key, model, diarize, vocabulary, onStatus }) {
-        onStatus(`Sende Audio an Mistral Voxtral (${model}) … (kann bei langen Dateien dauern)`);
+    async function transcribe(file, { key, model, diarize, vocabulary, signal, onStage, onUpload }) {
+        onStage('upload', `Sende Audio an Mistral Voxtral (${model}) …`);
         const form = new FormData();
         form.append('model', model);
         form.append('file', file);
@@ -16,10 +16,13 @@ window.Scribe = window.Scribe || {};
         if (diarize) form.append('diarize', 'true');
         for (const term of vocabulary || []) form.append('context_bias', term);
 
-        const raw = await S.http.fetchJson('https://api.mistral.ai/v1/audio/transcriptions', {
-            method: 'POST',
+        // Synchronous: the answer arrives once Mistral has processed the whole file.
+        const raw = await S.http.send('https://api.mistral.ai/v1/audio/transcriptions', {
             headers: { 'Authorization': 'Bearer ' + key },
-            body: form
+            body: form,
+            signal,
+            onUpload,
+            onUploaded: () => onStage('process', 'Mistral verarbeitet das Audio …')
         }, 'Mistral');
 
         let segments = (raw.segments || []).map(s => {

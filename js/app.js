@@ -467,6 +467,7 @@ window.Scribe = window.Scribe || {};
         const player = $('audio-player');
         if (player.src) URL.revokeObjectURL(player.src);
         player.src = URL.createObjectURL(file);
+        S.player.setFile(file);
         updatePlayerVisibility();
         updateHint();
     }
@@ -479,6 +480,7 @@ window.Scribe = window.Scribe || {};
         if (player.src) URL.revokeObjectURL(player.src);
         player.removeAttribute('src');
         player.load();
+        S.player.setFile(null);
         $('file-info').classList.add('hidden');
         $('drop-zone').classList.remove('hidden');
         $('start-btn').disabled = true;
@@ -488,45 +490,57 @@ window.Scribe = window.Scribe || {};
 
     function updatePlayerVisibility() {
         const hasTranscript = S.state.get().segments.length > 0;
-        $('player-bar').classList.toggle('hidden', !currentFile);
-        $('player-missing').classList.toggle('hidden', !!currentFile || !hasTranscript);
+        // The timeline also helps without audio (who spoke when), so the bar shows with a transcript.
+        $('player-bar').classList.toggle('hidden', !currentFile && !hasTranscript);
+        $('player-load').classList.toggle('hidden', !!currentFile);
+        S.player.redraw();
     }
 
     // --- Transcription ---
+    let running = null;
+
     async function startTranscription() {
-        if (!currentFile) return;
+        if (!currentFile || running) return;
         if (S.state.get().segments.length && !confirm('Das aktuelle Transkript inklusive deiner Änderungen wird ersetzt. Fortfahren?')) return;
 
         const provider = selectedProvider;
-        await waitForDuration();
-        const limitMsg = limitMessage(provider);
-        if (limitMsg) {
-            setStatus(limitMsg, 'error');
-            return;
-        }
-
-        const diarize = $('diarize').checked;
-        const { terms: vocabulary } = S.vocabulary.prepare(S.vocabulary.getTerms(), vocabularySupport());
-        $('start-btn').disabled = true;
-        const startedAt = Date.now();
+        const file = currentFile;
+        const model = $('model-select').value;
+        running = new AbortController();
+        hideStatus();
+        S.progress.begin({ file, provider, model, duration: currentDuration, cancel: () => running?.abort() });
 
         try {
-            const { raw, segments } = await S.apis[provider].transcribe(currentFile, {
+            await waitForDuration();
+            const limitMsg = limitMessage(provider);
+            if (limitMsg) throw new Error(limitMsg);
+
+            const diarize = $('diarize').checked;
+            const { terms: vocabulary } = S.vocabulary.prepare(S.vocabulary.getTerms(), vocabularySupport());
+            const startedAt = Date.now();
+            const { raw, segments } = await S.apis[provider].transcribe(file, {
                 key: getKey(provider),
-                model: $('model-select').value,
+                model,
                 language: $('language-select').value,
                 diarize,
                 speakers: diarize ? getSpeakerCount() : null,
                 vocabulary,
-                onStatus: text => setStatus(text)
+                signal: running.signal,
+                onStage: (stage, text) => S.progress.stage(stage, text),
+                onUpload: fraction => S.progress.upload(fraction)
             });
-            S.state.setTranscript({ raw, segments, provider, fileName: currentFile.name });
-            S.recorder.markUsed(currentFile);
+            S.progress.stage('done');
+            S.state.setTranscript({ raw, segments, provider, fileName: file.name });
+            S.recorder.markUsed(file);
+            S.progress.end();
             switchView('transcript');
-            setStatus(`Transkription abgeschlossen (${Math.round((Date.now() - startedAt) / 1000)} s).`, 'success');
+            setStatus(`Transkription abgeschlossen (${S.format.clock((Date.now() - startedAt) / 1000)}).`, 'success');
         } catch (err) {
-            showError('Fehler', err);
+            S.progress.end();
+            if (err?.name === 'AbortError') setStatus('Transkription abgebrochen. Beim Anbieter bereits hochgeladene Daten löscht er nach seinen eigenen Regeln.', 'error');
+            else showError('Fehler', err);
         } finally {
+            running = null;
             $('start-btn').disabled = !currentFile;
         }
     }
@@ -651,12 +665,14 @@ window.Scribe = window.Scribe || {};
             if (confirm('Transkript und alle Änderungen verwerfen?')) S.state.clear();
         });
 
+        S.player.init();
         S.editor.init({
             list: $('segment-list'),
             speakers: $('speaker-panel'),
             audio: $('audio-player'),
             follow: $('follow-playback')
         });
+        S.search.init();
         S.summary.init();
         S.state.subscribe(type => { if (type !== 'text') updateTranscriptView(); });
 
