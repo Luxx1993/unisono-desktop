@@ -24,18 +24,19 @@ Audio und Video transkribieren, lesen, korrigieren und exportieren, komplett im 
 
 1. Repository herunterladen (*Code → Download ZIP*), entpacken und `index.html` im Browser öffnen.
 2. Beim ersten Start öffnet sich **API-Keys**. Mindestens einen Key eintragen und mit **Prüfen** testen. Das zeigt auch, ob der Anbieter Anfragen direkt aus dem Browser zulässt.
-3. Unter **Neue Transkription** eine Datei ablegen oder aufnehmen, die Engine wählen (unter **Optionen** Modell, Sprache und Sprecher) und **Mit … transkribieren**.
+3. Unter **Transkribieren** eine Datei ablegen (oder unter **Aufnahme** live aufnehmen), die Engine wählen (unter **Optionen** Modell, Sprache und Sprecher) und **Mit … transkribieren**.
 4. Unter **Transkript** korrigieren, Sprecher benennen, zusammenfassen lassen und exportieren.
 
-<img src="docs/screenshots/start.png" alt="Neue Transkription: Datei, Aufnahme, Engine-Auswahl" width="100%">
+<img src="docs/screenshots/start.png" alt="Transkribieren: Datei und Engine-Auswahl" width="100%">
 
 ## Aufbau
 
-Links steht die Seitenleiste (auf dem Handy eine Tab-Leiste unten):
+Links steht die Seitenleiste. Auf dem Handy gibt es unten eine Tab-Leiste mit Datei, Transkript, Aufnahme, Begriffe und Mehr; die API-Keys erreicht man dort über die Engine-Punkte oben rechts.
 
 | Seite | Inhalt |
 |---|---|
-| **Neue Transkription** | Datei ablegen oder aufnehmen, Engine wählen, Optionen, Start. Während des Laufs der Fortschritt. |
+| **Aufnahme** | Live aufnehmen (vor Ort, Diktat) mit Merkern; danach „Transkribieren“ oder „Aufnahme sichern“. Auf Handy und Tablet die Startseite. |
+| **Transkribieren** | Vorhandene Audio- oder Videodatei ablegen, Engine wählen, Optionen, Start. Während des Laufs der Fortschritt. |
 | **Transkript** | Player, Transkript-Editor, Suche, Sprecher und Redezeit, Zusammenfassung, Export. |
 | **Fachbegriffe** | Begriffsliste mit Import und Export. |
 | **API-Keys** | Keys für die Engines und die Zusammenfassung, jeweils mit **Prüfen**, **Entfernen** und der Anleitung „So bekommst du einen Key“. |
@@ -77,13 +78,21 @@ Nach dem Start zeigt Unisono die Schritte *Vorbereiten → Hochladen → Verarbe
 
 ## Mikrofonaufnahme
 
-Mit **Aufnehmen** unter „Neue Transkription“ nimmst du Diktate oder Besprechungen direkt im Browser auf – mit Pause/Weiter, Zeitanzeige und Pegelanzeige. Ein roter Punkt zeigt die laufende Aufnahme. Während der Aufnahme bleibt der Bildschirm an (wo der Browser das erlaubt). Nach **Stopp** wird die Aufnahme wie eine hochgeladene Datei behandelt: Sie liegt im Player und kann transkribiert oder über **Sichern** als Audiodatei gespeichert werden.
+Auf der Seite **Aufnahme** nimmst du Diktate oder Besprechungen direkt im Browser auf – mit Pause/Weiter, Zeitanzeige und Pegelanzeige. Ein roter Punkt zeigt die laufende Aufnahme. Während der Aufnahme bleibt der Bildschirm an (wo der Browser das erlaubt). Nach **Stopp** wird die Aufnahme wie eine hochgeladene Datei behandelt: Sie liegt im Player und kann über **Transkribieren** weiterverarbeitet oder über **Aufnahme sichern** als Audiodatei gespeichert werden. Während einer Aufnahme zeigt ein roter Punkt an „Aufnahme“ in der Navigation, dass sie läuft, auch wenn man auf einer anderen Seite ist.
 
 - Format: Opus/WebM (Chrome, Edge, Firefox) bzw. AAC/M4A (Safari), ca. 0,5 MB pro Minute.
 - Der Browser fragt beim ersten Mal nach der Mikrofon-Freigabe.
 - **Absturzsicher:** Während der Aufnahme wird jede Sekunde im Browser (IndexedDB) gesichert. Wird der Tab geschlossen, neu geladen oder vom Handy beendet, bietet Unisono beim nächsten Öffnen an, die unterbrochene Aufnahme wiederherzustellen. Nach einem normalen Stopp wird die Sicherung gelöscht.
 - Beim Schließen des Tabs warnt der Browser, solange eine Aufnahme läuft oder eine fertige Aufnahme weder transkribiert noch gesichert wurde.
 - Im privaten Modus mancher Browser ist keine Sicherung möglich; die App weist beim Start der Aufnahme darauf hin.
+
+### Vor-Ort-Termine mit dem Handy
+
+- **Die Seite „Aufnahme“ ist die Vor-Ort-Ansicht:** große Zeit, Pegel, darunter im Daumenbereich der große Button **Merker setzen**, darunter **Pause** und **Stopp**. **Bildschirm abdunkeln** schaltet auf einen fast schwarzen Bildschirm (spart Akku, blendet nicht); Tippen hellt wieder auf. Am PC gibt es zusätzlich eine Großansicht (Symbol oben rechts in der Karte).
+- **Nach dem Stopp** steht die Karte **Letzte Aufnahme** oben, mit **Transkribieren** als nächstem Schritt und **Aufnahme sichern**.
+- **Merker:** Ein Tipp setzt eine Zeitmarke, z. B. für einen Mangel oder eine Entscheidung. Nach der Transkription stehen die Merker in einer Liste (umbenennen, springen, entfernen), als Zeilen im Transkript und als Fahnen in der Wellenform. Weitere Merker lassen sich später beim Abhören über **Merker** im Player setzen. Sie landen in Projektdatei, HTML, Markdown und Text.
+- **Bildschirm nicht sperren:** Handy-Browser schalten das Mikrofon ab, sobald der Bildschirm gesperrt oder die App gewechselt wird. Unisono hält den Bildschirm während der Aufnahme wach und weist darauf hin.
+- **Unterbrechungen:** Passiert es doch, bleibt das Bisherige gesichert. Beim Zurückkehren nimmt Unisono in **dieselbe Datei** weiter auf (oder bietet **Weiter aufnehmen** an, wenn der Browser das Mikrofon nur nach einem Tipp freigibt). Die Lücke wird als Merker „Unterbrechung (… ohne Ton)“ vermerkt; Zeitanzeige und Merker bleiben dabei deckungsgleich mit der Audiodatei.
 
 ## Grenzen der Anbieter
 
@@ -109,7 +118,7 @@ Unter **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und
 | AssemblyAI | `keyterms_prompt` (Universal-3.5 Pro), `word_boost` (Universal-2) | max. 1.000 Begriffe à 6 Wörter |
 | Mistral | `context_bias` | max. 100 Begriffe (für Deutsch laut Mistral noch experimentell) |
 
-Unter „Neue Transkription“ steht, wie viele Begriffe bei der gewählten Engine ankommen und welche wegen der Grenzen übersprungen werden.
+Unter „Transkribieren“ steht, wie viele Begriffe bei der gewählten Engine ankommen und welche wegen der Grenzen übersprungen werden.
 
 <img src="docs/screenshots/vocab.png" alt="Fachbegriffe" width="720">
 
@@ -194,6 +203,7 @@ css/app.css             Komponenten, ausschließlich aus den Tokens gebaut
 fonts/                  Manrope, Inter, IBM Plex Mono (woff2, SIL Open Font License, siehe fonts/OFL.txt)
 js/state.js             Zentraler State: Segmente, Sprecher, Rohdaten, Autosave
 js/segment-editor.js    Segmente, Sprecherlabels und Kürzel, Redezeit, Player-Sync
+js/markers.js           Merker: Liste, Zeilen im Transkript, Merker im Player setzen
 js/player.js            Player-Bedienung, Wellenform und Sprecherspur
 js/search.js            Suchen und Ersetzen mit Markierung im Text
 js/progress.js          Fortschrittsanzeige mit Upload-Prozent und Abbrechen
@@ -201,7 +211,7 @@ js/icons.js             Linien-Icons aus dem Sprite in index.html
 js/brand-logos.js       Logos der Anbieter als SVG
 js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem bearbeiteten Stand
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
-js/recorder.js          Mikrofonaufnahme (MediaRecorder), Pegel, Pause, Bildschirm-wach-halten
+js/recorder.js          Mikrofonaufnahme, Pegel, Pause, Merker, Großansicht, Weiteraufnahme nach Unterbrechung
 js/recording-backup.js  Laufende Sicherung der Aufnahme in IndexedDB, Wiederherstellung
 js/summary.js           Zusammenfassung (Anthropic / OpenAI)
 js/appearance.js        Hell, Dunkel oder wie System, wird vor dem ersten Zeichnen gesetzt
@@ -232,6 +242,7 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 
 ## Ausblick
 
-- **Etappe 3:** Verlauf/Archiv früherer Transkripte im Browser und Kennzahlen.
-- **Etappe 4 – Meeting-Aufnahme ohne Bot (zuschaltbares Modul):** Ton eines Web-Meetings (Browser-Tab mit Ton, unter Windows auch Systemton der Desktop-App) plus eigenes Mikrofon aufnehmen und danach wie gewohnt transkribieren; das eigene Mikrofon wird als „Ich“ erkannt. Vor dem Start muss bestätigt werden, dass alle Teilnehmer informiert sind und zustimmen (§ 201 StGB). Das Modul wird erst beim Einschalten in den Einstellungen bzw. beim ersten Klick nachgeladen – wer es nicht nutzt, lädt keinen zusätzlichen Code.
+- **Etappe 4a – Vor Ort (mobil):** umgesetzt, siehe „Vor-Ort-Termine mit dem Handy“.
+- **Etappe 3:** Verlauf/Archiv früherer Transkripte im Browser und Kennzahlen, dazu „jetzt aufnehmen, später transkribieren“: Aufnahmen ohne Netz bleiben gesichert und werden transkribiert, sobald man wieder online ist.
+- **Etappe 4b – Meeting-Aufnahme ohne Bot (zuschaltbares Modul):** Ton eines Web-Meetings (Browser-Tab mit Ton, unter Windows auch Systemton der Desktop-App) plus eigenes Mikrofon aufnehmen und danach wie gewohnt transkribieren; das eigene Mikrofon wird als „Ich“ erkannt. Vor dem Start muss bestätigt werden, dass alle Teilnehmer informiert sind und zustimmen (§ 201 StGB). Das Modul wird erst beim Einschalten in den Einstellungen bzw. beim ersten Klick nachgeladen – wer es nicht nutzt, lädt keinen zusätzlichen Code.
 - **Danach:** Protokoll-Vorlagen (Baubesprechung, Begehung, Telefonnotiz, Aktenvermerk), Aufgabenliste mit Verantwortlichen und Fristen, wiederkehrende Personen pro Projekt.

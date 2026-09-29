@@ -171,6 +171,11 @@
   --line-thin: 2px;                /* Fortschrittslinie, Unterlinie gespieltes Wort */
   --topbar-height: 56px;
   --tabbar-height: 64px;
+
+  /* Aufnahme vor Ort: abgedunkelter Bildschirm (in Hell und Dunkel gleich, fast schwarz spart Akku) */
+  --surface-dim: #0C0B0A;
+  --text-on-dim: #857E77;
+  --mark-button-height: 96px;      /* großer Merker-Button, mit dem Daumen blind treffbar */
 }
 
 /* ---------------- Dunkelmodus ---------------- */

@@ -69,10 +69,11 @@ window.Unisono = window.Unisono || {};
         return quiet(tx('readwrite', ({ chunks }) => { chunks.add(blob); }));
     }
 
-    function updateElapsed(elapsedMs) {
+    // changes: { elapsedMs?, markers? } – merged into the stored info of the running recording.
+    function updateMeta(changes) {
         return quiet(tx('readwrite', async ({ meta }) => {
             const current = await request(meta.get(META_KEY));
-            if (current) meta.put({ ...current, elapsedMs }, META_KEY);
+            if (current) meta.put({ ...current, ...changes }, META_KEY);
         }));
     }
 
@@ -83,7 +84,7 @@ window.Unisono = window.Unisono || {};
         }));
     }
 
-    // → { mime, startedAt, elapsedMs, blob } of an unfinished recording, or null.
+    // → { mime, startedAt, elapsedMs, markers, blob } of an unfinished recording, or null.
     async function find() {
         try {
             return await tx('readonly', async ({ meta, chunks }) => {
@@ -100,5 +101,5 @@ window.Unisono = window.Unisono || {};
         }
     }
 
-    S.recordingBackup = { begin, addChunk, updateElapsed, clear, find, isAvailable: () => available };
+    S.recordingBackup = { begin, addChunk, updateMeta, clear, find, isAvailable: () => available };
 })(window.Unisono);

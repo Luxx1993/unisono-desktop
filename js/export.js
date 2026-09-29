@@ -60,13 +60,21 @@ window.Unisono = window.Unisono || {};
     }
 
     // --- Formats ---
+    function markers() {
+        return S.state.get().markers;
+    }
+
     function toText() {
         const withTimes = S.state.hasTimes();
-        return textSegments()
-            .map(seg => {
-                const parts = [speakerLabel(seg), withTimes ? clock(seg.start) : ''].filter(Boolean);
-                return parts.length ? `[${parts.join(' - ')}]: ${seg.text.trim()}` : seg.text.trim();
-            })
+        const blocks = textSegments().map(seg => {
+            const parts = [speakerLabel(seg), withTimes ? clock(seg.start) : ''].filter(Boolean);
+            return { start: seg.start, text: parts.length ? `[${parts.join(' - ')}]: ${seg.text.trim()}` : seg.text.trim() };
+        });
+        // Markers as their own lines, at their place in time.
+        for (const m of markers()) blocks.push({ start: m.time, before: true, text: `[Merker - ${clock(m.time)}]: ${m.label}` });
+        return blocks
+            .sort((a, b) => a.start - b.start || (b.before ? 1 : 0) - (a.before ? 1 : 0))
+            .map(b => b.text)
             .join('\n\n');
     }
 
@@ -88,6 +96,9 @@ window.Unisono = window.Unisono || {};
 
         const body = [`# ${m.title}`, ''];
         if (summary) body.push('## Zusammenfassung', '', summary, '');
+        if (markers().length) {
+            body.push('## Merker', '', ...markers().map(m => `- \`${clock(m.time)}\` ${m.label}`), '');
+        }
         body.push('## Transkript', '');
         for (const seg of textSegments()) {
             const head = [speakerLabel(seg) && `**${speakerLabel(seg)}**`, withTimes && `\`${clock(seg.start)}\``].filter(Boolean).join(' · ');
@@ -127,6 +138,7 @@ window.Unisono = window.Unisono || {};
             fileName, provider, createdAt,
             speakers,
             segments: segments.map(({ speaker, start, end, text }) => ({ speaker, start, end, text })),
+            markers: S.state.get().markers.map(({ time, label, kind }) => ({ time, label, kind })),
             summary: S.summary.getText(),
             raw
         }, null, 2);
@@ -187,6 +199,9 @@ window.Unisono = window.Unisono || {};
   .seg p { grid-column:2; margin:.5rem 0 0; font:var(--type-body-l); max-width:var(--measure); }
   .seg.active { background:var(--mark-playing-bg); box-shadow:inset 2px 0 0 var(--text-primary); }
   footer { margin-top:2rem; font:var(--type-small); color:var(--text-tertiary); }
+  .markers { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.25rem; max-width:var(--measure); }
+  .markers li { display:grid; grid-template-columns:4.5rem minmax(0,1fr); column-gap:1rem; align-items:baseline; }
+  .markers .time { padding:0; }
   @media (max-width:640px) {
     h1 { font:400 28px/34px var(--font-display); }
     .seg { grid-template-columns:minmax(0,1fr); }
@@ -257,6 +272,13 @@ window.Unisono = window.Unisono || {};
   </article>`;
         }).join('\n  ');
 
+        const markerTime = t => audioSrc
+            ? `<button type="button" class="time" data-start="${t}">${clock(t)}</button>`
+            : `<span class="time">${clock(t)}</span>`;
+        const markersHtml = markers().length
+            ? `<h2>Merker</h2>\n  <ul class="markers">${markers().map(mk => `<li>${markerTime(mk.time)}<span>${escapeHtml(mk.label)}</span></li>`).join('')}</ul>`
+            : '';
+
         const html = `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -273,6 +295,7 @@ window.Unisono = window.Unisono || {};
   <dl>${facts.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join('')}</dl>
   ${audioSrc ? `<div class="player"><audio id="audio" controls preload="metadata" src="${AUDIO_PLACEHOLDER}"></audio></div>` : ''}
   ${summary ? `<h2>Zusammenfassung</h2>\n  <div class="summary">${escapeHtml(summary)}</div>` : ''}
+  ${markersHtml}
   <h2>Transkript</h2>
   <div class="transcript">
   ${segmentsHtml}

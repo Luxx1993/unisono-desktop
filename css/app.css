@@ -10,7 +10,7 @@ html { scroll-padding-top: var(--space-6); }
 body { min-height: 100vh; }
 h1, h2, h3, p, ol, ul { margin: 0; }
 button, input, select, textarea { font: inherit; letter-spacing: inherit; color: inherit; }
-button { cursor: pointer; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 button:disabled { cursor: default; }
 a { color: inherit; }
 ::selection { background: var(--mark-playing-bg); }
@@ -358,16 +358,139 @@ select.input { appearance: none; padding-right: var(--space-8); background-image
 }
 .file-name { font: var(--type-button); }
 
-.recorder { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3) var(--space-4); }
-.rec-buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-.recorder:has(.rec-live:not(.hidden)) .rec-or { display: none; }
-.rec-live { display: flex; align-items: center; gap: var(--space-3); flex: 1; min-width: calc(var(--space-32) * 2); }
-.rec-dot { background: var(--status-danger); }
+/* ---------------- Aufnahme ---------------- */
+.record-card { max-width: calc(var(--measure) + 2 * var(--space-6)); }
+#rec-result { max-width: calc(var(--measure) + 2 * var(--space-6)); }
+.recorder { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-6); }
+.rec-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--control-height); }
+.rec-display { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; text-align: center; }
+/* Always one line, so the display keeps its height in every state */
+#rec-markers-info { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rec-display-status { display: flex; align-items: center; gap: var(--space-2); color: var(--text-secondary); }
+.rec-display-time { font: var(--type-display-l); letter-spacing: var(--tracking-display); font-variant-numeric: tabular-nums; }
+/* Actions by importance: the marker button large and alone, pause / stop below, extras as text */
+.rec-actions { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+.rec-actions .rec-mark-btn { max-width: none; }
+/* With a finished recording waiting, "Neue Aufnahme" steps back behind "Transkribieren" */
+.rec-mark-btn.is-secondary { background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font: var(--type-button); letter-spacing: normal; text-transform: none; min-height: var(--touch-min); }
+.rec-controls { display: flex; justify-content: center; gap: var(--space-2); width: 100%; }
+.rec-controls .btn-secondary { flex: 1; max-width: calc(var(--space-32) + var(--space-16)); min-height: var(--touch-min); }
+.rec-controls { min-height: var(--touch-min); }
+.is-invisible { visibility: hidden; }
+.rec-hint { text-align: center; }
+/* Only relevant on phones and tablets */
+@media (pointer: fine) { .rec-hint { display: none; } }
+.rec-dot { background: var(--border-strong); }
+.recorder.is-recording .rec-dot, .recorder.is-paused .rec-dot, .rec-focus .rec-dot { background: var(--status-danger); }
+
+/* Red dot at "Aufnahme" in the navigation while recording */
+.nav-rec-dot { display: none; width: var(--space-2); height: var(--space-2); margin-left: auto; border-radius: var(--radius-pill); background: var(--status-danger); }
+.is-recording .nav-rec-dot { display: block; animation: rec-pulse var(--dur-ambient) var(--ease-in-out) infinite; }
+.tabbar .nav-item { position: relative; }
+.tabbar .nav-rec-dot { position: absolute; top: var(--space-2); right: calc(50% - var(--space-4)); margin: 0; }
 .recorder.is-recording .rec-dot { animation: rec-pulse var(--dur-ambient) var(--ease-in-out) infinite; }
 .recorder.is-paused .rec-dot { background: var(--status-warning); }
 @keyframes rec-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 .rec-level { flex: 1; height: var(--line-thin); background: var(--border-subtle); border-radius: var(--radius-pill); overflow: hidden; }
 .rec-level-bar { height: 100%; background: var(--text-primary); transform-origin: left; transform: scaleX(0); }
+.rec-interrupted { width: 100%; }
+.rec-interrupted .status-dot { margin-top: var(--space-2); }
+
+/* Recording on site: full-screen view */
+.has-rec-focus, .has-rec-focus body { overflow: hidden; }
+.rec-focus {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-6) var(--space-6) var(--space-8);
+    background: var(--surface-canvas);
+    overflow-y: auto;
+}
+.rec-focus-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+.rec-focus-status { display: flex; align-items: center; gap: var(--space-2); color: var(--text-secondary); }
+.rec-focus.is-recording .rec-dot { animation: rec-pulse var(--dur-ambient) var(--ease-in-out) infinite; }
+.rec-focus.is-paused .rec-dot { background: var(--status-warning); }
+.rec-focus-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); text-align: center; }
+.rec-focus-time { font: var(--type-display-xl); letter-spacing: var(--tracking-display); font-variant-numeric: tabular-nums; }
+.rec-level.is-large { flex: none; width: min(100%, calc(var(--measure) * .6)); }
+.rec-mark-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    width: 100%;
+    max-width: calc(var(--measure) * .8);
+    min-height: var(--mark-button-height);
+    margin: 0 auto;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--action-primary);
+    color: var(--action-on-primary);
+    font: var(--type-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    transition: transform var(--dur-fast) var(--ease-out);
+}
+.rec-mark-btn .icon { width: var(--space-6); height: var(--space-6); }
+.rec-mark-btn:active { transform: scale(.98); }
+.rec-mark-btn.is-confirmed { animation: mark-confirm var(--dur-slow) var(--ease-out); }
+@keyframes mark-confirm { 40% { opacity: .6; } }
+.rec-focus-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); }
+.rec-focus-actions .btn-secondary { min-height: var(--touch-min); }
+.rec-focus-hint { text-align: center; max-width: var(--measure); margin: 0 auto; }
+.rec-focus .notice { max-width: calc(var(--measure) * .8); margin: 0 auto; }
+
+/* Dimmed: almost black, only the time; a tap brings the view back */
+.rec-dim {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    border: 0;
+    background: var(--surface-dim);
+    color: var(--text-on-dim);
+    cursor: pointer;
+}
+
+/* Markers: list in the transcript sidebar and rows between the segments */
+.marker-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.marker-item { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-2); }
+.marker-item .icon { width: var(--icon-size-s); height: var(--icon-size-s); color: var(--text-tertiary); }
+.marker-item.is-gap .icon { color: var(--status-warning); }
+.marker-time { padding: var(--space-1) 0; border: 0; background: none; font: var(--type-mono); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.marker-time:hover { color: var(--text-primary); text-decoration: underline; }
+.marker-label { width: 100%; min-height: var(--space-8); padding: 0 var(--space-2); border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; font: var(--type-small); color: var(--text-primary); }
+.marker-label:hover { background: var(--surface-sunken); }
+.marker-label:focus { outline: none; background: var(--surface-sunken); border-color: var(--border-strong); }
+.marker-item .icon-btn { width: var(--space-8); height: var(--space-8); }
+.marker-empty { color: var(--text-secondary); }
+
+.marker-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-1) 0;
+    padding: var(--space-1) var(--space-2);
+    border: 0;
+    border-top: 1px dashed var(--border-strong);
+    background: none;
+    font: var(--type-small);
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: left;
+}
+.marker-row .icon { width: var(--icon-size-s); height: var(--icon-size-s); }
+.marker-row .t-mono { color: var(--text-tertiary); }
+.marker-row.is-gap .icon { color: var(--status-warning); }
+.marker-row:hover { color: var(--text-primary); }
+.segment-list.search-only .marker-row { display: none; }
 
 .engine-row { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3) var(--space-4); }
 .engine-row > .t-label { color: var(--text-secondary); }
@@ -771,6 +894,24 @@ button.seg-time:hover { color: var(--text-primary); text-decoration: underline; 
     .tabbar .nav-item[aria-current="page"] { background: none; box-shadow: none; color: var(--text-primary); }
     .status-dock { right: var(--space-4); bottom: calc(var(--tabbar-height) + var(--space-3)); }
     .page-title { font: var(--type-heading); letter-spacing: var(--tracking-heading); }
+
+    /* Recording on the phone: the page is the on-site view. Intro and full-screen option go,
+       the card fills the screen so the marker button sits in the thumb zone at the bottom. */
+    .record-intro, #rec-focus-open { display: none !important; }
+    #view-record { gap: var(--space-4); }
+    .record-card {
+        min-height: calc(100dvh - var(--topbar-height) - var(--tabbar-height) - var(--space-24) - var(--space-8));
+    }
+    .record-card .recorder { flex: 1; }
+    /* Display anchored at the top, actions at the bottom: neither moves when a state
+       changes (the free space in between absorbs it). */
+    .record-card .rec-display { flex: none; padding-top: var(--space-12); }
+    .record-card .rec-actions { margin-top: auto; }
+    .rec-actions { width: 100%; }
+    .rec-actions > .btn-primary, .rec-actions > .btn-secondary { width: 100%; }
+    #rec-result:not(.hidden) + .record-card { min-height: 0; }
+    #rec-result .button-row { flex-direction: column; }
+    #rec-result .button-row > * { width: 100%; min-height: var(--touch-min); }
     .start-aside { grid-template-columns: minmax(0, 1fr); }
     .card { padding: var(--space-4); }
     .run-card { gap: var(--space-4); }
