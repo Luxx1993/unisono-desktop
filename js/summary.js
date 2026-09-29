@@ -1,5 +1,5 @@
 /* Optional LLM step: bullet points, summary or minutes from the edited transcript. */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
     const MODELS = {
         anthropic: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5'],
@@ -48,6 +48,7 @@ window.Scribe = window.Scribe || {};
         const user = `${PROMPTS[$('summary-mode').value]}\n\n<transcript>\n${transcript}\n</transcript>`;
 
         $('summary-btn').disabled = true;
+        $('summary-btn').textContent = 'Zusammenfassung wird erstellt …';
         $('summary-text').value = '';
         S.ui.setStatus(`Erstelle Zusammenfassung mit ${model} …`);
         try {
@@ -61,6 +62,7 @@ window.Scribe = window.Scribe || {};
         } catch (err) {
             S.ui.showError('Fehler bei der Zusammenfassung', err);
         } finally {
+            $('summary-btn').textContent = 'Zusammenfassung erstellen';
             updateButton();
         }
     }
@@ -110,4 +112,4 @@ window.Scribe = window.Scribe || {};
     }
 
     S.summary = { init, getText, setText };
-})(window.Scribe);
+})(window.Unisono);

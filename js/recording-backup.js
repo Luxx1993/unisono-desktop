@@ -8,9 +8,9 @@
  * Every call fails silently (private mode, storage full): the recording itself still works,
  * only the safety net is missing – isAvailable() tells the UI.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
-    const DB_NAME = 'scribe-recordings';
+    const DB_NAME = 'unisono-recordings';
     const META_KEY = 'current';
     let dbPromise = null;
     let available = true;
@@ -101,4 +101,4 @@ window.Scribe = window.Scribe || {};
     }
 
     S.recordingBackup = { begin, addChunk, updateElapsed, clear, find, isAvailable: () => available };
-})(window.Scribe);
+})(window.Unisono);

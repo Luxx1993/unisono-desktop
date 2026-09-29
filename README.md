@@ -1,76 +1,53 @@
-# Scribe Studio
+# Unisono
 
-Audioaufnahmen aufnehmen, transkribieren und bearbeiten – komplett im Browser, ohne Installation und ohne eigenen Server. Du bringst deine eigenen API-Schlüssel mit (BYOK: *Bring Your Own Key*), die Audiodatei geht direkt vom Browser zum gewählten Anbieter.
+Audio und Video transkribieren, lesen, korrigieren und exportieren, komplett im Browser, ohne Installation und ohne eigenen Server. Du bringst deine eigenen API-Keys mit (BYOK: *Bring Your Own Key*), die Datei geht direkt vom Browser zur gewählten Engine.
 
-<img src="docs/screenshots/transcript.png" alt="Transkript mit Sprecher-Zeitleiste, Redezeit und Suche" width="100%">
+<img src="docs/screenshots/transcript.png" alt="Transkript mit einfarbiger Wellenform, Sprecherspur, Redezeit und Zusammenfassung" width="100%">
 
 ## Auf einen Blick
 
-- **Läuft einfach so:** `index.html` per Doppelklick öffnen – kein Node.js, kein Server, keine Installation. Ideal für Dienstrechner.
-- **Vier Anbieter:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral), jeweils mit Sprechererkennung.
+- **Läuft einfach so:** `index.html` per Doppelklick öffnen. Kein Node.js, kein Server, keine Installation, keine Verbindung zu Google Fonts. Ideal für Dienstrechner.
+- **Vier Engines:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral), jeweils mit Sprechererkennung.
 - **Aufnehmen im Browser:** Mikrofonaufnahme mit Pause, Pegelanzeige und Absturzsicherung.
-- **Fachbegriffe:** eine Liste mit Namen und Fachwörtern, die in passender Form an jeden Anbieter geht.
+- **Fachbegriffe:** eine Liste mit Namen und Fachwörtern, die in passender Form an jede Engine geht.
 - **Live-Fortschritt:** Hochladen mit echtem Prozentwert und Tempo, Verarbeitungszeit, jederzeit abbrechbar.
-- **Player mit Zeitleiste:** Wellenform in den Farben der Sprecher – auf einen Blick, wer wann spricht; klicken oder ziehen zum Springen.
-- **Redezeit:** Anteil und Minuten je Sprecher, dazu die Pausen.
-- **Suchen & Ersetzen:** Treffer markiert im Text, nur Treffer anzeigen, einzeln oder alle ersetzen.
+- **Player:** einfarbige Wellenform, darunter die Sprecherspur. Klicken oder ziehen zum Springen.
+- **Redezeit:** ein geteilter Balken plus Minuten und Prozent je Sprecher, dazu die Pausen.
+- **Suchen und Ersetzen:** Treffer markiert im Text, nur Treffer anzeigen, einzeln oder alle ersetzen.
 - **Segment-Editor:** Sprecher umbenennen und zuordnen, Text korrigieren, Abschnitte zusammenführen, mitlaufender Player.
 - **Export:** HTML-Seite (mit Audio, als PDF druckbar), Markdown, Text, SRT/VTT und Projektdatei zum Weiterbearbeiten.
-- **KI-Zusammenfassung:** Stichpunkte, Zusammenfassung oder Protokoll mit Aufgaben über Anthropic (Claude) oder OpenAI.
-- **Vier Designs** in Hell und Dunkel, jedes ein eigenes Designsystem.
+- **Zusammenfassung:** Stichpunkte, Zusammenfassung oder Protokoll mit Aufgaben über Anthropic (Claude) oder OpenAI.
+- **Hell und Dunkel,** fest oder wie im Betriebssystem eingestellt.
 - **Datenschutz:** Keys, Transkript und Einstellungen bleiben in deinem Browser und lassen sich dort jederzeit löschen.
 
 ## Schnellstart
 
 1. Repository herunterladen (*Code → Download ZIP*), entpacken und `index.html` im Browser öffnen.
-2. Beim ersten Start öffnen sich die Einstellungen. Unter **API-Schlüssel** mindestens einen Key eintragen und mit **Test-Ping** prüfen – der zeigt auch, ob der Anbieter Anfragen direkt aus dem Browser zulässt.
-3. Unter **Transkription** den Anbieter wählen, aufnehmen oder eine Datei ablegen, Modell, Sprache und Sprechererkennung einstellen und **Transkription starten**.
-4. Unter **Transkript & Export** korrigieren, Sprecher benennen, zusammenfassen lassen und exportieren.
+2. Beim ersten Start öffnet sich **API-Keys**. Mindestens einen Key eintragen und mit **Prüfen** testen. Das zeigt auch, ob der Anbieter Anfragen direkt aus dem Browser zulässt.
+3. Unter **Neue Transkription** eine Datei ablegen oder aufnehmen, die Engine wählen (unter **Optionen** Modell, Sprache und Sprecher) und **Mit … transkribieren**.
+4. Unter **Transkript** korrigieren, Sprecher benennen, zusammenfassen lassen und exportieren.
 
-<img src="docs/screenshots/start.png" alt="Startseite: Anbieter, Aufnahme oder Datei, Einstellungen" width="100%">
+<img src="docs/screenshots/start.png" alt="Neue Transkription: Datei, Aufnahme, Engine-Auswahl" width="100%">
 
-## Einstellungen
+## Aufbau
 
-Das Zahnrad ⚙️ oben rechts öffnet ein Fenster mit allen dauerhaften Einstellungen. Alles wird nur in diesem Browser gespeichert.
+Links steht die Seitenleiste (auf dem Handy eine Tab-Leiste unten):
 
-- **API-Schlüssel:** Keys für die Transkriptions-Anbieter und die KI-Zusammenfassung, jeweils mit **Test-Ping**. Jede Karte hat eine aufklappbare Anleitung **„So bekommst du einen Key“** mit den Schritten beim Anbieter und einem direkten Link; oben stehen allgemeine Tipps (Key sofort kopieren, Ausgabenlimit, Datenschutz im Dienst).
-- **Fachbegriffe:** die Begriffsliste mit Import und Export (siehe unten).
-- **Darstellung:** Dunkel, Hell oder wie im Betriebssystem eingestellt, dazu die Wahl des Designs (siehe unten).
-- **Daten & Datenschutz:** Keys, das zuletzt bearbeitete Transkript und die Sicherung einer unterbrochenen Aufnahme einzeln löschen oder alles zurücksetzen.
+| Seite | Inhalt |
+|---|---|
+| **Neue Transkription** | Datei ablegen oder aufnehmen, Engine wählen, Optionen, Start. Während des Laufs der Fortschritt. |
+| **Transkript** | Player, Transkript-Editor, Suche, Sprecher und Redezeit, Zusammenfassung, Export. |
+| **Fachbegriffe** | Begriffsliste mit Import und Export. |
+| **API-Keys** | Keys für die Engines und die Zusammenfassung, jeweils mit **Prüfen**, **Entfernen** und der Anleitung „So bekommst du einen Key“. |
+| **Einstellungen** | Darstellung (Hell, Dunkel, Wie System) sowie Daten und Datenschutz: Keys, Transkript und Aufnahme-Sicherung einzeln löschen oder alles zurücksetzen. |
 
-<img src="docs/screenshots/settings-keys.png" alt="Einstellungen – API-Schlüssel mit Test-Ping" width="100%">
+Unten in der Seitenleiste steht, für welche Engine ein Key hinterlegt ist.
 
-## Designs
-
-Jedes Design ist ein eigenes Designsystem mit eigener Schrift, Farben, Ecken, Rahmen, Schatten, Button-Stil, Effekten und Bewegung – jeweils in Hell und Dunkel. Die Auswahl zeigt eine kleine Live-Vorschau.
-
-| Design | Charakter | Schriften |
-|---|---|---|
-| **Deep Audio Precision** (Standard) | Tech-Glas aus TranscribeLocal: Nachtblau, Indigo-Verläufe, Leuchten, Milchglas, Glanzeffekt auf dem Start-Button, gleitende Übergänge | Plus Jakarta Sans, Inter, JetBrains Mono |
-| **Graphit** | Neo-Brutalismus: 2-px-Tuschrahmen, harte versetzte Schatten, Neon-Limette, Karopapier; Buttons drücken sich beim Klick ein | Space Grotesk, Space Mono |
-| **Bernstein** | Analog und warm: Serifen, kursive Beschriftungen, Pillen-Buttons, runde Karten ohne Rahmen, weiche warme Schatten, Filmkorn, federnde Bewegung | Fraunces, DM Sans, DM Mono |
-| **Swiss** | Editorial nach dem Swiss-Stil (Palette „Bone & forest“) aus dem Skill `code-motion-video`: Inhalt offen auf Papier unter kräftigen Linien, Eckklammern am Bildrand, feines Punktraster und Korn, Versalien, schnelle Wischer. Hell Papier und Waldgrün, dunkel Schwarz und Salbei; Sprecherfarben beginnen mit Persimmon | Schibsted Grotesk, Martian Mono |
-
-<img src="docs/screenshots/settings-designs.png" alt="Einstellungen – Darstellung mit Live-Vorschau der Designs" width="100%">
-
-<table>
-  <tr>
-    <td><img src="docs/screenshots/design-graphit-light.png" alt="Graphit, hell"><br><sub>Graphit · hell</sub></td>
-    <td><img src="docs/screenshots/design-bernstein-dark.png" alt="Bernstein, dunkel"><br><sub>Bernstein · dunkel</sub></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/design-swiss-light.png" alt="Swiss, hell"><br><sub>Swiss · hell</sub></td>
-    <td><img src="docs/screenshots/design-swiss-dark.png" alt="Swiss, dunkel"><br><sub>Swiss · dunkel</sub></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/design-deep-light.png" alt="Deep Audio Precision, hell"><br><sub>Deep Audio Precision · hell</sub></td>
-    <td><img src="docs/screenshots/design-bernstein-light.png" alt="Bernstein, hell"><br><sub>Bernstein · hell</sub></td>
-  </tr>
-</table>
+<img src="docs/screenshots/keys.png" alt="API-Keys mit Status, Prüfen und Anleitung" width="100%">
 
 ## Fortschritt während der Transkription
 
-Nach **Transkription starten** zeigt Scribe Studio die Schritte *Vorbereiten → Hochladen → Verarbeiten → Fertig*:
+Nach dem Start zeigt Unisono die Schritte *Vorbereiten → Hochladen → Verarbeiten → Fertig*:
 
 - **Hochladen** mit echtem Prozentwert, übertragenen MB, Tempo und geschätzter Restzeit – bei 50-MB-Besprechungen sieht man, dass es vorangeht.
 - **Verarbeiten** mit der Zeit, die der Anbieter schon rechnet.
@@ -79,13 +56,14 @@ Nach **Transkription starten** zeigt Scribe Studio die Schritte *Vorbereiten →
 
 <img src="docs/screenshots/progress.png" alt="Fortschrittsanzeige beim Hochladen" width="100%">
 
-## Player, Zeitleiste und Redezeit
+## Player, Sprecherspur und Redezeit
 
-- **Zeitleiste:** Die Wellenform der Aufnahme, jeder Balken in der Farbe des Sprechers, der gerade redet. Klicken oder ziehen springt an die Stelle, beim Überfahren stehen Zeit und Sprecher; mit dem Fokus auf der Zeitleiste springen ← / → um 5 Sekunden.
+- **Wellenform:** einfarbig, der gespielte Teil dunkler. Darunter die **Sprecherspur**: ein Balken je Redeabschnitt in der Graustufe des Sprechers. Die Abspielposition läuft als Linie durch beide. Klicken oder ziehen springt an die Stelle, beim Überfahren stehen Zeit, Kürzel und Sprecher; mit dem Fokus auf der Zeitleiste springen ← / → um 5 Sekunden.
 - **Bedienung:** Abspielen/Pause, 10 Sekunden zurück/vor, Geschwindigkeit 0,75× bis 2×, **Mitlaufen** scrollt zum gerade gesprochenen Abschnitt.
-- **Ohne Audiodatei** (etwa nach dem Neuladen oder beim Öffnen einer Projektdatei) zeigt die Zeitleiste die Sprecher als farbige Blöcke; ein Klick springt zum passenden Abschnitt im Text.
-- **Redezeit:** Die Sprecherleiste zeigt je Sprecher Anteil und Dauer mit einem Balken, dazu die **Pausen**. Das zeigt, wer die Besprechung geprägt hat – und verrät, wenn die Erkennung eine Person in zwei Sprecher aufgeteilt hat (ein „Sprecher“ mit 1 %).
-- **Wellenform auch bei langen Aufnahmen:** WAV wird blockweise gelesen, MP3 stückweise dekodiert (2:40 h WAV in etwa 1 s, 70 min MP3 in etwa 4 s). M4A, WebM und OGG müssten Browser komplett in den Speicher dekodieren; dort gibt es die Wellenform bis 20 Minuten, bei längeren Dateien die Sprecher-Zeitleiste.
+- **Ohne Audiodatei** (etwa nach dem Neuladen oder beim Öffnen einer Projektdatei) bleibt die Sprecherspur; ein Klick springt zum passenden Abschnitt im Text.
+- **Sprecher:** Jeder Sprecher hat ein Kürzel aus zwei Buchstaben (z. B. „Bauleitung LBB“ → BL), das in Spur, Transkript und Redezeit gleich erscheint. Die vier Graustufen wiederholen sich ab dem fünften Sprecher, dann unterscheiden die Kürzel. Farbe steht in Unisono nur für eine Engine oder einen Status.
+- **Redezeit:** ein geteilter Balken, darunter je Sprecher Minuten und Prozent, dazu die **Pausen**. Das zeigt, wer die Besprechung geprägt hat – und verrät, wenn die Erkennung eine Person in zwei Sprecher aufgeteilt hat (ein „Sprecher“ mit 1 %).
+- **Wellenform auch bei langen Aufnahmen:** WAV wird blockweise gelesen, MP3 stückweise dekodiert (2:40 h WAV in etwa 1 s, 70 min MP3 in etwa 4 s). M4A, WebM und OGG müssten Browser komplett in den Speicher dekodieren; dort gibt es die Wellenform bis 20 Minuten, bei längeren Dateien die Sprecherspur.
 
 ## Suchen & Ersetzen
 
@@ -99,17 +77,17 @@ Nach **Transkription starten** zeigt Scribe Studio die Schritte *Vorbereiten →
 
 ## Mikrofonaufnahme
 
-Mit **Aufnehmen** in der Audio-Karte nimmst du Diktate oder Besprechungen direkt im Browser auf – mit Pause/Weiter, Zeitanzeige und Pegelanzeige. Während der Aufnahme bleibt der Bildschirm an (wo der Browser das erlaubt). Nach **Stopp** wird die Aufnahme wie eine hochgeladene Datei behandelt: Sie liegt im Player und kann transkribiert oder über **Sichern** als Audiodatei gespeichert werden.
+Mit **Aufnehmen** unter „Neue Transkription“ nimmst du Diktate oder Besprechungen direkt im Browser auf – mit Pause/Weiter, Zeitanzeige und Pegelanzeige. Ein roter Punkt zeigt die laufende Aufnahme. Während der Aufnahme bleibt der Bildschirm an (wo der Browser das erlaubt). Nach **Stopp** wird die Aufnahme wie eine hochgeladene Datei behandelt: Sie liegt im Player und kann transkribiert oder über **Sichern** als Audiodatei gespeichert werden.
 
 - Format: Opus/WebM (Chrome, Edge, Firefox) bzw. AAC/M4A (Safari), ca. 0,5 MB pro Minute.
 - Der Browser fragt beim ersten Mal nach der Mikrofon-Freigabe.
-- **Absturzsicher:** Während der Aufnahme wird jede Sekunde im Browser (IndexedDB) gesichert. Wird der Tab geschlossen, neu geladen oder vom Handy beendet, bietet Scribe Studio beim nächsten Öffnen an, die unterbrochene Aufnahme wiederherzustellen. Nach einem normalen Stopp wird die Sicherung gelöscht.
+- **Absturzsicher:** Während der Aufnahme wird jede Sekunde im Browser (IndexedDB) gesichert. Wird der Tab geschlossen, neu geladen oder vom Handy beendet, bietet Unisono beim nächsten Öffnen an, die unterbrochene Aufnahme wiederherzustellen. Nach einem normalen Stopp wird die Sicherung gelöscht.
 - Beim Schließen des Tabs warnt der Browser, solange eine Aufnahme läuft oder eine fertige Aufnahme weder transkribiert noch gesichert wurde.
 - Im privaten Modus mancher Browser ist keine Sicherung möglich; die App weist beim Start der Aufnahme darauf hin.
 
 ## Grenzen der Anbieter
 
-Vor dem Upload prüft Scribe Studio Dateigröße und Länge gegen die Grenzen des gewählten Anbieters und schlägt passende Alternativen vor – so schlägt nichts erst nach einem langen Upload fehl.
+Vor dem Upload prüft Unisono Dateigröße und Länge gegen die Grenzen des gewählten Anbieters und schlägt passende Alternativen vor – so schlägt nichts erst nach einem langen Upload fehl.
 
 | Anbieter | Max. Dateigröße | Max. Länge |
 |---|---|---|
@@ -122,7 +100,7 @@ Besprechungen von 1–2 Stunden (typisch 40–60 MB) passen bei allen Anbietern.
 
 ## Fachbegriffe
 
-In den Einstellungen (⚙️) unter **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und Abkürzungen (ein Begriff pro Zeile, Zeilen mit `#` sind Kommentare). Die Liste bleibt im Browser gespeichert, lässt sich als `.txt` exportieren und aus `.txt`/`.csv` importieren. Bei jeder Transkription wird sie im jeweils passenden Format mitgeschickt:
+Unter **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und Abkürzungen (ein Begriff pro Zeile, Zeilen mit `#` sind Kommentare). Die Liste bleibt im Browser gespeichert, lässt sich als `.txt` exportieren und aus `.txt`/`.csv` importieren. Bei jeder Transkription wird sie im jeweils passenden Format mitgeschickt:
 
 | Anbieter | Parameter | Grenzen |
 |---|---|---|
@@ -131,19 +109,19 @@ In den Einstellungen (⚙️) unter **Fachbegriffe** pflegst du eine Liste mit N
 | AssemblyAI | `keyterms_prompt` (Universal-3.5 Pro), `word_boost` (Universal-2) | max. 1.000 Begriffe à 6 Wörter |
 | Mistral | `context_bias` | max. 100 Begriffe (für Deutsch laut Mistral noch experimentell) |
 
-Auf der Startseite steht, wie viele Begriffe beim gewählten Anbieter ankommen und welche wegen der Grenzen übersprungen werden.
+Unter „Neue Transkription“ steht, wie viele Begriffe bei der gewählten Engine ankommen und welche wegen der Grenzen übersprungen werden.
 
-<img src="docs/screenshots/settings-vocab.png" alt="Einstellungen – Fachbegriffe" width="720">
+<img src="docs/screenshots/vocab.png" alt="Fachbegriffe" width="720">
 
 ## Segment-Editor
 
-Das Transkript besteht aus Abschnitten (Segmenten) mit Sprecher, Zeitstempel und Text. Viele Anbieter – besonders Gladia – liefern sehr kleine Bruchstücke („Ja,“ / „gut.“). Scribe Studio fasst direkt aufeinanderfolgende Bruchstücke desselben Sprechers automatisch zu Absätzen zusammen (Pause ≤ 2 s, Absatz ≤ 60 s); der Text bleibt dabei vollständig erhalten.
+Das Transkript besteht aus Abschnitten (Segmenten) mit Sprecher, Zeitstempel und Text. Viele Anbieter – besonders Gladia – liefern sehr kleine Bruchstücke („Ja,“ / „gut.“). Unisono fasst direkt aufeinanderfolgende Bruchstücke desselben Sprechers automatisch zu Absätzen zusammen (Pause ≤ 2 s, Absatz ≤ 60 s); der Text bleibt dabei vollständig erhalten.
 
-- **Sprecher umbenennen:** In der Sprecherleiste links z. B. „Sprecher A“ in „Projektleitung“ ändern – alle Abschnitte dieses Sprechers ändern sich sofort mit. Über **+ Sprecher** kommt ein weiterer hinzu.
-- **Sprecher zuordnen:** Pro Abschnitt über das Auswahlfeld einen anderen Sprecher wählen.
+- **Sprecher umbenennen:** Unter „Sprecher und Redezeit“ z. B. „Sprecher A“ in „Projektleitung“ ändern . Alle Abschnitte dieses Sprechers und das Kürzel ändern sich sofort mit. Über **Sprecher** kommt ein weiterer hinzu.
+- **Sprecher zuordnen:** Pro Abschnitt auf das Sprecherlabel klicken und einen anderen Sprecher wählen.
 - **Text korrigieren:** Direkt im Abschnitt tippen.
-- **Zusammenführen / Löschen:** Über die Symbole rechts im Abschnitt.
-- **Click-to-Jump:** Klick auf den Zeitstempel springt im Player an diese Stelle. Der gerade gesprochene Abschnitt wird hervorgehoben, **Mitlaufen** scrollt automatisch mit.
+- **Zusammenführen / Löschen:** Über die Symbole rechts im Abschnitt (beim Überfahren oder mit dem Fokus sichtbar).
+- **Click-to-Jump:** Klick auf den Zeitstempel springt im Player an diese Stelle. Der gerade gesprochene Abschnitt wird hinterlegt und links markiert, **Mitlaufen** scrollt automatisch mit.
 - **Automatisch gespeichert:** Das bearbeitete Transkript bleibt nach einem Neuladen der Seite erhalten. Die Audiodatei selbst wird nicht gespeichert und muss für den Player erneut geladen werden.
 - **Auch lange Aufnahmen:** Eine echte Besprechung mit 348 Abschnitten öffnet und rendert in etwa einer Viertelsekunde.
 
@@ -155,15 +133,15 @@ Alle Exporte und die KI-Zusammenfassung verwenden den bearbeiteten Stand.
 
 | Format | Wofür |
 |---|---|
-| **HTML-Seite** | Eigenständige Datei zum Lesen und Weitergeben. Optional mit eingebettetem Audio: Klick auf einen Zeitstempel spielt die Stelle ab. Im Browser über *Drucken → Als PDF speichern* sauber druckbar. |
+| **HTML-Seite** | Eigenständige Datei im Unisono-Stil (hell und dunkel) zum Lesen und Weitergeben. Optional mit eingebettetem Audio: Klick auf einen Zeitstempel spielt die Stelle ab. Im Browser über *Drucken → Als PDF speichern* sauber druckbar. |
 | **Markdown** | Für Obsidian, Notion oder Wikis – mit Frontmatter (Titel, Datum, Quelle, Anbieter, Dauer, Sprecher, Tags). |
 | **Text** | `[Projektleitung - 00:01:12]: Guten Morgen …` – zum Einfügen in E-Mail oder Word. |
 | **Untertitel SRT / VTT** | Für Videos; VTT enthält die Sprechernamen. |
-| **Projektdatei** (`.scribe.json`) | Speichert Transkript, Sprechernamen und Zusammenfassung. Über **Öffnen** später wieder laden und weiterbearbeiten. Die Audiodatei selbst ist nicht enthalten. |
+| **Projektdatei** (`.unisono.json`) | Speichert Transkript, Sprechernamen und Zusammenfassung. Über **Öffnen** später wieder laden und weiterbearbeiten. Die Audiodatei selbst ist nicht enthalten. |
 
 Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (abschaltbar im Menü). Beim HTML-Export mit eingebettetem Audio wird die Datei etwa ein Drittel größer als das Audio; ab 25 MB Audio ist das Einbetten deshalb standardmäßig aus.
 
-<img src="docs/screenshots/export.png" alt="Exportmenü" width="100%">
+<img src="docs/screenshots/export.png" alt="Exportierte HTML-Seite" width="100%">
 
 ## Anbieter & Modelle
 
@@ -176,9 +154,9 @@ Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (a
 
 Sprechererkennung (Diarization) ist bei allen Anbietern aktivierbar.
 
-Die Anbieter erscheinen in der Oberfläche mit ihren Logos (Zeichenmarken), einfarbig in den Farben des gewählten Designs. Die Marken gehören ihren Inhabern und kennzeichnen hier nur den jeweiligen Dienst; Quellen stehen in `js/brand-logos.js`.
+Jede Engine hat eine feste Farbe (Punkt in Chips, Fortschrittslinie, Seitenleiste): Gladia Salbei, AssemblyAI Fjord, ElevenLabs Bernstein, Mistral Rosenholz. Logos erscheinen nur klein und neutral neben dem Namen unter „API-Keys“. Die Marken gehören ihren Inhabern und kennzeichnen hier nur den jeweiligen Dienst; Quellen stehen in `js/brand-logos.js`.
 
-### KI-Zusammenfassung
+### Zusammenfassung
 
 | Anbieter | Modelle (frei änderbar) | Hinweis |
 |---|---|---|
@@ -189,73 +167,68 @@ Zusammengefasst wird immer der aktuelle (ggf. von dir korrigierte) Text im Ergeb
 
 ## Handy und Tablet
 
-Die Oberfläche passt sich an schmale Bildschirme an: Navigation und Einstellungen rutschen untereinander, das Transkript steht oben.
+Auf schmalen Bildschirmen ersetzt eine Tab-Leiste unten die Seitenleiste, Karten stehen untereinander.
 
-<img src="docs/screenshots/mobile.png" alt="Scribe Studio auf dem Handy" width="300">
+<table>
+  <tr>
+    <td><img src="docs/screenshots/mobile.png" alt="Unisono auf dem Handy, hell"></td>
+    <td><img src="docs/screenshots/mobile-dark.png" alt="Unisono auf dem Handy, dunkel"></td>
+  </tr>
+</table>
 
 ## Datenschutz
 
-- Es gibt keinen Server von Scribe Studio. Audio und Keys gehen nur an den Anbieter, den du auswählst.
+- Es gibt keinen Server von Unisono. Audio und Keys gehen nur an den Anbieter, den du auswählst.
 - API-Keys, das zuletzt bearbeitete Transkript, Fachbegriffe und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme liegt in IndexedDB.
-- Alles lässt sich unter ⚙️ → **Daten & Datenschutz** einzeln löschen oder komplett zurücksetzen.
+- Alles lässt sich unter **Einstellungen → Daten und Datenschutz** einzeln löschen oder komplett zurücksetzen.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.
 
 ## Projektstruktur
 
 ```
-index.html              Layout
-css/themes.css          Design-Tokens: Standardwerte und gemeinsame Farben je Hell/Dunkel
-css/designs/*.css       Je Design eine Datei: Farben, Schrift, Ecken, Schatten, Buttons, Effekte, Bewegung
-css/styles.css          Komponenten-Styles (Karten, Felder, Segment-Editor, Einstellungsfenster)
-css/tailwind.css        Erzeugte Tailwind-Klassen (npm run build:css)
+index.html              Layout: Seitenleiste, Seiten (Views), Icon-Sprite, Tab-Leiste
+favicon.svg             Bildmarke als App-Icon
+DESIGN.md               Designregeln von Unisono (zuerst lesen)
+css/tokens.css          Design-Tokens: Farben, Schrift, Abstände, Radien, Tiefe, Bewegung; Hell und Dunkel
+css/app.css             Komponenten, ausschließlich aus den Tokens gebaut
+fonts/                  Manrope, Inter, IBM Plex Mono (woff2, SIL Open Font License, siehe fonts/OFL.txt)
 js/state.js             Zentraler State: Segmente, Sprecher, Rohdaten, Autosave
-js/segment-editor.js    Darstellung und Bearbeitung der Segmente, Redezeit, Player-Sync
-js/player.js            Player-Bedienung und Zeitleiste (Wellenform nach Sprechern eingefärbt)
-js/search.js            Suchen & Ersetzen mit Markierung im Text
+js/segment-editor.js    Segmente, Sprecherlabels und Kürzel, Redezeit, Player-Sync
+js/player.js            Player-Bedienung, Wellenform und Sprecherspur
+js/search.js            Suchen und Ersetzen mit Markierung im Text
 js/progress.js          Fortschrittsanzeige mit Upload-Prozent und Abbrechen
-js/brand-logos.js       Logos der Anbieter als SVG, einfarbig in der Farbe des Designs
+js/icons.js             Linien-Icons aus dem Sprite in index.html
+js/brand-logos.js       Logos der Anbieter als SVG
 js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem bearbeiteten Stand
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
 js/recorder.js          Mikrofonaufnahme (MediaRecorder), Pegel, Pause, Bildschirm-wach-halten
 js/recording-backup.js  Laufende Sicherung der Aufnahme in IndexedDB, Wiederherstellung
-js/summary.js           KI-Zusammenfassung (Anthropic / OpenAI)
-js/appearance.js        Hell/Dunkel und Design, wird vor dem ersten Zeichnen gesetzt
-js/settings.js          Einstellungsfenster: Kategorien, Darstellung, Daten löschen
-js/app.js               Keys, Konfiguration, Datei-Upload, Ablauf der Transkription
+js/summary.js           Zusammenfassung (Anthropic / OpenAI)
+js/appearance.js        Hell, Dunkel oder wie System, wird vor dem ersten Zeichnen gesetzt
+js/settings.js          Seite „Einstellungen“: Darstellung, Daten löschen
+js/app.js               Seiten, Keys, Engine-Auswahl, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP-Helfer: Upload mit Fortschritt, Polling, Abbrechen
-js/apis/*.js            Je ein Modul pro Anbieter (Gladia, ElevenLabs, AssemblyAI, Mistral)
+js/apis/*.js            Je ein Modul pro Engine (Gladia, ElevenLabs, AssemblyAI, Mistral)
 docs/screenshots/       Bilder für diese README
 ```
 
-Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und nicht als ES-Module: Browser blockieren ES-Module, wenn eine Seite per Doppelklick (`file://`) geöffnet wird. Die Module teilen sich das globale Objekt `window.Scribe`. Ein neuer Anbieter wird als Datei unter `js/apis/` angelegt, registriert sich in `Scribe.apis` und in `index.html` eingebunden.
+Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und nicht als ES-Module: Browser blockieren ES-Module, wenn eine Seite per Doppelklick (`file://`) geöffnet wird. Die Module teilen sich das globale Objekt `window.Unisono`. Eine neue Engine wird als Datei unter `js/apis/` angelegt, registriert sich in `Unisono.apis` und wird in `index.html` eingebunden. Ihre Farbe kommt aus `--provider-free` bzw. einem neuen Token in `css/tokens.css` und wird in `css/app.css` unter „Provider colors“ zugeordnet.
 
 ## Design anpassen
 
-Das Aussehen steckt in vier Dateien:
+Grundlage ist das Designsystem in [`DESIGN.md`](DESIGN.md):
 
-- `css/themes.css` – alle Design-Tokens mit Standardwerten: Schriften, Ecken (`--r-panel`, `--r-btn` …), Rahmen (`--bw`), Schatten (`--shadow-panel`, `--shadow-btn` …), Button-Stil (`--btn-bg`, `--btn-case` …), Unschärfe und Bewegung (`--ease`, `--dur`, `--page-anim`)
-- `css/designs/*.css` – je Design eine Datei, die diese Tokens überschreibt, die Farben für Dunkel und Hell festlegt und eigene Effekte ergänzt (Hintergründe, Filmkorn, Eckklammern)
-- `tailwind.config.js` – verbindet die Tailwind-Farben (`bg-primary`, `text-on-surface` …) mit den Farb-Variablen
-- `css/styles.css` – Bausteine wie Panels, Buttons, Anbieter- und Key-Karten, Segmente, Rekorder, Exportmenü, Einstellungsfenster; sie lesen nur Tokens
-- `index.html` – Aufbau der Ansichten mit Tailwind-Klassen
+- `css/tokens.css` enthält alle Werte. Hell ist Standard, Dunkel greift über die Systemeinstellung oder `data-theme="dark"` am `<html>`.
+- `css/app.css` baut die Komponenten nur aus diesen Variablen: keine eigenen Farben, Schatten, Radien oder Schriftgrößen.
+- Icons sind eigene Linien-Icons (24er-Raster, Strich 1,5) als `<symbol>` in `index.html`.
 
-**Neues Design anlegen:** eine Datei in `css/designs/` kopieren (z. B. `graphit.css`), alle `graphit` durch den neuen Namen ersetzen und die Werte ändern (Farben als `R G B`). Tokens stehen auf `[data-theme="…"]`, seitenweite Effekte auf `html[data-theme="…"]`. Dann die Datei in `index.html` verlinken und in `js/appearance.js` einen Eintrag in `THEMES` ergänzen (mit den Google-Fonts-Familien) – das Design erscheint automatisch unter Einstellungen → Darstellung. Neu erzeugt werden muss dafür nichts.
-
-Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-list`, `vocab-text`) und die Klassennamen aus `styles.css` auf die Seite zu. Solange diese erhalten bleiben, lassen sich Layout, Farben und Schriften frei ändern.
-
-## Tailwind-CSS neu erzeugen
-
-Die Tailwind-Klassen liegen fertig erzeugt in `css/tailwind.css` – die App braucht dafür kein Skript aus dem Internet. Nur wer im HTML oder JS **neue Tailwind-Klassen** verwendet, muss die Datei neu erzeugen (Node.js nötig):
-
-```
-npm install
-npm run build:css
-```
+Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-list`, `vocab-text`) auf die Seite zu. Solange diese erhalten bleiben, lässt sich das Layout frei ändern.
 
 ## Hinweise
 
-- Schriften und Symbole (Material Symbols) kommen von Google Fonts; die Schriften eines Designs werden erst geladen, wenn es gewählt oder in den Einstellungen angezeigt wird. Ohne Internet greifen Standardschriften, und Symbole erscheinen als Wörter.
-- Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen. Der **Test-Ping** in den Einstellungen zeigt das vorab.
+- Schriften liegen im Ordner `fonts/`, die App lädt nichts von Google oder anderen CDNs.
+- Schlägt eine Anfrage mit „Netzwerk- oder CORS-Fehler“ fehl, blockiert der Anbieter direkte Browser-Anfragen. **Prüfen** unter „API-Keys“ zeigt das vorab.
+- Umbenennung: Die App hieß früher „Scribe Studio“. Keys und Einstellungen unter dem alten Namen werden nicht übernommen und beim ersten Start entfernt; alte `.scribe.json`-Projekte lassen sich nicht mehr öffnen.
 
 ## Ausblick
 

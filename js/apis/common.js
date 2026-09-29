@@ -1,7 +1,7 @@
 /*
  * Shared helpers for the provider modules.
  *
- * Every provider registers itself in Scribe.apis[id] with:
+ * Every provider registers itself in Unisono.apis[id] with:
  *   label, models: [{ id, name }], transcribe(file, options) → { raw, segments }
  * where segments are [{ speaker: 'A' | null, start, end, text }] with times in seconds.
  *
@@ -21,7 +21,7 @@
  * limits() → { maxBytes, maxSeconds } – checked before a file is sent
  * (see app.js), so a too-large or too-long file fails fast instead of after the upload.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
     const POLL_INTERVAL_MS = 3000;
     const POLL_TIMEOUT_MS = 60 * 60 * 1000;
@@ -96,4 +96,4 @@ window.Scribe = window.Scribe || {};
 
     S.apis = S.apis || {};
     S.http = { fetchJson, send, poll, fallbackSegment };
-})(window.Scribe);
+})(window.Unisono);

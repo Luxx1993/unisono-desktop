@@ -1,5 +1,5 @@
 /* ElevenLabs Scribe: one synchronous multipart request. */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
     async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, signal, onStage, onUpload }) {
         onStage('upload', 'Sende Audio an ElevenLabs Scribe …');
@@ -74,4 +74,4 @@ window.Scribe = window.Scribe || {};
             : null,
         transcribe
     };
-})(window.Scribe);
+})(window.Unisono);

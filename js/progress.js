@@ -3,7 +3,7 @@
  * real upload percentage and speed, elapsed time, and a cancel button.
  * The panel replaces the start form (#start-form) until the run ends.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 
 (function (S) {
     const $ = id => document.getElementById(id);
@@ -63,7 +63,8 @@ window.Scribe = window.Scribe || {};
         current = null;
         STEPS.forEach(step => detail(step, ''));
 
-        $('progress-icon').replaceChildren(S.brandLogo(provider) || Object.assign(document.createElement('span'), { className: 'material-symbols-outlined', textContent: api.icon }));
+        // The provider's color for the dot and the progress line (DESIGN.md: one line per provider).
+        $('progress-panel').dataset.provider = provider;
         $('progress-file').textContent = file.name;
         const modelName = api.models.find(m => m.id === model)?.name.split(' (')[0] || model;
         $('progress-meta').textContent = [api.label, modelName, `${mb(file.size)} MB`, duration ? S.format.clock(duration) : null].filter(Boolean).join(' · ');
@@ -134,4 +135,4 @@ window.Scribe = window.Scribe || {};
 
     document.addEventListener('DOMContentLoaded', init);
     S.progress = { begin, stage, upload, end, isRunning };
-})(window.Scribe);
+})(window.Unisono);

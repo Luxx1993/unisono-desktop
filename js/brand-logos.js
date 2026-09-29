@@ -1,12 +1,13 @@
 /*
- * Brand marks of the providers, drawn in currentColor so they take the color of the active
- * design (and of light/dark mode) like every other icon.
+ * Brand marks of the providers, drawn in currentColor. Per DESIGN.md they appear only small
+ * and neutral (--text-tertiary) next to the provider's name, never in the header or next to
+ * the wordmark.
  *
  * Sources: Gladia – the official Gladia n8n package (@gladiaio/n8n-nodes-gladia);
  * ElevenLabs, Mistral AI, AssemblyAI, OpenAI, Anthropic – LobeHub icons (MIT).
  * The marks are trademarks of their owners and only identify the respective service here.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 
 (function (S) {
     const MARKS = {
@@ -35,4 +36,4 @@ window.Scribe = window.Scribe || {};
     }
 
     S.brandLogo = brandLogo;
-})(window.Scribe);
+})(window.Unisono);

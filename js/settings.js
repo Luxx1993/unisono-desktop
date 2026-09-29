@@ -1,122 +1,39 @@
 /*
- * Settings dialog behind the gear button: API keys, vocabulary, appearance, data & privacy.
+ * Settings pages: "Einstellungen" (appearance, data & privacy) and the jump targets of
+ * open(tab) for the API keys and vocabulary pages.
  *
- * The key cards and the vocabulary editor are filled by app.js and vocabulary.js (they only
- * look up their element IDs); this module opens and closes the dialog, switches categories,
- * and owns the "Darstellung" and "Daten & Datenschutz" panels.
+ * The key list and the vocabulary editor are filled by app.js and vocabulary.js (they only
+ * look up their element IDs); this module owns the appearance switch and the data panel.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 
 (function (S) {
     const $ = id => document.getElementById(id);
-    const TABS = ['keys', 'vocab', 'appearance', 'data'];
-    const MODE_LABELS = {
-        dark: ['dark_mode', 'Dunkel'],
-        light: ['light_mode', 'Hell'],
-        system: ['contrast', 'Wie System']
-    };
+    // Former dialog tabs → pages
+    const PAGES = { keys: 'keys', vocab: 'vocab', appearance: 'settings', data: 'settings', settings: 'settings' };
+    const MODE_LABELS = { light: 'Hell', dark: 'Dunkel', system: 'Wie System' };
 
-    let dialog;
     let options = {};
 
-    function el(tag, className, text) {
-        const node = document.createElement(tag);
-        if (className) node.className = className;
-        if (text) node.textContent = text;
-        return node;
-    }
-
-    function icon(name) {
-        return el('span', 'material-symbols-outlined', name);
-    }
-
-    // --- Open / close ---
     function open(tab = 'keys') {
-        selectTab(TABS.includes(tab) ? tab : 'keys');
-        refreshData();
-        if (!dialog.open) {
-            dialog.showModal();
-            // The dialog sits in the top layer; move the status toast inside so its messages stay visible.
-            dialog.append(document.querySelector('.status-dock'));
-        }
-        // Focus the dialog itself: Esc and Tab work, and no focus ring appears on a button.
-        dialog.querySelector('.settings-shell').focus();
+        S.app.switchView(PAGES[tab] || 'keys');
     }
 
-    function close() {
-        if (dialog.open) dialog.close();
-    }
-
-    function onClosed() {
-        document.querySelector('main').prepend(document.querySelector('.status-dock'));
-        options.onClose?.();
-    }
-
-    function selectTab(name) {
-        document.querySelectorAll('[data-settings-tab]').forEach(tab => {
-            const selected = tab.dataset.settingsTab === name;
-            tab.setAttribute('aria-selected', selected);
-            tab.tabIndex = selected ? 0 : -1;
-            $('settings-' + tab.dataset.settingsTab).classList.toggle('hidden', !selected);
-        });
-        document.querySelector('.settings-panels').scrollTop = 0;
-        if (name === 'data') refreshData();
-    }
-
-    // Arrow keys move between categories (tablist pattern).
-    function onTabKey(e) {
-        const keysNext = ['ArrowDown', 'ArrowRight'];
-        const keysPrev = ['ArrowUp', 'ArrowLeft'];
-        if (![...keysNext, ...keysPrev, 'Home', 'End'].includes(e.key)) return;
-        e.preventDefault();
-        const current = TABS.indexOf(e.target.dataset.settingsTab);
-        let next = e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1
-            : (current + (keysNext.includes(e.key) ? 1 : -1) + TABS.length) % TABS.length;
-        selectTab(TABS[next]);
-        $('settings-tab-' + TABS[next]).focus();
+    function isShown() {
+        return !$('view-settings').classList.contains('hidden');
     }
 
     // --- Appearance ---
     function renderAppearance() {
-        const { mode, theme, resolved } = S.appearance.get();
-
+        const { mode } = S.appearance.get();
         $('mode-options').replaceChildren(...S.appearance.MODES.map(id => {
-            const [iconName, label] = MODE_LABELS[id];
-            const button = el('button');
+            const button = document.createElement('button');
             button.type = 'button';
             button.setAttribute('role', 'radio');
-            button.setAttribute('aria-checked', id === mode);
-            button.append(icon(iconName), label);
+            button.setAttribute('aria-checked', String(id === mode));
+            button.textContent = MODE_LABELS[id];
             button.addEventListener('click', () => S.appearance.setMode(id));
             return button;
-        }));
-
-        $('theme-options').replaceChildren(...S.appearance.THEMES.map(t => {
-            // A tiny page rendered in the design itself: its own data-theme/data-mode switch
-            // all tokens (colors, fonts, corners, shadows, buttons) for this element.
-            S.appearance.loadFonts(t.id);
-            const preview = el('span', 'theme-preview');
-            preview.dataset.theme = t.id;
-            preview.dataset.mode = resolved;
-            preview.setAttribute('aria-hidden', 'true');
-            const panel = el('span', 'tp-panel');
-            panel.append(el('span', 'tp-label', 'Schritt 1'), el('span', 'tp-title', 'Aa Sprecher'));
-            const buttons = el('span', 'tp-buttons');
-            buttons.append(el('span', 'tp-btn', 'Start'), el('span', 'tp-ghost', 'Export'));
-            panel.append(buttons);
-            preview.append(panel);
-
-            const name = el('span', 'theme-name');
-            name.append(el('strong', '', t.label));
-            if (t.id === theme) name.append(icon('check_circle'));
-
-            const card = el('button', 'theme-card');
-            card.type = 'button';
-            card.setAttribute('role', 'radio');
-            card.setAttribute('aria-checked', t.id === theme);
-            card.append(preview, name, el('p', '', t.description));
-            card.addEventListener('click', () => S.appearance.setTheme(t.id));
-            return card;
         }));
     }
 
@@ -172,32 +89,13 @@ window.Scribe = window.Scribe || {};
         $('vocab-text').value = '';
         await S.recorder.discardBackup();
         try {
-            Object.keys(localStorage).filter(k => k.startsWith('scribe_')).forEach(k => localStorage.removeItem(k));
+            Object.keys(localStorage).filter(k => k.startsWith('unisono_')).forEach(k => localStorage.removeItem(k));
         } catch (_) {}
         location.reload();
     }
 
     function init(opts) {
         options = opts;
-        dialog = $('settings-dialog');
-
-        document.querySelectorAll('[data-settings]').forEach(button =>
-            button.addEventListener('click', () => open(button.dataset.settings)));
-        document.querySelectorAll('[data-settings-tab]').forEach(tab => {
-            tab.addEventListener('click', () => selectTab(tab.dataset.settingsTab));
-            tab.addEventListener('keydown', onTabKey);
-        });
-        $('settings-close').addEventListener('click', close);
-        dialog.addEventListener('close', onClosed);
-
-        // Close on a click on the backdrop – but not when a text selection started inside ends outside.
-        let downOnBackdrop = false;
-        dialog.addEventListener('pointerdown', e => { downOnBackdrop = e.target === dialog; });
-        dialog.addEventListener('click', e => {
-            if (downOnBackdrop && e.target === dialog) close();
-            downOnBackdrop = false;
-        });
-
         $('clear-session').addEventListener('click', clearSession);
         $('clear-recordings').addEventListener('click', clearRecordings);
         $('reset-all').addEventListener('click', resetAll);
@@ -206,5 +104,5 @@ window.Scribe = window.Scribe || {};
         S.appearance.onChange(renderAppearance);
     }
 
-    S.settings = { init, open, close, refresh: () => dialog?.open && refreshData() };
-})(window.Scribe);
+    S.settings = { init, open, refresh: () => isShown() && refreshData(), refreshData };
+})(window.Unisono);

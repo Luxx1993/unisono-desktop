@@ -1,5 +1,5 @@
 /* AssemblyAI v2: upload → /v2/transcript → poll. */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
     const BASE = 'https://api.assemblyai.com/v2';
 
@@ -68,4 +68,4 @@ window.Scribe = window.Scribe || {};
         limits: () => ({ maxBytes: 2.2 * 1024 * 1024 * 1024, maxSeconds: 10 * 3600 }),
         transcribe
     };
-})(window.Scribe);
+})(window.Unisono);

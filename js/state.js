@@ -15,9 +15,9 @@
  *   'speaker-renamed'  (detail: speaker id) name changed
  *   'text'             (detail: segment id) text of one segment changed
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
-    const STORAGE_KEY = 'scribe_session';
+    const STORAGE_KEY = 'unisono_session';
     const listeners = new Set();
     let seq = 0;
     let persistTimer = null;
@@ -138,11 +138,11 @@ window.Scribe = window.Scribe || {};
         emit('reset');
     }
 
-    // Opens a project file written by Scribe.export (format 'scribe-studio', version 1).
+    // Opens a project file written by Unisono.export (format 'unisono', version 1).
     // Keeps the edited speaker names and segments exactly as saved.
     function loadProject(data) {
-        if (data?.format !== 'scribe-studio' || !Array.isArray(data.segments)) {
-            throw new Error('Das ist keine Scribe-Studio-Projektdatei.');
+        if (data?.format !== 'unisono' || !Array.isArray(data.segments)) {
+            throw new Error('Das ist keine Unisono-Projektdatei.');
         }
         state.speakers = (Array.isArray(data.speakers) ? data.speakers : [])
             .filter(s => s && typeof s.id === 'string')
@@ -255,4 +255,4 @@ window.Scribe = window.Scribe || {};
         setTranscript, loadProject, clear, updateText, renameSpeaker, addSpeaker, setSegmentSpeaker,
         mergeWithNext, deleteSegment, restore
     };
-})(window.Scribe);
+})(window.Unisono);

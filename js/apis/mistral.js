@@ -5,7 +5,7 @@
  * and segment timestamps. Mistral does not allow a fixed language together with
  * timestamps, so the language is detected automatically here.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
     async function transcribe(file, { key, model, diarize, vocabulary, signal, onStage, onUpload }) {
         onStage('upload', `Sende Audio an Mistral Voxtral (${model}) …`);
@@ -62,4 +62,4 @@ window.Scribe = window.Scribe || {};
         test: key => ({ url: 'https://api.mistral.ai/v1/models', headers: { 'Authorization': 'Bearer ' + key } }),
         transcribe
     };
-})(window.Scribe);
+})(window.Unisono);
