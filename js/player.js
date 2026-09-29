@@ -55,6 +55,8 @@ window.Unisono = window.Unisono || {};
             lane: get('--speaker-lane'),
             none: get('--border-strong'),
             head: get('--text-primary'),
+            mark: get('--text-tertiary'),
+            gapMark: get('--status-warning'),
             speakers: [1, 2, 3, 4].map(n => get('--speaker-' + n)),
             waveHeight: px('--wave-height'),
             gap: px('--space-2'),
@@ -142,6 +144,14 @@ window.Unisono = window.Unisono || {};
             ctx.fillRect(x, barTop, w, t.barHeight);
         }
 
+        // Markers: a thin line through the waveform with a small flag on top.
+        for (const m of S.state.get().markers) {
+            const x = Math.round((m.time / total) * width);
+            ctx.fillStyle = m.kind === 'gap' ? t.gapMark : t.mark;
+            ctx.fillRect(x, 0, 1, waveH);
+            ctx.fillRect(x, 0, 6, 4);
+        }
+
         // Playhead through waveform and lane.
         if (hasAudio() && now > 0) {
             const x = Math.round((now / total) * width);
@@ -184,8 +194,13 @@ window.Unisono = window.Unisono || {};
     function showHover(clientX) {
         const t = timeAt(clientX);
         const seg = S.state.segmentAt(t);
-        hoverEl.textContent = S.format.clock(t) + (seg?.speaker ? ` · ${S.editor.abbreviation(seg.speaker)} ${S.state.speakerName(seg.speaker)}` : '');
         const rect = wrap.getBoundingClientRect();
+        // Within a few pixels of a marker, show the marker instead.
+        const near = (5 / rect.width) * duration();
+        const marker = S.state.get().markers.find(m => Math.abs(m.time - t) <= near);
+        hoverEl.textContent = marker
+            ? `${S.format.clock(marker.time)} · ${marker.label}`
+            : S.format.clock(t) + (seg?.speaker ? ` · ${S.editor.abbreviation(seg.speaker)} ${S.state.speakerName(seg.speaker)}` : '');
         const x = Math.min(rect.width - 8, Math.max(8, clientX - rect.left));
         hoverEl.style.left = x + 'px';
         hoverEl.classList.remove('hidden');

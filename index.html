@@ -25,6 +25,7 @@
     <script src="js/recorder.js" defer></script>
     <script src="js/icons.js" defer></script>
     <script src="js/segment-editor.js" defer></script>
+    <script src="js/markers.js" defer></script>
     <script src="js/summary.js" defer></script>
     <script src="js/brand-logos.js" defer></script>
     <script src="js/progress.js" defer></script>
@@ -67,6 +68,9 @@
             <symbol id="i-merge" viewBox="0 0 24 24"><path d="M12 4v10.5M7.5 10 12 14.5l4.5-4.5M5 19.5h14"/></symbol>
             <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.6a2.4 2.4 0 1 1 3.3 2.2c-.6.3-1 .8-1 1.5v.4M12 16.6v.1"/></symbol>
             <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v3.7h3.7M12 8.5V12l2.5 1.5"/></symbol>
+            <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 20.5v-16M6 4.5h11l-2.5 4 2.5 4H6"/></symbol>
+            <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4.5 9V4.5H9M19.5 9V4.5H15M4.5 15v4.5H9M19.5 15v4.5H15"/></symbol>
+            <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.5 7.5 0 1 1 9.5 4.5a6 6 0 0 0 10 10z"/></symbol>
         </defs>
     </svg>
 
@@ -87,7 +91,8 @@
                 <span class="wordmark" aria-label="Unisono">unısono</span>
             </span>
             <nav class="side-nav" aria-label="Bereiche">
-                <button type="button" class="nav-item" data-view="start"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Neue Transkription</button>
+                <button type="button" class="nav-item" data-view="record"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Aufnahme<span class="nav-rec-dot" aria-hidden="true"></span></button>
+                <button type="button" class="nav-item" data-view="start"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Transkribieren</button>
                 <button type="button" class="nav-item" data-view="transcript"><svg class="icon" aria-hidden="true"><use href="#i-text"/></svg>Transkript</button>
                 <button type="button" class="nav-item" data-view="vocab"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>Fachbegriffe</button>
                 <button type="button" class="nav-item" data-view="keys"><svg class="icon" aria-hidden="true"><use href="#i-key"/></svg>API-Keys</button>
@@ -109,12 +114,12 @@
                 </div>
             </div>
 
-            <!-- ================= VIEW: Neue Transkription ================= -->
+            <!-- ================= VIEW: Datei transkribieren ================= -->
             <section id="view-start" class="view" aria-labelledby="start-title">
                 <header class="page-head">
                     <div>
-                        <p class="t-label eyebrow">Transkribieren</p>
-                        <h1 id="start-title" class="page-title">Neue Transkription</h1>
+                        <p class="t-label eyebrow">Datei</p>
+                        <h1 id="start-title" class="page-title">Transkribieren</h1>
                     </div>
                     <button type="button" id="open-project-start" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>Projekt öffnen</button>
                 </header>
@@ -147,15 +152,9 @@
 
                 <div id="start-form" class="start-grid">
                     <section class="card run-card" aria-labelledby="run-title">
-                        <h2 id="run-title" class="t-title">Aufnahme</h2>
-
-                        <div id="rec-recovery" class="notice hidden" role="alert">
-                            <svg class="icon" aria-hidden="true"><use href="#i-restore"/></svg>
-                            <p id="rec-recovery-text" class="t-small"></p>
-                            <div class="notice-actions">
-                                <button type="button" id="rec-restore" class="btn-secondary">Wiederherstellen</button>
-                                <button type="button" id="rec-discard" class="btn-text is-danger">Verwerfen</button>
-                            </div>
+                        <div class="card-head">
+                            <h2 id="run-title" class="t-title">Datei</h2>
+                            <button type="button" class="btn-text" data-view="record"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Stattdessen aufnehmen</button>
                         </div>
 
                         <div id="drop-zone" role="button" tabindex="0" class="drop-zone" aria-describedby="drop-formats">
@@ -174,24 +173,6 @@
                                 </p>
                             </div>
                             <button type="button" id="file-clear" class="icon-btn" aria-label="Auswahl aufheben"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
-                        </div>
-
-                        <div id="recorder" class="recorder">
-                            <span class="t-small muted rec-or">oder direkt aufnehmen</span>
-                            <div class="rec-buttons">
-                                <button type="button" id="rec-start" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Aufnehmen</button>
-                                <button type="button" id="rec-pause" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg>Pause</button>
-                                <button type="button" id="rec-resume" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Weiter</button>
-                                <button type="button" id="rec-stop" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-stop"/></svg>Stopp</button>
-                                <button type="button" id="rec-save" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Aufnahme sichern</button>
-                            </div>
-                            <div id="rec-live" class="rec-live hidden" aria-live="polite">
-                                <span class="status-dot rec-dot" aria-hidden="true"></span>
-                                <span id="rec-state" class="t-small"></span>
-                                <span id="rec-time" class="t-mono">00:00:00</span>
-                                <div class="rec-level" aria-hidden="true"><div id="rec-level-bar" class="rec-level-bar"></div></div>
-                            </div>
-                            <p id="rec-unsupported" class="t-small muted hidden">Dieser Browser unterstützt keine Aufnahme über das Mikrofon.</p>
                         </div>
 
                         <div class="engine-row">
@@ -258,13 +239,85 @@
                 </div>
             </section>
 
+            <!-- ================= VIEW: Aufnahme (live, e.g. on site) ================= -->
+            <section id="view-record" class="view hidden" aria-labelledby="record-title">
+                <header class="page-head">
+                    <div>
+                        <p class="t-label eyebrow">Vor Ort</p>
+                        <h1 id="record-title" class="page-title">Aufnahme</h1>
+                        <p class="page-intro muted record-intro">Für Termine vor Ort, Begehungen und Diktate. Die Aufnahme wird laufend im Browser gesichert und danach wie eine Datei transkribiert.</p>
+                    </div>
+                </header>
+
+                <!-- After "Stopp" the finished recording comes first: transcribing it is the next step -->
+                <section id="rec-result" class="card hidden" aria-labelledby="rec-result-title">
+                    <h2 id="rec-result-title" class="t-label">Letzte Aufnahme</h2>
+                    <div class="file-card">
+                        <svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>
+                        <div class="min-w-0">
+                            <p id="rec-result-name" class="file-name truncate"></p>
+                            <p id="rec-result-meta" class="t-mono muted"></p>
+                        </div>
+                    </div>
+                    <div class="button-row">
+                        <button type="button" id="rec-transcribe" class="btn-primary">Transkribieren</button>
+                        <button type="button" id="rec-save" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Aufnahme sichern</button>
+                    </div>
+                </section>
+
+                <section class="card record-card" aria-label="Aufnahme">
+                    <div id="rec-recovery" class="notice hidden" role="alert">
+                        <svg class="icon" aria-hidden="true"><use href="#i-restore"/></svg>
+                        <p id="rec-recovery-text" class="t-small"></p>
+                        <div class="notice-actions">
+                            <button type="button" id="rec-restore" class="btn-secondary">Wiederherstellen</button>
+                            <button type="button" id="rec-discard" class="btn-text is-danger">Verwerfen</button>
+                        </div>
+                    </div>
+
+                    <div id="recorder" class="recorder">
+                        <div class="rec-top">
+                            <p class="rec-display-status"><span class="status-dot rec-dot" aria-hidden="true"></span><span id="rec-state" class="t-label">Bereit</span></p>
+                            <button type="button" id="rec-focus-open" class="icon-btn hidden" aria-label="Großansicht" title="Großansicht"><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg></button>
+                        </div>
+                        <div class="rec-display">
+                            <p id="rec-time" class="rec-display-time">00:00:00</p>
+                            <div class="rec-level is-large" aria-hidden="true"><div id="rec-level-bar" class="rec-level-bar"></div></div>
+                            <p id="rec-markers-info" class="t-small muted">Merker setzt du während der Aufnahme.</p>
+                            <p id="rec-mark-inline-live" class="visually-hidden" aria-live="polite"></p>
+                        </div>
+                        <div id="rec-inline-interrupted" class="notice rec-interrupted hidden" role="alert">
+                            <span class="status-dot is-warning" aria-hidden="true"></span>
+                            <p id="rec-inline-interrupted-text" class="t-small">Die Aufnahme wurde unterbrochen, weil der Bildschirm gesperrt oder die App gewechselt wurde. Das bisher Aufgenommene ist gesichert.</p>
+                            <div class="notice-actions"><button type="button" id="rec-inline-continue" class="btn-primary">Weiter aufnehmen</button></div>
+                        </div>
+                        <!-- Order by importance: start / marker, then pause / stop (only while recording), then extras -->
+                        <!-- The large start / marker button keeps its place in every state: the rows above
+                             and below keep their height even while their buttons are not shown. -->
+                        <div class="rec-actions">
+                            <div class="rec-controls">
+                                <button type="button" id="rec-pause" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg>Pause</button>
+                                <button type="button" id="rec-resume" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Weiter</button>
+                                <button type="button" id="rec-stop" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-stop"/></svg>Stopp</button>
+                            </div>
+                            <!-- One large button: starts the recording, then sets markers -->
+                            <button type="button" id="rec-main" class="rec-mark-btn"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span id="rec-main-text">Aufnahme starten</span></button>
+                            <button type="button" id="rec-dim-open" class="btn-text is-invisible"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg>Bildschirm abdunkeln</button>
+                        </div>
+                        <p id="rec-unsupported" class="t-small muted hidden">Dieser Browser unterstützt keine Aufnahme über das Mikrofon.</p>
+                        <p class="t-small muted rec-hint">Bildschirm während der Aufnahme nicht sperren und nicht in eine andere App wechseln. Das Handy mit dem Display nach oben ablegen.</p>
+                    </div>
+                </section>
+            </section>
+
             <!-- ================= VIEW: Transkript ================= -->
             <section id="view-transcript" class="view hidden" aria-labelledby="transcript-title">
                 <div id="transcript-empty" class="card empty-card">
                     <h1 class="page-title">Noch kein Transkript</h1>
                     <p class="muted">Starte eine Transkription oder öffne eine gespeicherte Projektdatei. Das Ergebnis erscheint hier.</p>
                     <div class="empty-actions">
-                        <button type="button" class="btn-primary" data-view="start">Neue Transkription</button>
+                        <button type="button" class="btn-primary" data-view="start">Datei transkribieren</button>
+                        <button type="button" class="btn-secondary" data-view="record"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Aufnehmen</button>
                         <button type="button" id="open-project-empty" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>Projekt öffnen</button>
                     </div>
                 </div>
@@ -324,6 +377,7 @@
                             </select>
                             <button type="button" id="player-load" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Audiodatei laden</button>
                             <span id="player-note" class="t-small muted hidden"></span>
+                            <button type="button" id="marker-add" class="btn-secondary is-small" title="Merker an der aktuellen Stelle setzen"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>Merker</button>
                             <label class="check player-follow"><input type="checkbox" id="follow-playback" checked> Mitlaufen</label>
                         </div>
                     </section>
@@ -360,6 +414,14 @@
                                     <h2 id="speakers-title" class="t-label">Sprecher und Redezeit</h2>
                                 </div>
                                 <div id="speaker-panel" class="speaker-panel hidden"></div>
+                            </section>
+
+                            <section id="marker-card" class="card hidden" aria-labelledby="markers-title">
+                                <div class="card-head">
+                                    <h2 id="markers-title" class="t-label">Merker</h2>
+                                    <span id="marker-count" class="t-mono muted"></span>
+                                </div>
+                                <ol id="marker-list" class="marker-list"></ol>
                             </section>
 
                             <section class="card summary-card" aria-labelledby="summary-title">
@@ -513,12 +575,45 @@
         </main>
     </div>
 
+    <!-- Recording on site: full-screen view with a large marker button (opens by itself on phones) -->
+    <div id="rec-focus" class="rec-focus hidden" role="dialog" aria-modal="true" aria-labelledby="rec-focus-state">
+        <div class="rec-focus-top">
+            <p class="rec-focus-status"><span class="status-dot rec-dot" aria-hidden="true"></span><span id="rec-focus-state" class="t-label">Aufnahme läuft</span></p>
+            <button type="button" id="rec-focus-close" class="btn-text">Kleine Ansicht</button>
+        </div>
+        <div class="rec-focus-center">
+            <p id="rec-focus-time" class="rec-focus-time" aria-live="off">00:00:00</p>
+            <div class="rec-level is-large" aria-hidden="true"><div id="rec-focus-level" class="rec-level-bar"></div></div>
+            <p id="rec-focus-markers" class="t-small muted">Noch keine Merker</p>
+            <p id="rec-mark-live" class="visually-hidden" aria-live="polite"></p>
+        </div>
+        <div id="rec-focus-interrupted" class="notice rec-interrupted hidden" role="alert">
+            <span class="status-dot is-warning" aria-hidden="true"></span>
+            <p id="rec-interrupted-text" class="t-small">Die Aufnahme wurde unterbrochen, weil der Bildschirm gesperrt oder die App gewechselt wurde. Das bisher Aufgenommene ist gesichert.</p>
+            <div class="notice-actions"><button type="button" id="rec-continue" class="btn-primary">Weiter aufnehmen</button></div>
+        </div>
+        <button type="button" id="rec-focus-mark" class="rec-mark-btn"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>Merker setzen</button>
+        <div class="rec-focus-actions">
+            <button type="button" id="rec-focus-pause" class="btn-secondary">Pause</button>
+            <button type="button" id="rec-focus-stop" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-stop"/></svg>Stopp</button>
+            <button type="button" id="rec-dim" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg>Abdunkeln</button>
+        </div>
+        <p class="t-small muted rec-focus-hint">Bildschirm nicht sperren und nicht in eine andere App wechseln. Das Handy mit dem Display nach oben ablegen.</p>
+    </div>
+
+    <!-- Dimmed screen while recording (from the page or the full-screen view) -->
+    <button type="button" id="rec-dim-layer" class="rec-dim hidden" aria-label="Bildschirm wieder aufhellen">
+            <span id="rec-dim-time" class="t-mono">00:00:00</span>
+            <span class="t-small">Aufnahme läuft. Tippen zum Aufhellen.</span>
+        </button>
+
     <!-- Mobile: tab bar at the bottom -->
     <nav class="tabbar" aria-label="Bereiche">
-        <button type="button" class="nav-item" data-view="start"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg><span>Neu</span></button>
+        <button type="button" class="nav-item" data-view="start"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg><span>Datei</span></button>
         <button type="button" class="nav-item" data-view="transcript"><svg class="icon" aria-hidden="true"><use href="#i-text"/></svg><span>Transkript</span></button>
+        <button type="button" class="nav-item" data-view="record"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span>Aufnahme</span><span class="nav-rec-dot" aria-hidden="true"></span></button>
         <button type="button" class="nav-item" data-view="vocab"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>Begriffe</span></button>
-        <button type="button" class="nav-item" data-view="keys"><svg class="icon" aria-hidden="true"><use href="#i-key"/></svg><span>Keys</span></button>
+        <!-- API-Keys: on mobile via the engine dots in the top bar -->
         <button type="button" class="nav-item" data-view="settings"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg><span>Mehr</span></button>
     </nav>
 </body>

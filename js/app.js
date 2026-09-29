@@ -72,6 +72,7 @@ window.Unisono = window.Unisono || {};
     const shortLabel = api => api.label.split(' (')[0];
 
     // --- Status line (shared with the other modules via S.ui) ---
+    // type: 'info' (something is working, the dot pulses), 'success', 'error', 'note' (neutral hint)
     function setStatus(text, type = 'info') {
         clearTimeout(statusTimer);
         $('status-banner').className = 'status-banner status-' + type;
@@ -518,6 +519,7 @@ window.Unisono = window.Unisono || {};
         if (player.src) URL.revokeObjectURL(player.src);
         player.src = URL.createObjectURL(file);
         S.player.setFile(file);
+        S.recorder.fileChanged(file);
         updatePlayerVisibility();
         updateHint();
     }
@@ -531,6 +533,7 @@ window.Unisono = window.Unisono || {};
         player.removeAttribute('src');
         player.load();
         S.player.setFile(null);
+        S.recorder.fileChanged(null);
         $('file-info').classList.add('hidden');
         $('drop-zone').classList.remove('hidden');
         $('start-btn').disabled = true;
@@ -580,7 +583,7 @@ window.Unisono = window.Unisono || {};
                 onUpload: fraction => S.progress.upload(fraction)
             });
             S.progress.stage('done');
-            S.state.setTranscript({ raw, segments, provider, fileName: file.name });
+            S.state.setTranscript({ raw, segments, provider, fileName: file.name, markers: file.unisonoMarkers });
             S.recorder.markUsed(file);
             S.progress.end();
             switchView('transcript');
@@ -690,7 +693,7 @@ window.Unisono = window.Unisono || {};
 
     // --- Init ---
     function init() {
-        S.ui = { setStatus, showError, copy, getKey };
+        S.ui = { setStatus, hideStatus, showError, copy, getKey };
         S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, switchView, openSettings: tab => S.settings.open(tab) };
 
         loadKeys();
@@ -732,6 +735,7 @@ window.Unisono = window.Unisono || {};
             audio: $('audio-player'),
             follow: $('follow-playback')
         });
+        S.markers.init();
         S.search.init();
         S.summary.init();
         const showLlmLogo = () => $('llm-logo').replaceChildren(...[S.brandLogo($('llm-provider').value)].filter(Boolean));
@@ -746,7 +750,9 @@ window.Unisono = window.Unisono || {};
             switchView('keys');
             setStatus('Willkommen. Trage zuerst den API-Key für mindestens eine Engine ein.', 'success');
         } else {
-            switchView('start');
+            // On phones and tablets Unisono is mostly used to record on site.
+            const touch = window.matchMedia?.('(pointer: coarse)').matches;
+            switchView(touch ? 'record' : 'start');
             if (restored) {
                 const name = S.state.get().fileName;
                 setStatus(`Letztes Transkript wiederhergestellt${name ? ` (${name})` : ''}. Du findest es unter „Transkript“.`, 'success');
