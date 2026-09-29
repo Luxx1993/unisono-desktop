@@ -1,26 +1,15 @@
 <!DOCTYPE html>
-<html lang="de" data-mode="dark" data-theme="deep">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scribe Studio</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%23171e37'/%3E%3Crect x='10' y='20' width='4' height='8' rx='2' fill='%23818CF8'/%3E%3Crect x='17' y='14' width='4' height='20' rx='2' fill='%236366F1'/%3E%3Crect x='24' y='9' width='4' height='30' rx='2' fill='%234F46E5'/%3E%3Crect x='31' y='16' width='4' height='16' rx='2' fill='%236366F1'/%3E%3C/svg%3E">
-    <!-- Fonts and icons of the "Deep Audio Precision" design. Without internet the app falls
-         back to system fonts; icons then show as their names. -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet">
-    <!-- Prebuilt Tailwind (npm run build:css) -->
-    <link href="css/tailwind.css" rel="stylesheet">
-    <link href="css/themes.css" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
-    <!-- Designs (Einstellungen → Darstellung); each file is one complete design system -->
-    <link href="css/designs/deep.css" rel="stylesheet">
-    <link href="css/designs/graphit.css" rel="stylesheet">
-    <link href="css/designs/bernstein.css" rel="stylesheet">
-    <link href="css/designs/swiss.css" rel="stylesheet">
-    <!-- Not deferred: sets light/dark mode and design before the page paints, loads its fonts -->
+    <title>Unisono</title>
+    <meta name="description" content="Unisono: Audio und Video im Browser transkribieren, lesen, korrigieren und exportieren. Mit eigenem API-Key, ohne eigenen Server.">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Tokens first (colors, type, spacing, fonts), then the components built only from them -->
+    <link href="css/tokens.css" rel="stylesheet">
+    <link href="css/app.css" rel="stylesheet">
+    <!-- Not deferred: sets light/dark before the page paints -->
     <script src="js/appearance.js"></script>
 
     <!-- Classic scripts (no ES modules) so the app also runs when opened directly via file:// -->
@@ -34,6 +23,7 @@
     <script src="js/vocabulary.js" defer></script>
     <script src="js/recording-backup.js" defer></script>
     <script src="js/recorder.js" defer></script>
+    <script src="js/icons.js" defer></script>
     <script src="js/segment-editor.js" defer></script>
     <script src="js/summary.js" defer></script>
     <script src="js/brand-logos.js" defer></script>
@@ -43,518 +33,493 @@
     <script src="js/settings.js" defer></script>
     <script src="js/app.js" defer></script>
 </head>
-<body class="bg-background text-on-surface font-body text-[14px] min-h-screen flex flex-col selection:bg-primary/30 selection:text-on-surface">
+<body>
+    <!-- Line icons (24 grid, stroke 1.5), used via <svg class="icon"><use href="#i-…"></use></svg> -->
+    <svg class="icon-sprite" aria-hidden="true" focusable="false">
+        <defs>
+            <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+            <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol>
+            <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol>
+            <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></symbol>
+            <symbol id="i-play" viewBox="0 0 24 24"><path class="fill" d="M8 5.5v13l10.5-6.5z"/></symbol>
+            <symbol id="i-pause" viewBox="0 0 24 24"><path class="fill" d="M7.5 5h3v14h-3zM13.5 5h3v14h-3z"/></symbol>
+            <symbol id="i-stop" viewBox="0 0 24 24"><rect class="fill" x="6.5" y="6.5" width="11" height="11" rx="1.5"/></symbol>
+            <symbol id="i-rewind" viewBox="0 0 24 24"><path d="M11.5 7 6.5 12l5 5M18 7l-5 5 5 5"/></symbol>
+            <symbol id="i-forward" viewBox="0 0 24 24"><path d="m12.5 7 5 5-5 5M6 7l5 5-5 5"/></symbol>
+            <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+            <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+            <symbol id="i-chev-up" viewBox="0 0 24 24"><path d="m6.5 14.5 5.5-5.5 5.5 5.5"/></symbol>
+            <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"/></symbol>
+            <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></symbol>
+            <symbol id="i-replace" viewBox="0 0 24 24"><path d="M4 8.5h13l-3.5-3.5M20 15.5H7l3.5 3.5"/></symbol>
+            <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></symbol>
+            <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></symbol>
+            <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 11.6a2 2 0 0 0 2 1.9h5.4a2 2 0 0 0 2-1.9L17.5 7M10.5 11v5.5M13.5 11v5.5"/></symbol>
+            <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15.5" r="4"/><path d="m11 12.5 8.5-8.5M16.5 7l2.5 2.5M14.5 9l2 2"/></symbol>
+            <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 18.5V5.5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2 2 2 0 0 0 2 2h12M9 7.5h6"/></symbol>
+            <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7.5h9M17 7.5h3M4 16.5h3M11 16.5h9"/><circle cx="15" cy="7.5" r="2"/><circle cx="9" cy="16.5" r="2"/></symbol>
+            <symbol id="i-text" viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11zM13.5 3.5v4h4M9.5 12h5M9.5 16h5"/></symbol>
+            <symbol id="i-file" viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11zM13.5 3.5v4h4"/></symbol>
+            <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+            <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4.5h5.5V10M19.5 4.5 11 13M17.5 14v4.5a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-11a1 1 0 0 1 1-1H10"/></symbol>
+            <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.75"/></symbol>
+            <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="m4 4 16 16M10 5.7A9 9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.7 3.4M6.7 6.9C4 8.6 2.5 12 2.5 12S6 18.5 12 18.5a9 9 0 0 0 4.6-1.3M10 10.1a2.75 2.75 0 0 0 3.9 3.9"/></symbol>
+            <symbol id="i-merge" viewBox="0 0 24 24"><path d="M12 4v10.5M7.5 10 12 14.5l4.5-4.5M5 19.5h14"/></symbol>
+            <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.6a2.4 2.4 0 1 1 3.3 2.2c-.6.3-1 .8-1 1.5v.4M12 16.6v.1"/></symbol>
+            <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v3.7h3.7M12 8.5V12l2.5 1.5"/></symbol>
+        </defs>
+    </svg>
 
-    <!-- Header -->
-    <header id="app-header" class="app-header sticky top-0 w-full z-50 bg-surface-container-low/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.12)] border-b border-outline-variant/20">
-        <div class="min-h-16 w-full px-4 md:px-8 py-2 flex flex-wrap md:flex-nowrap items-center justify-between gap-x-4 gap-y-2">
-            <div class="flex items-center gap-3 shrink-0">
-                <svg class="h-8 w-8 shrink-0" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-                    <rect width="48" height="48" rx="12" class="fill-primary-container/15"/>
-                    <rect x="1" y="1" width="46" height="46" rx="11" fill="none" class="stroke-primary-container/30" stroke-width="1.5"/>
-                    <rect x="10" y="20" width="4" height="8" rx="2" class="fill-primary"/>
-                    <rect x="17" y="14" width="4" height="20" rx="2" class="fill-primary-container"/>
-                    <rect x="24" y="9" width="4" height="30" rx="2" class="fill-primary-container"/>
-                    <rect x="31" y="16" width="4" height="16" rx="2" class="fill-primary-container"/>
-                    <rect x="38" y="22" width="4" height="4" rx="2" class="fill-primary"/>
-                    <circle cx="26" cy="11" r="1.5" class="fill-tertiary"/>
-                </svg>
-                <span class="font-headline text-[18px] text-on-surface font-semibold tracking-tight">Scribe Studio</span>
-                <span class="flex max-md:hidden items-center gap-1.5 px-2.5 py-0.5 rounded bg-surface-container text-secondary font-label text-[11px] border border-outline-variant/30">
-                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>Läuft im Browser
-                </span>
-            </div>
-
-            <nav class="app-nav order-last md:order-none w-full md:w-auto flex items-center gap-1 bg-surface-container-lowest p-1 rounded-xl border border-outline-variant/20 overflow-x-auto text-[13px] font-medium" aria-label="Ansichten">
-                <button id="nav-start" class="nav-item" data-view="start">Transkription</button>
-                <button id="nav-transcript" class="nav-item" data-view="transcript">Transkript &amp; Export</button>
-            </nav>
-
-            <div class="flex items-center gap-3 shrink-0">
-                <button id="key-status" class="flex max-xl:hidden items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-lowest font-label text-[11px] border border-outline-variant/30 hover:border-primary/50 transition-colors" data-settings="keys" title="API-Schlüssel verwalten"></button>
-                <button id="settings-open" class="settings-gear" data-settings="keys" title="Einstellungen" aria-haspopup="dialog" aria-controls="settings-dialog">
-                    <span class="material-symbols-outlined text-[22px]">settings</span>
-                </button>
-            </div>
-        </div>
+    <!-- Mobile: top bar with the lockup (the sidebar is hidden) -->
+    <header class="topbar">
+        <span class="lockup">
+            <svg class="logo-mark is-small" viewBox="0 0 48 48" aria-hidden="true"><rect class="logo-tile" width="48" height="48" rx="12"/><path class="logo-lines" d="M12 16h24M12 24h12M12 32h8"/></svg>
+            <span class="wordmark" aria-label="Unisono">unısono</span>
+        </span>
+        <button type="button" id="topbar-keys" class="topbar-keys" data-view="keys"></button>
     </header>
 
-    <main class="w-full flex-1">
-        <!-- Global status toast, visible in every view -->
-        <div class="status-dock">
-            <div id="status-banner" class="status-banner hidden" role="status">
-                <span id="status-icon" class="material-symbols-outlined text-[18px]"></span>
-                <span id="status-text" class="flex-1"></span>
-                <button id="status-close" class="status-close" title="Meldung schließen"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    <div class="shell">
+        <!-- ================= Sidebar ================= -->
+        <aside class="sidebar">
+            <span class="lockup">
+                <svg class="logo-mark is-small" viewBox="0 0 48 48" aria-hidden="true"><rect class="logo-tile" width="48" height="48" rx="12"/><path class="logo-lines" d="M12 16h24M12 24h12M12 32h8"/></svg>
+                <span class="wordmark" aria-label="Unisono">unısono</span>
+            </span>
+            <nav class="side-nav" aria-label="Bereiche">
+                <button type="button" class="nav-item" data-view="start"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Neue Transkription</button>
+                <button type="button" class="nav-item" data-view="transcript"><svg class="icon" aria-hidden="true"><use href="#i-text"/></svg>Transkript</button>
+                <button type="button" class="nav-item" data-view="vocab"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>Fachbegriffe</button>
+                <button type="button" class="nav-item" data-view="keys"><svg class="icon" aria-hidden="true"><use href="#i-key"/></svg>API-Keys</button>
+                <button type="button" class="nav-item" data-view="settings"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg>Einstellungen</button>
+            </nav>
+            <div class="side-providers">
+                <h2 class="t-label">Anbieter</h2>
+                <ul id="provider-status" class="provider-status"></ul>
             </div>
-        </div>
+        </aside>
 
-        <!-- ================= VIEW: Transkription starten ================= -->
-        <section id="view-start" class="view page-entrance w-full max-w-7xl mx-auto px-4 md:px-8 py-8 flex flex-col gap-6">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div class="flex flex-col gap-1 max-w-3xl">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-0.5 rounded bg-primary/10 text-primary font-label text-[11px] uppercase tracking-wider">BYOK</span>
-                        <span class="text-outline font-label text-[12px]">Direkt vom Browser zum Anbieter</span>
-                    </div>
-                    <h1 class="font-display text-[28px] md:text-[32px] leading-tight text-on-surface tracking-tight font-bold">Neue Audio- oder Videodatei transkribieren</h1>
-                    <p class="text-on-surface-variant text-[15px]">Keine Installation, kein eigener Server. Die Datei geht nur an den Anbieter, den du auswählst.</p>
-                </div>
-                <div class="flex items-center gap-3 note-card self-start md:self-auto bg-surface-container-low px-3.5 py-2">
-                    <span class="material-symbols-outlined text-secondary text-[20px]">shield</span>
-                    <div class="flex flex-col">
-                        <span class="font-label text-on-surface font-medium text-[11px]">Keys bleiben lokal</span>
-                        <span class="font-code text-outline text-[10px]">nur in diesem Browser gespeichert</span>
-                    </div>
+        <main class="main">
+            <!-- Global status message, visible in every view -->
+            <div class="status-dock">
+                <div id="status-banner" class="status-banner hidden" role="status">
+                    <span id="status-icon" class="status-dot" aria-hidden="true"></span>
+                    <span id="status-text" class="status-text"></span>
+                    <button type="button" id="status-close" class="icon-btn is-small" aria-label="Meldung schließen"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
                 </div>
             </div>
 
-            <!-- Live progress while a transcription runs (replaces the form below) -->
-            <section id="progress-panel" class="panel progress-panel hidden" aria-live="polite" aria-labelledby="progress-file">
-                <div class="panel-head">
-                    <span class="step-label">Transkription läuft</span>
-                    <span class="font-code text-[12px] text-on-surface-variant flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">timer</span><span id="progress-elapsed">00:00</span></span>
-                </div>
-                <div class="flex items-center gap-3 min-w-0">
-                    <div id="progress-icon" class="provider-icon shrink-0"></div>
-                    <div class="min-w-0">
-                        <h2 id="progress-file" class="font-headline text-[18px] text-on-surface font-semibold truncate"></h2>
-                        <p id="progress-meta" class="font-code text-[11.5px] text-on-surface-variant"></p>
+            <!-- ================= VIEW: Neue Transkription ================= -->
+            <section id="view-start" class="view" aria-labelledby="start-title">
+                <header class="page-head">
+                    <div>
+                        <p class="t-label eyebrow">Transkribieren</p>
+                        <h1 id="start-title" class="page-title">Neue Transkription</h1>
                     </div>
-                </div>
-                <ol id="progress-steps" class="progress-steps">
-                    <li data-step="prepare"><span class="progress-dot"></span><span class="progress-label">Vorbereiten</span><span class="progress-detail"></span></li>
-                    <li data-step="upload"><span class="progress-dot"></span><span class="progress-label">Hochladen</span><span class="progress-detail"></span></li>
-                    <li data-step="process"><span class="progress-dot"></span><span class="progress-label">Verarbeiten</span><span class="progress-detail"></span></li>
-                    <li data-step="done"><span class="progress-dot"></span><span class="progress-label">Fertig</span><span class="progress-detail"></span></li>
-                </ol>
-                <div class="progress-track" aria-hidden="true"><div id="progress-bar" class="progress-bar"></div></div>
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <p id="progress-text" class="text-[13px] text-on-surface-variant"></p>
-                    <button id="progress-cancel" class="btn-ghost btn-danger"><span class="material-symbols-outlined text-[16px]">close</span>Abbrechen</button>
-                </div>
-            </section>
+                    <button type="button" id="open-project-start" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>Projekt öffnen</button>
+                </header>
 
-            <div id="start-form" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Left: provider & media -->
-                <div class="lg:col-span-8 flex flex-col gap-6">
-                    <div class="panel">
-                        <div class="panel-head">
-                            <span class="step-label">Schritt 1: Anbieter</span>
-                            <button id="provider-key-note" class="font-code text-[11px] hover:underline" data-settings="keys" title="API-Schlüssel verwalten"></button>
-                        </div>
-                        <div id="provider-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1" role="radiogroup" aria-label="Anbieter"></div>
+                <!-- Live progress while a transcription runs (replaces the form below) -->
+                <section id="progress-panel" class="card progress-card hidden" aria-live="polite" aria-labelledby="progress-file">
+                    <div class="card-head">
+                        <p class="t-label">Transkription läuft</p>
+                        <span class="t-mono muted"><span id="progress-elapsed">00:00</span></span>
                     </div>
-
-                    <div class="panel">
-                        <div class="panel-head">
-                            <span class="step-label">Schritt 2: Audio aufnehmen oder Datei wählen</span>
-                            <button id="open-project-start" class="link-btn"><span class="material-symbols-outlined text-[15px]">folder_open</span>Projekt öffnen</button>
+                    <div class="progress-file">
+                        <span id="progress-icon" class="provider-dot" aria-hidden="true"></span>
+                        <div class="min-w-0">
+                            <h2 id="progress-file" class="t-title truncate"></h2>
+                            <p id="progress-meta" class="t-mono muted"></p>
                         </div>
+                    </div>
+                    <div class="progress-line" aria-hidden="true"><div id="progress-bar" class="progress-bar"></div></div>
+                    <ol id="progress-steps" class="progress-steps">
+                        <li data-step="prepare"><span class="progress-dot" aria-hidden="true"></span><span class="progress-label">Vorbereiten</span><span class="progress-detail t-mono"></span></li>
+                        <li data-step="upload"><span class="progress-dot" aria-hidden="true"></span><span class="progress-label">Hochladen</span><span class="progress-detail t-mono"></span></li>
+                        <li data-step="process"><span class="progress-dot" aria-hidden="true"></span><span class="progress-label">Verarbeiten</span><span class="progress-detail t-mono"></span></li>
+                        <li data-step="done"><span class="progress-dot" aria-hidden="true"></span><span class="progress-label">Fertig</span><span class="progress-detail t-mono"></span></li>
+                    </ol>
+                    <div class="card-foot">
+                        <p id="progress-text" class="t-small muted"></p>
+                        <button type="button" id="progress-cancel" class="btn-secondary">Abbrechen</button>
+                    </div>
+                </section>
 
-                        <div id="rec-recovery" class="rec-recovery hidden" role="alert">
-                            <p class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px]">history</span><span id="rec-recovery-text"></span></p>
-                            <div class="flex gap-2">
-                                <button id="rec-restore" class="btn-ghost">Wiederherstellen</button>
-                                <button id="rec-discard" class="btn-ghost btn-danger">Verwerfen</button>
+                <div id="start-form" class="start-grid">
+                    <section class="card run-card" aria-labelledby="run-title">
+                        <h2 id="run-title" class="t-title">Aufnahme</h2>
+
+                        <div id="rec-recovery" class="notice hidden" role="alert">
+                            <svg class="icon" aria-hidden="true"><use href="#i-restore"/></svg>
+                            <p id="rec-recovery-text" class="t-small"></p>
+                            <div class="notice-actions">
+                                <button type="button" id="rec-restore" class="btn-secondary">Wiederherstellen</button>
+                                <button type="button" id="rec-discard" class="btn-text is-danger">Verwerfen</button>
                             </div>
+                        </div>
+
+                        <div id="drop-zone" role="button" tabindex="0" class="drop-zone" aria-describedby="drop-formats">
+                            <input type="file" id="file-input" accept="audio/*,video/*" class="hidden">
+                            <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
+                            <span class="drop-title">Datei hierher ziehen oder auswählen</span>
+                            <span id="drop-formats" class="t-small muted">MP3, WAV, M4A, FLAC, OGG, WEBM, MP4, MOV</span>
+                        </div>
+
+                        <div id="file-info" class="file-card hidden">
+                            <svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>
+                            <div class="min-w-0">
+                                <p id="file-name" class="file-name truncate"></p>
+                                <p class="t-mono muted">
+                                    <span id="file-size"></span><span id="file-duration-wrap" class="hidden"> · <span id="file-duration"></span></span><span id="file-format"></span>
+                                </p>
+                            </div>
+                            <button type="button" id="file-clear" class="icon-btn" aria-label="Auswahl aufheben"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
                         </div>
 
                         <div id="recorder" class="recorder">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <button id="rec-start" class="rec-btn rec-btn-record"><span class="material-symbols-outlined text-[18px]">mic</span>Aufnehmen</button>
-                                <button id="rec-pause" class="rec-btn hidden"><span class="material-symbols-outlined text-[18px]">pause</span>Pause</button>
-                                <button id="rec-resume" class="rec-btn hidden"><span class="material-symbols-outlined text-[18px]">play_arrow</span>Weiter</button>
-                                <button id="rec-stop" class="rec-btn rec-btn-stop hidden"><span class="material-symbols-outlined text-[18px]">stop</span>Stopp</button>
-                                <button id="rec-save" class="btn-ghost ml-auto hidden" title="Aufnahme als Audiodatei speichern"><span class="material-symbols-outlined text-[16px]">download</span>Aufnahme sichern</button>
+                            <span class="t-small muted rec-or">oder direkt aufnehmen</span>
+                            <div class="rec-buttons">
+                                <button type="button" id="rec-start" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Aufnehmen</button>
+                                <button type="button" id="rec-pause" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg>Pause</button>
+                                <button type="button" id="rec-resume" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Weiter</button>
+                                <button type="button" id="rec-stop" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-stop"/></svg>Stopp</button>
+                                <button type="button" id="rec-save" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Aufnahme sichern</button>
                             </div>
                             <div id="rec-live" class="rec-live hidden" aria-live="polite">
-                                <span class="rec-dot" aria-hidden="true"></span>
-                                <span id="rec-state" class="font-label text-[12px] text-on-surface-variant"></span>
-                                <span id="rec-time" class="rec-time">00:00:00</span>
+                                <span class="status-dot rec-dot" aria-hidden="true"></span>
+                                <span id="rec-state" class="t-small"></span>
+                                <span id="rec-time" class="t-mono">00:00:00</span>
                                 <div class="rec-level" aria-hidden="true"><div id="rec-level-bar" class="rec-level-bar"></div></div>
                             </div>
-                            <p id="rec-unsupported" class="hidden text-[12px] text-error">Dieser Browser unterstützt keine Aufnahme über das Mikrofon.</p>
+                            <p id="rec-unsupported" class="t-small muted hidden">Dieser Browser unterstützt keine Aufnahme über das Mikrofon.</p>
                         </div>
 
-                        <p class="or-divider"><span>oder</span></p>
+                        <div class="engine-row">
+                            <span class="t-label">Engine</span>
+                            <div id="provider-cards" class="chips" role="group" aria-label="Engine wählen"></div>
+                        </div>
+                        <p id="provider-info" class="t-small muted"></p>
 
-                        <div id="drop-zone" role="button" tabindex="0" class="drop-zone group">
-                            <input type="file" id="file-input" accept="audio/*,video/*" class="hidden">
-                            <div class="group-hover-float w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all duration-300 mb-3 shadow-md">
-                                <span class="material-symbols-outlined text-[30px]">cloud_upload</span>
+                        <div class="run-summary">
+                            <p id="start-summary" class="t-small muted"></p>
+                            <button type="button" id="start-options-toggle" class="btn-text" aria-expanded="false" aria-controls="start-options">Optionen<svg class="icon" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+                        </div>
+
+                        <div id="start-options" class="options-grid hidden">
+                            <div class="field">
+                                <label for="model-select">Modell</label>
+                                <select id="model-select" class="input"></select>
                             </div>
-                            <h4 class="font-headline text-[17px] text-on-surface font-semibold mb-1">Mediendatei hier ablegen</h4>
-                            <p class="text-on-surface-variant max-w-md text-[13px] mb-4">MP3, WAV, M4A, FLAC, OGG, WEBM sowie Videos (MP4, MOV)</p>
-                            <span class="btn-primary pointer-events-none"><span class="material-symbols-outlined text-[18px]">folder_open</span>Datei auswählen</span>
+                            <div class="field">
+                                <label for="language-select">Sprache</label>
+                                <select id="language-select" class="input">
+                                    <option value="de">Deutsch</option>
+                                    <option value="en">Englisch</option>
+                                    <option value="fr">Französisch</option>
+                                    <option value="es">Spanisch</option>
+                                    <option value="it">Italienisch</option>
+                                    <option value="auto">Automatisch erkennen</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">Sprecher</span>
+                                <label class="check"><input type="checkbox" id="diarize" checked> Sprecher erkennen</label>
+                            </div>
+                            <div id="speaker-options" class="field">
+                                <label for="num-speakers">Anzahl Sprecher (optional)</label>
+                                <input type="number" id="num-speakers" min="1" max="32" placeholder="automatisch" class="input">
+                            </div>
                         </div>
 
-                        <div id="file-info" class="hidden file-card">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-11 h-11 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary shrink-0">
-                                    <span class="material-symbols-outlined text-[24px]">audio_file</span>
-                                </div>
-                                <div class="flex flex-col min-w-0">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <span id="file-name" class="font-label text-on-surface font-semibold truncate text-[13px]"></span>
-                                        <span class="px-1.5 rounded bg-secondary/15 text-secondary font-label text-[10px] font-semibold shrink-0">BEREIT</span>
-                                    </div>
-                                    <div class="flex items-center gap-3 font-code text-outline text-[11px] mt-0.5">
-                                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">save</span><span id="file-size"></span></span>
-                                        <span id="file-duration-wrap" class="hidden items-center gap-1"><span class="material-symbols-outlined text-[13px]">schedule</span><span id="file-duration"></span></span>
-                                    </div>
-                                </div>
+                        <p id="model-hint" class="notice-line hidden"></p>
+
+                        <div class="card-foot">
+                            <p id="start-hint" class="t-small muted">Zuerst eine Datei wählen oder aufnehmen.</p>
+                            <div class="foot-actions">
+                                <button type="button" id="provider-key-note" class="btn-text" data-view="keys"></button>
+                                <button type="button" id="start-btn" disabled class="btn-primary"><span id="start-btn-text">Transkription starten</span></button>
                             </div>
-                            <button id="file-clear" class="icon-btn" title="Auswahl aufheben"><span class="material-symbols-outlined text-[20px]">close</span></button>
                         </div>
+                    </section>
+
+                    <aside class="start-aside">
+                        <section class="card" aria-labelledby="vocab-card-title">
+                            <div class="card-head">
+                                <h2 id="vocab-card-title" class="t-label">Fachbegriffe</h2>
+                                <button type="button" class="btn-text" data-view="vocab">Bearbeiten</button>
+                            </div>
+                            <p id="vocab-hint" class="t-small muted"></p>
+                        </section>
+                        <section class="card" aria-labelledby="privacy-title">
+                            <h2 id="privacy-title" class="t-label">Datenschutz</h2>
+                            <p class="t-small muted">Audio und Keys gehen nur an die gewählte Engine. Keys und bearbeitete Transkripte bleiben in diesem Browser, bis du sie exportierst oder löschst.</p>
+                        </section>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: Transkript ================= -->
+            <section id="view-transcript" class="view hidden" aria-labelledby="transcript-title">
+                <div id="transcript-empty" class="card empty-card">
+                    <h1 class="page-title">Noch kein Transkript</h1>
+                    <p class="muted">Starte eine Transkription oder öffne eine gespeicherte Projektdatei. Das Ergebnis erscheint hier.</p>
+                    <div class="empty-actions">
+                        <button type="button" class="btn-primary" data-view="start">Neue Transkription</button>
+                        <button type="button" id="open-project-empty" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>Projekt öffnen</button>
                     </div>
                 </div>
 
-                <!-- Right: parameters, start, vocabulary -->
-                <div class="lg:col-span-4 flex flex-col gap-6">
-                    <div class="panel gap-4">
-                        <div class="panel-head">
-                            <span class="step-label">Schritt 3: Einstellungen</span>
-                            <span class="material-symbols-outlined text-outline text-[18px]">tune</span>
+                <div id="transcript-content" class="hidden">
+                    <header class="page-head">
+                        <div class="min-w-0">
+                            <p id="transcript-eyebrow" class="t-label eyebrow">Transkript</p>
+                            <h1 id="transcript-title" class="page-title truncate"></h1>
+                            <p id="transcript-meta" class="t-mono muted meta-row"></p>
                         </div>
-                        <div class="flex flex-col gap-1.5">
-                            <label for="model-select" class="field-label">Modell</label>
-                            <select id="model-select" class="field"></select>
+                        <div class="head-actions">
+                            <button type="button" id="copy-transcript" class="btn-secondary" data-needs-transcript><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg><span class="btn-label">Kopieren</span></button>
+                            <button type="button" id="open-project" class="btn-secondary" title="Gespeicherte Projektdatei (.unisono.json) öffnen"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg><span class="btn-label">Öffnen</span></button>
+                            <input type="file" id="project-file" accept=".json,application/json" class="hidden">
+                            <button type="button" id="clear-transcript" class="icon-btn" data-needs-transcript aria-label="Transkript verwerfen" title="Transkript verwerfen"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></button>
+                            <div class="export-wrap">
+                                <button type="button" id="export-toggle" class="btn-primary" aria-haspopup="true" aria-expanded="false" aria-controls="export-menu" data-needs-transcript>Exportieren</button>
+                                <div id="export-menu" class="export-menu hidden" role="menu">
+                                    <button type="button" role="menuitem" data-export="html"><strong>HTML-Seite</strong><span>Zum Lesen und Teilen, im Browser als PDF druckbar</span></button>
+                                    <button type="button" role="menuitem" data-export="md"><strong>Markdown</strong><span>Für Obsidian, Notion oder Wikis, mit Datum, Sprechern, Tags</span></button>
+                                    <button type="button" role="menuitem" data-export="txt"><strong>Text</strong><span>Schlicht, zum Einfügen in E-Mail oder Word</span></button>
+                                    <button type="button" role="menuitem" data-export="srt"><strong>Untertitel SRT</strong><span>Für Videoschnitt und Player</span></button>
+                                    <button type="button" role="menuitem" data-export="vtt"><strong>Untertitel VTT</strong><span>Für Web-Player, mit Sprechernamen</span></button>
+                                    <button type="button" role="menuitem" data-export="json"><strong>Projektdatei</strong><span>Später hier öffnen und weiterbearbeiten</span></button>
+                                    <div class="export-options">
+                                        <label class="check"><input type="checkbox" id="export-summary" checked> Zusammenfassung einbeziehen</label>
+                                        <label class="check"><input type="checkbox" id="export-audio" checked> Audio in HTML-Seite einbetten</label>
+                                        <span id="export-audio-note" class="t-small muted"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex flex-col gap-1.5">
-                            <label for="language-select" class="field-label">Sprache</label>
-                            <select id="language-select" class="field">
-                                <option value="de">Deutsch</option>
-                                <option value="en">Englisch</option>
-                                <option value="fr">Französisch</option>
-                                <option value="es">Spanisch</option>
-                                <option value="it">Italienisch</option>
-                                <option value="auto">Automatisch erkennen</option>
+                    </header>
+
+                    <!-- Player: controls, monochrome waveform, speaker lane -->
+                    <section id="player-bar" class="card player-card hidden" aria-label="Wiedergabe">
+                        <audio id="audio-player" preload="metadata"></audio>
+                        <div class="player-main">
+                            <button type="button" id="player-play" class="player-play" aria-label="Abspielen" title="Abspielen"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg></button>
+                            <div id="timeline" class="timeline" role="slider" tabindex="0" aria-label="Position im Audio, darunter die Sprecherspur" aria-valuemin="0">
+                                <canvas id="timeline-canvas"></canvas>
+                                <div id="timeline-hover" class="timeline-hover hidden"></div>
+                            </div>
+                        </div>
+                        <div class="player-controls">
+                            <button type="button" id="player-back" class="icon-btn" aria-label="10 Sekunden zurück" title="10 Sekunden zurück"><svg class="icon" aria-hidden="true"><use href="#i-rewind"/></svg></button>
+                            <span id="player-time" class="t-mono">00:00:00 / 00:00:00</span>
+                            <button type="button" id="player-fwd" class="icon-btn" aria-label="10 Sekunden vor" title="10 Sekunden vor"><svg class="icon" aria-hidden="true"><use href="#i-forward"/></svg></button>
+                            <select id="player-rate" class="rate-select" aria-label="Wiedergabegeschwindigkeit">
+                                <option value="0.75">0,75×</option>
+                                <option value="1" selected>1×</option>
+                                <option value="1.25">1,25×</option>
+                                <option value="1.5">1,5×</option>
+                                <option value="1.75">1,75×</option>
+                                <option value="2">2×</option>
                             </select>
-                        </div>
-                        <div class="sub-panel">
-                            <div class="flex items-start justify-between gap-2">
-                                <label class="flex items-center gap-2 text-[13px] font-medium text-on-surface cursor-pointer">
-                                    <input type="checkbox" id="diarize" checked class="w-4 h-4 accent-primary-container">
-                                    Sprecher erkennen
-                                </label>
-                                <span class="px-1.5 py-0.5 rounded bg-primary/20 text-primary font-label text-[10px]">Diarisation</span>
-                            </div>
-                            <div id="speaker-options" class="flex flex-col gap-1 pl-6">
-                                <label for="num-speakers" class="field-label">Anzahl Sprecher <span class="text-outline">(optional)</span></label>
-                                <input type="number" id="num-speakers" min="1" max="32" placeholder="automatisch" class="field">
-                            </div>
-                        </div>
-                        <p id="model-hint" class="hidden hint-warning"></p>
-
-                        <div class="pt-1">
-                            <button id="start-btn" disabled class="btn-start btn-shimmer-effect">
-                                <span class="material-symbols-outlined text-[20px]">auto_awesome</span>
-                                <span id="start-btn-text">Transkription starten</span>
-                            </button>
-                            <p id="start-hint" class="font-label text-[11px] text-outline px-1 pt-2">Zuerst eine Datei wählen oder aufnehmen.</p>
-                        </div>
-                    </div>
-
-                    <div class="panel gap-2">
-                        <div class="panel-head">
-                            <span class="step-label">Fachbegriffe</span>
-                            <button class="link-btn" data-settings="vocab"><span class="material-symbols-outlined text-[15px]">edit</span>Bearbeiten</button>
-                        </div>
-                        <p id="vocab-hint" class="text-[12px] text-on-surface-variant leading-relaxed"></p>
-                    </div>
-
-                    <div class="note-card flex items-start gap-3 p-4 bg-surface-container-lowest">
-                        <span class="material-symbols-outlined text-tertiary text-[20px] shrink-0">lock_clock</span>
-                        <div class="flex flex-col gap-0.5">
-                            <span class="font-label text-on-surface font-medium text-[12px]">Datenschutz</span>
-                            <p class="text-on-surface-variant text-[12px]">Audio und Keys gehen nur an den gewählten Anbieter. Bearbeitete Transkripte bleiben in diesem Browser, bis du sie exportierst.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= VIEW: Transkript & Export ================= -->
-        <section id="view-transcript" class="view page-entrance hidden w-full max-w-[1600px] mx-auto px-4 md:px-8 py-6 flex flex-col gap-6">
-            <div id="transcript-empty" class="flex flex-col items-center justify-center p-12 md:p-16 text-center panel max-w-2xl mx-auto my-12">
-                <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-outline mb-4">
-                    <span class="material-symbols-outlined text-[32px]">graphic_eq</span>
-                </div>
-                <h2 class="font-headline text-on-surface font-semibold text-[18px]">Noch kein Transkript geladen</h2>
-                <p class="text-on-surface-variant text-[13px] mt-2 max-w-md">Starte eine Transkription oder öffne eine gespeicherte Projektdatei. Das Ergebnis erscheint hier.</p>
-                <div class="mt-6 flex flex-wrap gap-3 justify-center">
-                    <button class="btn-primary" data-view="start"><span class="material-symbols-outlined text-[18px]">add_circle</span>Transkription beginnen</button>
-                    <button id="open-project-empty" class="btn-ghost"><span class="material-symbols-outlined text-[16px]">folder_open</span>Projekt öffnen</button>
-                </div>
-            </div>
-
-            <div id="transcript-content" class="hidden flex flex-col gap-6">
-                <!-- Command & export bar -->
-                <div class="bar flex flex-col xl:flex-row xl:items-center justify-between gap-5">
-                    <div class="flex flex-col gap-2 min-w-0">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <span class="material-symbols-outlined text-primary text-[28px]">audio_file</span>
-                            <h1 id="transcript-title" class="font-headline text-[22px] text-on-surface truncate tracking-tight font-bold"></h1>
-                            <span class="inline max-sm:hidden px-2.5 py-0.5 rounded-full bg-surface-container text-secondary font-label text-[11px] font-semibold uppercase tracking-wider border border-secondary/30 shrink-0">Im Browser</span>
-                        </div>
-                        <div id="transcript-meta" class="flex flex-wrap items-center gap-x-4 gap-y-1 font-code text-[12px] text-on-surface-variant"></div>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2 shrink-0">
-                        <button id="copy-transcript" class="btn-ghost" data-needs-transcript><span class="material-symbols-outlined text-[16px]">content_copy</span>Kopieren</button>
-                        <button id="open-project" class="btn-ghost" title="Gespeicherte Projektdatei (.scribe.json) öffnen"><span class="material-symbols-outlined text-[16px]">folder_open</span>Öffnen</button>
-                        <input type="file" id="project-file" accept=".json,application/json" class="hidden">
-                        <div class="export-wrap">
-                            <button id="export-toggle" class="btn-primary" aria-haspopup="true" aria-expanded="false" aria-controls="export-menu" data-needs-transcript>
-                                <span class="material-symbols-outlined text-[18px]">download</span>Exportieren<span class="material-symbols-outlined text-[16px]">expand_more</span>
-                            </button>
-                            <div id="export-menu" class="export-menu hidden" role="menu">
-                                <button role="menuitem" data-export="html"><strong>HTML-Seite</strong><span>Zum Lesen und Teilen, im Browser als PDF druckbar</span></button>
-                                <button role="menuitem" data-export="md"><strong>Markdown</strong><span>Für Obsidian, Notion oder Wikis – mit Datum, Sprechern, Tags</span></button>
-                                <button role="menuitem" data-export="txt"><strong>Text</strong><span>Schlicht, zum Einfügen in E-Mail oder Word</span></button>
-                                <button role="menuitem" data-export="srt"><strong>Untertitel SRT</strong><span>Für Videoschnitt und Player</span></button>
-                                <button role="menuitem" data-export="vtt"><strong>Untertitel VTT</strong><span>Für Web-Player, mit Sprechernamen</span></button>
-                                <button role="menuitem" data-export="json"><strong>Projektdatei</strong><span>Später hier öffnen und weiterbearbeiten</span></button>
-                                <div class="export-options">
-                                    <label><input type="checkbox" id="export-summary" checked class="accent-primary-container"> Zusammenfassung einbeziehen</label>
-                                    <label><input type="checkbox" id="export-audio" checked class="accent-primary-container"> Audio in HTML-Seite einbetten</label>
-                                    <span id="export-audio-note" class="export-note"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="btn-ghost" data-view="start" title="Neue Transkription"><span class="material-symbols-outlined text-[16px]">add_circle</span>Neu</button>
-                        <button id="clear-transcript" class="icon-btn" data-needs-transcript title="Transkript verwerfen"><span class="material-symbols-outlined text-[20px]">delete</span></button>
-                    </div>
-                </div>
-
-                <!-- Player: controls + timeline (waveform colored by speaker) -->
-                <div id="player-bar" class="player-bar hidden">
-                    <audio id="audio-player" preload="metadata"></audio>
-                    <div class="player-controls">
-                        <button id="player-back" class="icon-btn" title="10 Sekunden zurück"><span class="material-symbols-outlined text-[22px]">replay_10</span></button>
-                        <button id="player-play" class="player-play" title="Abspielen"><span class="material-symbols-outlined text-[26px]">play_arrow</span></button>
-                        <button id="player-fwd" class="icon-btn" title="10 Sekunden vor"><span class="material-symbols-outlined text-[22px]">forward_10</span></button>
-                        <span id="player-time" class="player-time">00:00:00 / 00:00:00</span>
-                        <select id="player-rate" class="player-rate" title="Wiedergabegeschwindigkeit" aria-label="Wiedergabegeschwindigkeit">
-                            <option value="0.75">0,75×</option>
-                            <option value="1" selected>1×</option>
-                            <option value="1.25">1,25×</option>
-                            <option value="1.5">1,5×</option>
-                            <option value="1.75">1,75×</option>
-                            <option value="2">2×</option>
-                        </select>
-                        <button id="player-load" class="btn-ghost hidden"><span class="material-symbols-outlined text-[16px]">headphones</span>Audiodatei laden</button>
-                        <span id="player-note" class="player-note hidden"></span>
-                        <label class="ml-auto flex items-center gap-2 font-label text-[11px] text-on-surface-variant shrink-0">
-                            <input type="checkbox" id="follow-playback" checked class="accent-primary-container"> Mitlaufen
-                        </label>
-                    </div>
-                    <div id="timeline" class="timeline" role="slider" tabindex="0" aria-label="Position im Audio – wer spricht wann" aria-valuemin="0">
-                        <canvas id="timeline-canvas"></canvas>
-                        <div id="timeline-hover" class="timeline-hover hidden"></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                    <!-- Speakers & summary -->
-                    <div class="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-24">
-                        <div class="panel gap-3">
-                            <div class="panel-head">
-                                <h2 class="font-headline text-[17px] text-on-surface font-semibold">Sprecher &amp; Redezeit</h2>
-                                <span class="font-label text-[11px] text-primary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span>Namen anpassen</span>
-                            </div>
-                            <div id="speaker-panel" class="speaker-panel hidden" aria-label="Sprecher"></div>
-                        </div>
-
-                        <div class="panel gap-3">
-                            <div class="panel-head">
-                                <h2 class="font-headline text-[17px] text-on-surface font-semibold flex items-center gap-2"><span class="material-symbols-outlined text-tertiary text-[20px]">auto_awesome</span>KI-Zusammenfassung</h2>
-                                <div class="flex gap-1">
-                                    <button id="summary-copy" class="icon-btn" title="Kopieren"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
-                                    <button id="summary-download" class="icon-btn" title="Als Markdown speichern"><span class="material-symbols-outlined text-[18px]">download</span></button>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div class="flex flex-col gap-1">
-                                    <label for="llm-provider" class="field-label flex items-center gap-1.5"><span id="llm-logo" class="inline-flex text-primary"></span>Anbieter</label>
-                                    <select id="llm-provider" class="field">
-                                        <option value="anthropic">Anthropic (Claude)</option>
-                                        <option value="openai">OpenAI</option>
-                                    </select>
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <label for="summary-mode" class="field-label">Art</label>
-                                    <select id="summary-mode" class="field">
-                                        <option value="bullets">Stichpunkte</option>
-                                        <option value="summary">Zusammenfassung</option>
-                                        <option value="minutes">Protokoll mit Aufgaben</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <label for="llm-model" class="field-label">Modell</label>
-                                <input id="llm-model" list="llm-model-list" autocomplete="off" class="field font-code text-[12px]">
-                                <datalist id="llm-model-list"></datalist>
-                            </div>
-                            <button id="summary-btn" disabled class="btn-primary justify-center"><span class="material-symbols-outlined text-[18px]">auto_awesome</span>Zusammenfassung erstellen</button>
-                            <textarea id="summary-text" placeholder="Die Zusammenfassung erscheint hier …" class="field min-h-[200px] resize-y text-[13px] leading-relaxed"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Segments -->
-                    <div class="lg:col-span-8 order-first lg:order-none flex flex-col gap-3">
-                        <div id="search-bar" class="search-bar" role="search">
-                            <div class="search-row">
-                                <span class="material-symbols-outlined text-[20px] text-outline">search</span>
-                                <input id="search-input" type="search" class="search-input" placeholder="Im Transkript suchen (Strg+F)" aria-label="Im Transkript suchen" autocomplete="off" spellcheck="false">
-                                <span id="search-count" class="search-count" aria-live="polite"></span>
-                                <button id="search-prev" class="icon-btn" title="Vorheriger Treffer (Umschalt+Enter)" disabled><span class="material-symbols-outlined text-[20px]">keyboard_arrow_up</span></button>
-                                <button id="search-next" class="icon-btn" title="Nächster Treffer (Enter)" disabled><span class="material-symbols-outlined text-[20px]">keyboard_arrow_down</span></button>
-                                <button id="search-only" class="icon-btn search-toggle" aria-pressed="false" title="Nur Abschnitte mit Treffern zeigen"><span class="material-symbols-outlined text-[20px]">filter_list</span></button>
-                                <button id="search-replace-toggle" class="icon-btn search-toggle" aria-expanded="false" aria-controls="replace-row" title="Ersetzen"><span class="material-symbols-outlined text-[20px]">find_replace</span></button>
-                            </div>
-                            <div id="replace-row" class="search-row hidden">
-                                <span class="material-symbols-outlined text-[20px] text-outline">edit</span>
-                                <input id="replace-input" class="search-input" placeholder="Ersetzen durch" aria-label="Ersetzen durch" autocomplete="off" spellcheck="false">
-                                <button id="replace-one" class="btn-ghost" disabled>Ersetzen</button>
-                                <button id="replace-all" class="btn-ghost" disabled>Alle ersetzen</button>
-                            </div>
-                        </div>
-                        <div id="segment-list" class="segment-list"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- ================= Settings dialog (gear button, top right) ================= -->
-    <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
-        <div class="settings-shell" tabindex="-1">
-            <div class="settings-head">
-                <div class="flex items-center gap-3 min-w-0">
-                    <span class="material-symbols-outlined text-primary text-[24px]">settings</span>
-                    <h2 id="settings-title" class="font-headline text-[20px] text-on-surface font-bold tracking-tight">Einstellungen</h2>
-                </div>
-                <button id="settings-close" class="icon-btn" title="Schließen (Esc)"><span class="material-symbols-outlined text-[22px]">close</span></button>
-            </div>
-
-            <div class="settings-body">
-                <nav class="settings-nav" role="tablist" aria-label="Kategorien" aria-orientation="vertical">
-                    <button role="tab" id="settings-tab-keys" data-settings-tab="keys" aria-controls="settings-keys"><span class="material-symbols-outlined">key</span>API-Schlüssel</button>
-                    <button role="tab" id="settings-tab-vocab" data-settings-tab="vocab" aria-controls="settings-vocab"><span class="material-symbols-outlined">menu_book</span>Fachbegriffe</button>
-                    <button role="tab" id="settings-tab-appearance" data-settings-tab="appearance" aria-controls="settings-appearance"><span class="material-symbols-outlined">palette</span>Darstellung</button>
-                    <button role="tab" id="settings-tab-data" data-settings-tab="data" aria-controls="settings-data"><span class="material-symbols-outlined">shield</span>Daten &amp; Datenschutz</button>
-                </nav>
-
-                <div class="settings-panels">
-                    <!-- API keys -->
-                    <section id="settings-keys" class="settings-panel" role="tabpanel" aria-labelledby="settings-tab-keys">
-                        <div class="settings-intro">
-                            <h3 class="font-headline text-[18px] text-on-surface font-semibold">API-Schlüssel</h3>
-                            <p>Die Schlüssel werden nur in diesem Browser gespeichert und direkt an den jeweiligen Anbieter geschickt. <strong class="text-on-surface font-medium">Test-Ping</strong> prüft, ob der Key gilt und ob der Anbieter Anfragen aus dem Browser zulässt.</p>
-                        </div>
-                        <details class="key-guide key-guide-general">
-                            <summary><span class="material-symbols-outlined text-[16px]">lightbulb</span>Allgemeine Tipps zu API-Keys</summary>
-                            <ul>
-                                <li><strong>Ein Anbieter genügt</strong> zum Start. Für die KI-Zusammenfassung brauchst du zusätzlich einen Key von Anthropic oder OpenAI – das ist optional.</li>
-                                <li><strong>Key sofort kopieren:</strong> Die meisten Anbieter zeigen ihn nur einmal an. Verloren? Einfach einen neuen erzeugen und den alten löschen.</li>
-                                <li><strong>Kosten im Griff:</strong> Abgerechnet wird beim Anbieter nach Verbrauch. Wo möglich, ein monatliches Ausgabenlimit setzen.</li>
-                                <li><strong>Nicht weitergeben:</strong> Wer den Key hat, kann auf deine Rechnung transkribieren. Nicht in E-Mails, Chats oder Dokumente kopieren.</li>
-                                <li><strong>Im Dienst:</strong> Vor der Nutzung mit dienstlichen Aufnahmen klären, ob der Anbieter datenschutzrechtlich freigegeben ist (Auftragsverarbeitungsvertrag, Serverstandort EU).</li>
-                            </ul>
-                        </details>
-                        <h4 class="step-label">Transkription</h4>
-                        <div id="key-cards-stt" class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"></div>
-                        <h4 class="step-label pt-2">KI-Zusammenfassung</h4>
-                        <div id="key-cards-llm" class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"></div>
-                    </section>
-
-                    <!-- Vocabulary -->
-                    <section id="settings-vocab" class="settings-panel hidden" role="tabpanel" aria-labelledby="settings-tab-vocab">
-                        <div class="settings-intro">
-                            <div class="flex items-center justify-between gap-3">
-                                <h3 class="font-headline text-[18px] text-on-surface font-semibold">Fachbegriffe</h3>
-                                <span id="vocab-count" class="font-code text-[11px] text-outline"></span>
-                            </div>
-                            <p>Namen, Firmen und Fachwörter, die der Anbieter richtig schreiben soll. Die Liste gilt für alle Transkriptionen und bleibt in diesem Browser gespeichert.</p>
-                        </div>
-                        <label class="flex items-center gap-2 text-[13px] text-on-surface cursor-pointer">
-                            <input type="checkbox" id="vocab-enabled" checked class="w-4 h-4 accent-primary-container"> Bei der Transkription mitschicken
-                        </label>
-                        <div class="flex flex-col gap-1.5">
-                            <label for="vocab-text" class="field-label">Ein Begriff pro Zeile. Zeilen mit # sind Kommentare.</label>
-                            <textarea id="vocab-text" rows="12" spellcheck="false" class="field font-code text-[12px] resize-y" placeholder="# Projekt Neubau Musterstraße&#10;Brandschottung&#10;Deckendurchführung&#10;Estrichleger&#10;Fa. Mustermann Elektro"></textarea>
-                        </div>
-                        <p id="vocab-hint-settings" class="hidden text-[12px] text-on-surface-variant"></p>
-                        <div class="flex flex-wrap gap-2">
-                            <button id="vocab-import" class="btn-ghost"><span class="material-symbols-outlined text-[16px]">upload_file</span>Importieren (.txt, .csv)</button>
-                            <button id="vocab-export" class="btn-ghost"><span class="material-symbols-outlined text-[16px]">download</span>Exportieren</button>
-                            <input type="file" id="vocab-file" accept=".txt,.csv,text/plain,text/csv" class="hidden">
+                            <button type="button" id="player-load" class="btn-secondary hidden"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Audiodatei laden</button>
+                            <span id="player-note" class="t-small muted hidden"></span>
+                            <label class="check player-follow"><input type="checkbox" id="follow-playback" checked> Mitlaufen</label>
                         </div>
                     </section>
 
-                    <!-- Appearance -->
-                    <section id="settings-appearance" class="settings-panel hidden" role="tabpanel" aria-labelledby="settings-tab-appearance">
-                        <div class="settings-intro">
-                            <h3 class="font-headline text-[18px] text-on-surface font-semibold">Darstellung</h3>
-                            <p>Wird sofort übernommen und in diesem Browser gespeichert.</p>
-                        </div>
-                        <h4 class="step-label">Modus</h4>
-                        <div id="mode-options" class="segmented" role="radiogroup" aria-label="Hell oder dunkel"></div>
-                        <h4 class="step-label pt-2">Design</h4>
-                        <div id="theme-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Design"></div>
-                    </section>
+                    <div class="transcript-grid">
+                        <section class="card transcript-card" aria-label="Transkript">
+                            <div id="search-bar" class="search-bar" role="search">
+                                <div class="search-row">
+                                    <div class="search-field">
+                                        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+                                        <input id="search-input" type="search" class="search-input" placeholder="Im Transkript suchen (Strg+F)" aria-label="Im Transkript suchen" autocomplete="off" spellcheck="false">
+                                        <span id="search-count" class="t-mono muted" aria-live="polite"></span>
+                                    </div>
+                                    <button type="button" id="search-prev" class="icon-btn" aria-label="Vorheriger Treffer" title="Vorheriger Treffer (Umschalt+Enter)" disabled><svg class="icon" aria-hidden="true"><use href="#i-chev-up"/></svg></button>
+                                    <button type="button" id="search-next" class="icon-btn" aria-label="Nächster Treffer" title="Nächster Treffer (Enter)" disabled><svg class="icon" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+                                    <button type="button" id="search-only" class="icon-btn" aria-pressed="false" aria-label="Nur Abschnitte mit Treffern zeigen" title="Nur Abschnitte mit Treffern zeigen"><svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg></button>
+                                    <button type="button" id="search-replace-toggle" class="icon-btn" aria-expanded="false" aria-controls="replace-row" aria-label="Ersetzen" title="Ersetzen"><svg class="icon" aria-hidden="true"><use href="#i-replace"/></svg></button>
+                                </div>
+                                <div id="replace-row" class="search-row hidden">
+                                    <div class="search-field">
+                                        <svg class="icon" aria-hidden="true"><use href="#i-replace"/></svg>
+                                        <input id="replace-input" class="search-input" placeholder="Ersetzen durch" aria-label="Ersetzen durch" autocomplete="off" spellcheck="false">
+                                    </div>
+                                    <button type="button" id="replace-one" class="btn-secondary" disabled>Ersetzen</button>
+                                    <button type="button" id="replace-all" class="btn-secondary" disabled>Alle ersetzen</button>
+                                </div>
+                            </div>
+                            <div id="segment-list" class="segment-list"></div>
+                        </section>
 
-                    <!-- Data & privacy -->
-                    <section id="settings-data" class="settings-panel hidden" role="tabpanel" aria-labelledby="settings-tab-data">
-                        <div class="settings-intro">
-                            <h3 class="font-headline text-[18px] text-on-surface font-semibold">Daten &amp; Datenschutz</h3>
-                            <p>Scribe Studio hat keinen eigenen Server. Audio und Keys gehen nur an den Anbieter, den du auswählst. Alles andere bleibt in diesem Browser – hier kannst du es löschen.</p>
-                        </div>
-                        <div class="data-row">
-                            <span class="material-symbols-outlined">key</span>
-                            <div class="flex-1 min-w-0">
-                                <strong>API-Keys</strong>
-                                <p id="data-keys-info"></p>
-                            </div>
-                            <button id="clear-keys" class="btn-ghost btn-danger"><span class="material-symbols-outlined text-[16px]">delete</span>Löschen</button>
-                        </div>
-                        <div class="data-row">
-                            <span class="material-symbols-outlined">description</span>
-                            <div class="flex-1 min-w-0">
-                                <strong>Zuletzt bearbeitetes Transkript</strong>
-                                <p id="data-session-info"></p>
-                            </div>
-                            <button id="clear-session" class="btn-ghost btn-danger"><span class="material-symbols-outlined text-[16px]">delete</span>Löschen</button>
-                        </div>
-                        <div class="data-row">
-                            <span class="material-symbols-outlined">mic</span>
-                            <div class="flex-1 min-w-0">
-                                <strong>Sicherung unterbrochener Aufnahmen</strong>
-                                <p id="data-recording-info"></p>
-                            </div>
-                            <button id="clear-recordings" class="btn-ghost btn-danger"><span class="material-symbols-outlined text-[16px]">delete</span>Löschen</button>
-                        </div>
-                        <div class="data-row">
-                            <span class="material-symbols-outlined">restart_alt</span>
-                            <div class="flex-1 min-w-0">
-                                <strong>Alles zurücksetzen</strong>
-                                <p>Löscht Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe und alle Einstellungen. Die Seite lädt danach neu.</p>
-                            </div>
-                            <button id="reset-all" class="btn-ghost btn-danger"><span class="material-symbols-outlined text-[16px]">delete_forever</span>Zurücksetzen</button>
-                        </div>
-                    </section>
+                        <aside class="transcript-aside">
+                            <section class="card" aria-labelledby="speakers-title">
+                                <div class="card-head">
+                                    <h2 id="speakers-title" class="t-label">Sprecher und Redezeit</h2>
+                                </div>
+                                <div id="speaker-panel" class="speaker-panel hidden"></div>
+                            </section>
+
+                            <section class="card summary-card" aria-labelledby="summary-title">
+                                <div class="card-head">
+                                    <h2 id="summary-title" class="t-label">Zusammenfassung</h2>
+                                    <div class="head-icons">
+                                        <button type="button" id="summary-copy" class="icon-btn" aria-label="Zusammenfassung kopieren" title="Kopieren"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button>
+                                        <button type="button" id="summary-download" class="icon-btn" aria-label="Zusammenfassung als Markdown speichern" title="Als Markdown speichern"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg></button>
+                                    </div>
+                                </div>
+                                <div class="options-grid is-two">
+                                    <div class="field">
+                                        <label for="llm-provider">Anbieter <span id="llm-logo" class="llm-logo"></span></label>
+                                        <select id="llm-provider" class="input">
+                                            <option value="anthropic">Anthropic (Claude)</option>
+                                            <option value="openai">OpenAI</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="summary-mode">Art</label>
+                                        <select id="summary-mode" class="input">
+                                            <option value="bullets">Stichpunkte</option>
+                                            <option value="summary">Zusammenfassung</option>
+                                            <option value="minutes">Protokoll mit Aufgaben</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label for="llm-model">Modell</label>
+                                    <input id="llm-model" list="llm-model-list" autocomplete="off" class="input is-mono">
+                                    <datalist id="llm-model-list"></datalist>
+                                </div>
+                                <button type="button" id="summary-btn" disabled class="btn-secondary is-wide">Zusammenfassung erstellen</button>
+                                <div class="field">
+                                    <label for="summary-text" class="visually-hidden">Zusammenfassung</label>
+                                    <textarea id="summary-text" placeholder="Die Zusammenfassung erscheint hier." class="input is-area"></textarea>
+                                </div>
+                            </section>
+                        </aside>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </dialog>
+            </section>
 
-    <footer class="w-full bg-surface-container-lowest py-5 border-t border-outline-variant/10 mt-8">
-        <div class="w-full px-4 md:px-8 flex items-center justify-between text-on-surface-variant font-label text-[11px] flex-wrap gap-2">
-            <span>Scribe Studio · Transkription im Browser (BYOK)</span>
-            <span id="footer-providers" class="footer-providers text-outline">Gladia · ElevenLabs · AssemblyAI · Mistral Voxtral</span>
-        </div>
-    </footer>
+            <!-- ================= VIEW: Fachbegriffe ================= -->
+            <section id="view-vocab" class="view hidden" aria-labelledby="vocab-title">
+                <header class="page-head">
+                    <div>
+                        <p class="t-label eyebrow">Einstellungen</p>
+                        <h1 id="vocab-title" class="page-title">Fachbegriffe</h1>
+                        <p class="page-intro muted">Namen, Firmen und Fachwörter, die die Engine richtig schreiben soll. Die Liste gilt für alle Transkriptionen und bleibt in diesem Browser gespeichert.</p>
+                    </div>
+                </header>
+                <section class="card narrow-card">
+                    <div class="card-head">
+                        <label class="check"><input type="checkbox" id="vocab-enabled" checked> Bei der Transkription mitschicken</label>
+                        <span id="vocab-count" class="t-mono muted"></span>
+                    </div>
+                    <div class="field">
+                        <label for="vocab-text">Ein Begriff pro Zeile. Zeilen mit # sind Kommentare.</label>
+                        <textarea id="vocab-text" rows="14" spellcheck="false" class="input is-area is-mono" placeholder="# Projekt Neubau Musterstraße&#10;Brandschottung&#10;Deckendurchführung&#10;Estrichleger&#10;Fa. Mustermann Elektro"></textarea>
+                    </div>
+                    <p id="vocab-hint-settings" class="t-small muted hidden"></p>
+                    <div class="button-row">
+                        <button type="button" id="vocab-import" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Importieren (.txt, .csv)</button>
+                        <button type="button" id="vocab-export" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Exportieren</button>
+                        <input type="file" id="vocab-file" accept=".txt,.csv,text/plain,text/csv" class="hidden">
+                    </div>
+                </section>
+            </section>
+
+            <!-- ================= VIEW: API-Keys ================= -->
+            <section id="view-keys" class="view hidden" aria-labelledby="keys-title">
+                <header class="page-head">
+                    <div>
+                        <p class="t-label eyebrow">Einstellungen</p>
+                        <h1 id="keys-title" class="page-title">API-Keys</h1>
+                        <p class="page-intro muted">Jede Engine nutzt deinen eigenen Key. Er wird nur in diesem Browser gespeichert und direkt an den Anbieter geschickt. „Prüfen“ zeigt, ob der Key gilt und ob der Anbieter Anfragen aus dem Browser zulässt.</p>
+                    </div>
+                </header>
+
+                <section class="card" aria-labelledby="keys-stt-title">
+                    <h2 id="keys-stt-title" class="t-label">Transkription</h2>
+                    <div id="key-cards-stt" class="key-list"></div>
+                </section>
+                <section class="card" aria-labelledby="keys-llm-title">
+                    <h2 id="keys-llm-title" class="t-label">Zusammenfassung (optional)</h2>
+                    <div id="key-cards-llm" class="key-list"></div>
+                </section>
+                <details class="card key-guide is-general">
+                    <summary><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg>Allgemeine Hinweise zu API-Keys</summary>
+                    <ul>
+                        <li><strong>Eine Engine genügt</strong> zum Start. Für die Zusammenfassung brauchst du zusätzlich einen Key von Anthropic oder OpenAI.</li>
+                        <li><strong>Key sofort kopieren:</strong> Die meisten Anbieter zeigen ihn nur einmal an. Verloren? Einen neuen erzeugen und den alten löschen.</li>
+                        <li><strong>Kosten im Griff:</strong> Abgerechnet wird beim Anbieter nach Verbrauch. Wo möglich, ein monatliches Ausgabenlimit setzen.</li>
+                        <li><strong>Nicht weitergeben:</strong> Wer den Key hat, kann auf deine Rechnung transkribieren. Nicht in E-Mails, Chats oder Dokumente kopieren.</li>
+                        <li><strong>Im Dienst:</strong> Vor der Nutzung mit dienstlichen Aufnahmen klären, ob der Anbieter datenschutzrechtlich freigegeben ist (Auftragsverarbeitungsvertrag, Serverstandort EU).</li>
+                    </ul>
+                </details>
+            </section>
+
+            <!-- ================= VIEW: Einstellungen ================= -->
+            <section id="view-settings" class="view hidden" aria-labelledby="settings-title">
+                <header class="page-head">
+                    <div>
+                        <p class="t-label eyebrow">Einstellungen</p>
+                        <h1 id="settings-title" class="page-title">Darstellung und Daten</h1>
+                    </div>
+                </header>
+
+                <section class="card narrow-card" aria-labelledby="appearance-title">
+                    <h2 id="appearance-title" class="t-label">Darstellung</h2>
+                    <div id="mode-options" class="segmented" role="radiogroup" aria-labelledby="appearance-title"></div>
+                    <p class="t-small muted">Wird sofort übernommen und in diesem Browser gespeichert.</p>
+                </section>
+
+                <section class="card narrow-card" aria-labelledby="data-title">
+                    <h2 id="data-title" class="t-label">Daten und Datenschutz</h2>
+                    <p class="t-small muted">Unisono hat keinen eigenen Server. Audio und Keys gehen nur an den Anbieter, den du auswählst. Alles andere bleibt in diesem Browser. Hier kannst du es löschen.</p>
+                    <div class="data-list">
+                        <div class="data-row">
+                            <div class="min-w-0">
+                                <p class="data-title">API-Keys</p>
+                                <p id="data-keys-info" class="t-small muted"></p>
+                            </div>
+                            <button type="button" id="clear-keys" class="btn-text is-danger">Löschen</button>
+                        </div>
+                        <div class="data-row">
+                            <div class="min-w-0">
+                                <p class="data-title">Zuletzt bearbeitetes Transkript</p>
+                                <p id="data-session-info" class="t-small muted"></p>
+                            </div>
+                            <button type="button" id="clear-session" class="btn-text is-danger">Löschen</button>
+                        </div>
+                        <div class="data-row">
+                            <div class="min-w-0">
+                                <p class="data-title">Sicherung unterbrochener Aufnahmen</p>
+                                <p id="data-recording-info" class="t-small muted"></p>
+                            </div>
+                            <button type="button" id="clear-recordings" class="btn-text is-danger">Löschen</button>
+                        </div>
+                        <div class="data-row">
+                            <div class="min-w-0">
+                                <p class="data-title">Alles zurücksetzen</p>
+                                <p class="t-small muted">Löscht Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe und alle Einstellungen. Die Seite lädt danach neu.</p>
+                            </div>
+                            <button type="button" id="reset-all" class="btn-text is-danger">Zurücksetzen</button>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <!-- Mobile: tab bar at the bottom -->
+    <nav class="tabbar" aria-label="Bereiche">
+        <button type="button" class="nav-item" data-view="start"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg><span>Neu</span></button>
+        <button type="button" class="nav-item" data-view="transcript"><svg class="icon" aria-hidden="true"><use href="#i-text"/></svg><span>Transkript</span></button>
+        <button type="button" class="nav-item" data-view="vocab"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>Begriffe</span></button>
+        <button type="button" class="nav-item" data-view="keys"><svg class="icon" aria-hidden="true"><use href="#i-key"/></svg><span>Keys</span></button>
+        <button type="button" class="nav-item" data-view="settings"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg><span>Mehr</span></button>
+    </nav>
 </body>
 </html>

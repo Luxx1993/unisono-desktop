@@ -8,7 +8,7 @@
  * While recording, every second of audio is also written to IndexedDB (recording-backup.js),
  * so a recording interrupted by a closed tab or a crash can be restored on the next visit.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
     const $ = id => document.getElementById(id);
     const MIME_CANDIDATES = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/webm'];
@@ -185,7 +185,7 @@ window.Scribe = window.Scribe || {};
         S.recordingBackup.clear();
         $('rec-save').classList.remove('hidden');
         onRecorded(lastRecording);
-        S.ui.setStatus(`Aufnahme gespeichert (${S.format.clock(duration)}, ${(blob.size / (1024 * 1024)).toFixed(1)} MB). Jetzt „Transkription starten“ oder die Aufnahme sichern.`, 'success');
+        S.ui.setStatus(`Aufnahme gespeichert (${S.format.clock(duration)}, ${(blob.size / (1024 * 1024)).toFixed(1)} MB). Jetzt transkribieren oder die Aufnahme sichern.`, 'success');
     }
 
     function cleanup() {
@@ -280,4 +280,4 @@ window.Scribe = window.Scribe || {};
     }
 
     S.recorder = { init, isActive, markUsed, discardBackup };
-})(window.Scribe);
+})(window.Unisono);

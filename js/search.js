@@ -6,7 +6,7 @@
  * step through the hits, "nur Treffer" hides all other segments, and replace works on the
  * current hit or on all of them. Ctrl/Cmd+F opens the search while the transcript is shown.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 
 (function (S) {
     const $ = id => document.getElementById(id);
@@ -205,7 +205,6 @@ window.Scribe = window.Scribe || {};
         document.addEventListener('keydown', e => {
             if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== 'f' || e.altKey) return;
             if ($('view-transcript').classList.contains('hidden') || !S.state.get().segments.length) return;
-            if (document.querySelector('.settings-dialog[open]')) return;
             e.preventDefault();
             input.focus();
             input.select();
@@ -216,4 +215,4 @@ window.Scribe = window.Scribe || {};
     }
 
     S.search = { init };
-})(window.Scribe);
+})(window.Unisono);

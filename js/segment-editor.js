@@ -1,13 +1,14 @@
 /*
- * Segment editor: renders the transcript as editable segments, colors speakers,
- * renames speakers globally, and syncs with the audio player (click-to-jump,
- * highlight of the segment currently playing).
+ * Segment editor: renders the transcript as editable segments, labels speakers (neutral
+ * grey tiers plus a two-letter abbreviation), renames speakers globally, shows the talk
+ * time as one split bar, and syncs with the audio player (click-to-jump, highlight of the
+ * segment currently playing).
  *
  * All DOM is built with textContent/value – transcript text is never parsed as HTML.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
-    const PALETTE_SIZE = 8;
+    const SPEAKER_TIERS = 4;   // --speaker-1 … --speaker-4; from the 5th speaker on they repeat
     // Browsers with CSS field-sizing grow textareas with their content natively – no JS needed.
     const NATIVE_AUTOSIZE = !!window.CSS?.supports?.('field-sizing', 'content');
     const NEW_SPEAKER = '__new';
@@ -47,9 +48,25 @@ window.Scribe = window.Scribe || {};
         syncActive();
     }
 
-    function colorClass(speakerId) {
+    function tierClass(speakerId) {
         const i = S.state.speakerIndex(speakerId);
-        return i < 0 ? 'spk-none' : 'spk-' + (i % PALETTE_SIZE);
+        return i < 0 ? 'spk-none' : 'spk-' + ((i % SPEAKER_TIERS) + 1);
+    }
+
+    // Two letters per speaker, the same everywhere: "Bauleitung LBB" → BL, "Anna" → AN.
+    function abbreviation(name) {
+        const words = String(name || '').trim().split(/[\s\-_.]+/).filter(Boolean);
+        if (!words.length) return '–';
+        const letters = words.length > 1 ? words[0][0] + words[1][0] : words[0].slice(0, 2);
+        return letters.toLocaleUpperCase('de-DE');
+    }
+
+    function abbreviationOf(speakerId) {
+        return speakerId ? abbreviation(S.state.speakerName(speakerId)) : '–';
+    }
+
+    function badge(speakerId) {
+        return el('span', 'spk-abbr ' + tierClass(speakerId), { textContent: abbreviationOf(speakerId), ariaHidden: 'true' });
     }
 
     function el(tag, className, props) {
@@ -86,10 +103,10 @@ window.Scribe = window.Scribe || {};
 
     function shareText(seconds, total) {
         const pct = total ? Math.round((seconds / total) * 100) : 0;
-        return `${pct} % · ${S.format.clock(seconds).replace(/^00:/, '')}`;
+        return `${S.format.clock(seconds).replace(/^00:/, '')} · ${pct} %`;
     }
 
-    // --- Speaker panel ---
+    // --- Speaker panel: split bar, then one row per speaker (abbreviation, name, minutes, %) ---
     function renderSpeakers() {
         const { speakers, segments } = S.state.get();
         speakersEl.replaceChildren();
@@ -98,12 +115,32 @@ window.Scribe = window.Scribe || {};
         const withTimes = S.state.hasTimes();
         const time = withTimes ? talkTime() : null;
 
+        if (time?.total) {
+            const bar = el('div', 'talk-bar');
+            bar.setAttribute('role', 'img');
+            bar.setAttribute('aria-label', 'Redezeit: ' + speakers.map(spk =>
+                `${spk.name} ${shareText(time.perSpeaker[spk.id] || 0, time.total)}`).join(', '));
+            for (const spk of speakers) {
+                const seconds = time.perSpeaker[spk.id] || 0;
+                if (!seconds) continue;
+                const part = el('span', tierClass(spk.id), { title: `${spk.name}: ${shareText(seconds, time.total)}` });
+                part.style.flexGrow = String(seconds);
+                bar.append(part);
+            }
+            if (time.pauses > 0) {
+                const pause = el('span', 'is-pause', { title: `Pausen: ${shareText(time.pauses, time.total)}` });
+                pause.style.flexGrow = String(time.pauses);
+                bar.append(pause);
+            }
+            speakersEl.append(bar);
+        }
+
+        const list = el('div', 'speaker-list');
         for (const spk of speakers) {
             const count = segments.filter(s => s.speaker === spk.id).length;
             const seconds = time?.perSpeaker[spk.id] || 0;
-            const chip = el('label', 'speaker-chip ' + colorClass(spk.id), { title: `${count} Abschnitt${count === 1 ? '' : 'e'} – Name ändern gilt für alle Abschnitte dieses Sprechers` });
-            if (time?.total) chip.style.setProperty('--share', (seconds / time.total * 100).toFixed(1) + '%');
-            chip.append(el('span', 'speaker-dot'));
+            const row = el('div', 'speaker-row', { title: `${count} Abschnitt${count === 1 ? '' : 'e'}. Der Name gilt für alle Abschnitte dieses Sprechers.` });
+            row.dataset.speakerRow = spk.id;
             const input = el('input', 'speaker-name', { value: spk.name, spellcheck: false });
             input.setAttribute('aria-label', `Name für Sprecher ${spk.id}`);
             input.dataset.speaker = spk.id;
@@ -114,19 +151,22 @@ window.Scribe = window.Scribe || {};
                     S.state.renameSpeaker(spk.id, input.value);
                 }
             });
-            chip.append(input, el('span', 'speaker-count', { textContent: time ? shareText(seconds, time.total) : String(count) }));
-            speakersEl.append(chip);
+            row.append(badge(spk.id), input,
+                el('span', 'speaker-share', { textContent: time ? shareText(seconds, time.total) : `${count} Abschnitt${count === 1 ? '' : 'e'}` }));
+            list.append(row);
         }
 
         if (time?.total) {
-            const pause = el('div', 'speaker-chip speaker-pause', { title: 'Zeit, in der niemand spricht' });
-            pause.style.setProperty('--share', (time.pauses / time.total * 100).toFixed(1) + '%');
-            pause.append(el('span', 'speaker-dot'), el('span', 'speaker-name', { textContent: 'Pausen' }),
-                el('span', 'speaker-count', { textContent: shareText(time.pauses, time.total) }));
-            speakersEl.append(pause);
+            const pause = el('div', 'speaker-row is-pause', { title: 'Zeit, in der niemand spricht' });
+            pause.append(el('span', 'spk-abbr', { textContent: '–', ariaHidden: 'true' }),
+                el('span', 'speaker-label', { textContent: 'Pausen' }),
+                el('span', 'speaker-share', { textContent: shareText(time.pauses, time.total) }));
+            list.append(pause);
         }
+        speakersEl.append(list);
 
-        const add = el('button', 'speaker-add', { type: 'button', textContent: '+ Sprecher' });
+        const add = el('button', 'btn-secondary is-small speaker-add', { type: 'button' });
+        add.append(S.icon('plus'), 'Sprecher');
         add.addEventListener('click', () => S.state.addSpeaker());
         speakersEl.append(add);
     }
@@ -134,6 +174,12 @@ window.Scribe = window.Scribe || {};
     function refreshSpeakerLabels(speakerId) {
         const name = S.state.speakerName(speakerId);
         listEl.querySelectorAll(`option[value="${CSS.escape(speakerId)}"]`).forEach(o => { o.textContent = name; });
+        // The abbreviation follows the name, in the transcript and in the panel.
+        const abbr = abbreviation(name);
+        listEl.querySelectorAll(`.segment[data-speaker="${CSS.escape(speakerId)}"] .spk-abbr`).forEach(b => { b.textContent = abbr; });
+        const panelBadge = speakersEl.querySelector(`[data-speaker-row="${CSS.escape(speakerId)}"] .spk-abbr`);
+        if (panelBadge) panelBadge.textContent = abbr;
+        S.player?.redraw();
         // Renamed elsewhere than in its own field (e.g. by a project file): update the panel too.
         const input = speakersEl.querySelector(`input[data-speaker="${CSS.escape(speakerId)}"]`);
         if (input && input !== document.activeElement && input.value !== name) input.value = name;
@@ -194,11 +240,15 @@ window.Scribe = window.Scribe || {};
     }
 
     function renderSegment(seg, withTimes, isLast) {
-        const row = el('div', 'segment ' + colorClass(seg.speaker));
+        const row = el('div', 'segment');
         row.dataset.id = seg.id;
+        row.dataset.speaker = seg.speaker || '';
 
         const meta = el('div', 'seg-meta');
+        const head = el('div', 'seg-head');
 
+        // Speaker label: abbreviation square + name; the name is a select to reassign the segment.
+        const label = el('span', 'spk-label');
         const select = el('select', 'seg-speaker');
         select.setAttribute('aria-label', 'Sprecher dieses Abschnitts');
         fillSpeakerSelect(select, seg.speaker);
@@ -206,7 +256,8 @@ window.Scribe = window.Scribe || {};
             const value = select.value === NEW_SPEAKER ? S.state.addSpeaker() : select.value;
             S.state.setSegmentSpeaker(seg.id, value);
         });
-        meta.append(select);
+        label.append(badge(seg.speaker), select, S.icon('chev-down', 'spk-caret'));
+        head.append(label);
 
         if (withTimes) {
             const time = el('button', 'seg-time', {
@@ -221,17 +272,20 @@ window.Scribe = window.Scribe || {};
         const actions = el('div', 'seg-actions');
         if (!isLast) {
             const merge = el('button', '', { type: 'button', title: 'Mit nächstem Abschnitt zusammenführen' });
-            merge.append(el('span', 'material-symbols-outlined', { textContent: 'vertical_align_bottom' }));
+            merge.setAttribute('aria-label', 'Mit nächstem Abschnitt zusammenführen');
+            merge.append(S.icon('merge'));
             merge.addEventListener('click', () => S.state.mergeWithNext(seg.id));
             actions.append(merge);
         }
         const del = el('button', 'seg-delete', { type: 'button', title: 'Abschnitt löschen' });
-        del.append(el('span', 'material-symbols-outlined', { textContent: 'delete' }));
+        del.setAttribute('aria-label', 'Abschnitt löschen');
+        del.append(S.icon('trash'));
         del.addEventListener('click', () => {
             if (confirm('Diesen Abschnitt löschen?')) S.state.deleteSegment(seg.id);
         });
         actions.append(del);
-        meta.append(actions);
+        head.append(actions);
+        meta.append(head);
 
         const text = el('textarea', 'seg-text', { value: seg.text, rows: 1, spellcheck: true });
         text.setAttribute('aria-label', 'Text des Abschnitts');
@@ -309,5 +363,8 @@ window.Scribe = window.Scribe || {};
         S.state.updateText(id, value);
     }
 
-    S.editor = { init, reveal, setText, refreshSpeakers: () => renderSpeakers() };
-})(window.Scribe);
+    S.editor = { init, reveal, setText, refreshSpeakers: () => renderSpeakers(), abbreviation: abbreviationOf, tierOf: speakerId => {
+        const i = S.state.speakerIndex(speakerId);
+        return i < 0 ? 0 : (i % SPEAKER_TIERS) + 1;
+    } };
+})(window.Unisono);

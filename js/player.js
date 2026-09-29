@@ -1,9 +1,11 @@
 /*
  * Player: own controls (play, ±10 s, speed) and a timeline that shows who spoke when.
  *
- * The timeline is a canvas. With the audio file loaded it draws the waveform, each bar in the
- * color of the speaker talking at that moment; without audio (e.g. a restored transcript) it
- * draws the speaker blocks only. Click or drag to seek, arrow keys move by 5 s.
+ * The timeline is a canvas with two parts: the waveform on top, in one color (played part
+ * --wave-played, the rest --wave-rest), and below it the speaker lane: one bar per segment in
+ * the speaker's grey tier (--speaker-1 … 4) on --speaker-lane. The playhead runs through both.
+ * Without audio data (e.g. a restored transcript) only a flat line and the lane are drawn.
+ * Click or drag to seek, arrow keys move by 5 s; hovering shows time and speaker.
  *
  * Waveform without filling the memory: browsers decode a whole file at full sample rate
  * (a 2-hour meeting would need several GB). So:
@@ -12,7 +14,7 @@
  *   other formats (M4A, WebM, OGG) – decoded at once, only up to FULL_DECODE_MAX_SECONDS.
  * Longer files keep the speaker timeline, which needs no audio data at all.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 
 (function (S) {
     const $ = id => document.getElementById(id);
@@ -42,17 +44,31 @@ window.Scribe = window.Scribe || {};
         return !!audio?.currentSrc && !audio.error;
     }
 
-    function cssColor(name, alpha = 1) {
-        const channels = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-        return channels ? `rgb(${channels} / ${alpha})` : `rgb(128 128 128 / ${alpha})`;
+    // Colors come from tokens.css, read once per draw (they change with light / dark).
+    function tokens() {
+        const style = getComputedStyle(document.documentElement);
+        const get = name => style.getPropertyValue(name).trim();
+        const px = name => parseFloat(get(name)) || 0;
+        return {
+            played: get('--wave-played'),
+            rest: get('--wave-rest'),
+            lane: get('--speaker-lane'),
+            none: get('--border-strong'),
+            head: get('--text-primary'),
+            speakers: [1, 2, 3, 4].map(n => get('--speaker-' + n)),
+            waveHeight: px('--wave-height'),
+            gap: px('--space-2'),
+            laneHeight: px('--speaker-lane-height'),
+            barHeight: px('--speaker-bar-height'),
+            radius: px('--radius-xs')
+        };
     }
 
-    // Speaker color per segment, resolved once per draw.
-    function speakerColors() {
+    // Speaker tier color per speaker id, resolved once per draw.
+    function speakerColors(t) {
         const colors = {};
         for (const spk of S.state.get().speakers) {
-            const i = S.state.speakerIndex(spk.id);
-            colors[spk.id] = getComputedStyle(document.documentElement).getPropertyValue('--c-spk-' + (i % 8)).trim();
+            colors[spk.id] = t.speakers[(S.editor.tierOf(spk.id) || 1) - 1];
         }
         return colors;
     }
@@ -84,54 +100,65 @@ window.Scribe = window.Scribe || {};
 
         const total = duration();
         if (!total) return;
+        const t = tokens();
         const now = hasAudio() ? audio.currentTime : 0;
-        const colors = speakerColors();
-        const idle = getComputedStyle(document.documentElement).getPropertyValue('--c-outline').trim();
+        const colors = speakerColors(t);
         const segs = sortedSegments();
-        const mid = height / 2;
+        const waveH = Math.min(t.waveHeight, height - t.gap - t.laneHeight);
+        const mid = waveH / 2;
+        const laneTop = waveH + t.gap;
 
+        // Waveform: one color, played part darker.
         if (peaks && peaksFor === file) {
             const bars = Math.floor(width / BAR_WIDTH);
-            let k = 0;
             for (let i = 0; i < bars; i++) {
                 const t0 = (i / bars) * total;
                 const t1 = ((i + 1) / bars) * total;
-                const tm = (t0 + t1) / 2;
-                while (k < segs.length && segs[k].end <= tm) k++;
-                const seg = segs[k] && segs[k].start <= tm ? segs[k] : null;
-                const channels = seg?.speaker ? colors[seg.speaker] : idle;
                 const from = Math.floor((t0 / total) * PEAK_BUCKETS);
                 const to = Math.max(from + 1, Math.floor((t1 / total) * PEAK_BUCKETS));
                 let p = 0;
                 for (let j = from; j < to && j < PEAK_BUCKETS; j++) p = Math.max(p, peaks[j]);
-                const h = Math.max(2, p * (height - 6));
-                const played = tm <= now;
-                ctx.fillStyle = `rgb(${channels || idle} / ${seg ? (played ? 1 : 0.55) : (played ? 0.5 : 0.25)})`;
+                const h = Math.max(2, p * (waveH - 4));
+                ctx.fillStyle = (t0 + t1) / 2 <= now ? t.played : t.rest;
                 ctx.fillRect(i * BAR_WIDTH, mid - h / 2, BAR_WIDTH - 1, h);
             }
         } else {
-            // Speaker blocks only: a thin baseline plus one block per segment.
-            ctx.fillStyle = `rgb(${idle} / 0.25)`;
+            ctx.fillStyle = t.rest;
             ctx.fillRect(0, mid - 1, width, 2);
-            const blockH = Math.min(22, height * 0.5);
-            for (const seg of segs) {
-                const x = (seg.start / total) * width;
-                const w = Math.max(1, ((seg.end - seg.start) / total) * width - 1);
-                const channels = seg.speaker ? colors[seg.speaker] : idle;
-                ctx.fillStyle = `rgb(${channels || idle} / ${seg.end <= now ? 1 : 0.7})`;
-                ctx.fillRect(x, mid - blockH / 2, w, blockH);
+            if (now > 0) {
+                ctx.fillStyle = t.played;
+                ctx.fillRect(0, mid - 1, (now / total) * width, 2);
             }
         }
 
+        // Speaker lane: background, then one bar per segment in the speaker's tier.
+        ctx.fillStyle = t.lane;
+        roundRect(ctx, 0, laneTop, width, t.laneHeight, t.radius);
+        const barTop = laneTop + (t.laneHeight - t.barHeight) / 2;
+        for (const seg of segs) {
+            const x = (seg.start / total) * width;
+            const w = Math.max(1, ((seg.end - seg.start) / total) * width - 1);
+            ctx.fillStyle = (seg.speaker && colors[seg.speaker]) || t.none;
+            ctx.fillRect(x, barTop, w, t.barHeight);
+        }
+
+        // Playhead through waveform and lane.
         if (hasAudio() && now > 0) {
             const x = Math.round((now / total) * width);
-            ctx.fillStyle = cssColor('--c-on-surface');
-            ctx.fillRect(x - 1, 0, 2, height);
+            ctx.fillStyle = t.head;
+            ctx.fillRect(x - 1, 0, 2, laneTop + t.laneHeight);
         }
 
         wrap.setAttribute('aria-valuemax', String(Math.round(total)));
         wrap.setAttribute('aria-valuenow', String(Math.round(now)));
         wrap.setAttribute('aria-valuetext', `${S.format.clock(now)} von ${S.format.clock(total)}`);
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+        else ctx.rect(x, y, w, h);
+        ctx.fill();
     }
 
     // --- Seeking & hover ---
@@ -157,7 +184,7 @@ window.Scribe = window.Scribe || {};
     function showHover(clientX) {
         const t = timeAt(clientX);
         const seg = S.state.segmentAt(t);
-        hoverEl.textContent = S.format.clock(t) + (seg?.speaker ? ' · ' + S.state.speakerName(seg.speaker) : '');
+        hoverEl.textContent = S.format.clock(t) + (seg?.speaker ? ` · ${S.editor.abbreviation(seg.speaker)} ${S.state.speakerName(seg.speaker)}` : '');
         const rect = wrap.getBoundingClientRect();
         const x = Math.min(rect.width - 8, Math.max(8, clientX - rect.left));
         hoverEl.style.left = x + 'px';
@@ -320,7 +347,7 @@ window.Scribe = window.Scribe || {};
             if (target !== file) return;
             peaks = result;
             peaksFor = result ? target : null;
-            setNote(result ? '' : 'Für diese Datei keine Wellenform (bei M4A, WebM und OGG nur bis 20 min) – die Zeitleiste zeigt, wer wann spricht.');
+            setNote(result ? '' : 'Für diese Datei keine Wellenform (bei M4A, WebM und OGG nur bis 20 min). Die Sprecherspur zeigt, wer wann spricht.');
         } catch (_) {
             if (target === file) setNote('');
         }
@@ -331,8 +358,10 @@ window.Scribe = window.Scribe || {};
     function updateControls() {
         const ready = hasAudio();
         ['player-play', 'player-back', 'player-fwd', 'player-rate'].forEach(id => { $(id).disabled = !ready; });
-        $('player-play').firstElementChild.textContent = ready && !audio.paused ? 'pause' : 'play_arrow';
-        $('player-play').title = ready && !audio.paused ? 'Pause' : 'Abspielen';
+        const playing = ready && !audio.paused;
+        S.setIcon($('player-play').firstElementChild, playing ? 'pause' : 'play');
+        $('player-play').title = playing ? 'Pause' : 'Abspielen';
+        $('player-play').setAttribute('aria-label', playing ? 'Pause' : 'Abspielen');
         const total = duration();
         $('player-time').textContent = `${S.format.clock(ready ? audio.currentTime : 0)} / ${S.format.clock(total)}`;
     }
@@ -384,4 +413,4 @@ window.Scribe = window.Scribe || {};
     }
 
     S.player = { init, setFile, redraw: scheduleDraw, duration, hasWaveform: () => !!peaks && peaksFor === file };
-})(window.Scribe);
+})(window.Unisono);

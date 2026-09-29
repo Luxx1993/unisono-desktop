@@ -1,14 +1,14 @@
 /*
- * Exporters. Everything is built from the current (edited) segments in Scribe.state,
+ * Exporters. Everything is built from the current (edited) segments in Unisono.state,
  * so corrected text and speaker names end up in every format.
  *
  *   txt   plain text:        [Herr Müller - 00:01:12]: Text
  *   md    Markdown with YAML frontmatter (Obsidian, Notion, wikis), optional summary
  *   html  standalone page: readable/printable, optional embedded audio with click-to-jump
  *   srt / vtt  subtitles (vtt with speaker voice tags)
- *   json  project file – can be opened again in Scribe Studio to continue editing
+ *   json  project file – can be opened again in Unisono to continue editing
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
     const pad = (n, len = 2) => String(n).padStart(len, '0');
 
@@ -122,7 +122,7 @@ window.Scribe = window.Scribe || {};
     function toJson() {
         const { fileName, provider, createdAt, speakers, segments, raw } = S.state.get();
         return JSON.stringify({
-            format: 'scribe-studio',
+            format: 'unisono',
             version: 1,
             fileName, provider, createdAt,
             speakers,
@@ -133,7 +133,75 @@ window.Scribe = window.Scribe || {};
     }
 
     // --- Standalone HTML ---
-    const SPEAKER_COLORS = ['#0369a1', '#be185d', '#4d7c0f', '#b45309', '#7e22ce', '#047857', '#c2410c', '#b91c1c'];
+    // The exported page must work on its own, without tokens.css, so the Unisono values are
+    // copied here (light and dark). Keep them in sync with css/tokens.css.
+    const HTML_STYLE = `
+  :root {
+    color-scheme: light dark;
+    --surface-canvas:#F4F1EC; --surface-raised:#FFFFFF; --surface-sunken:#ECE7E0;
+    --text-primary:#1F1C1A; --text-secondary:#5E5852; --text-tertiary:#6F6962;
+    --border-subtle:rgba(31,28,26,.08); --border-strong:rgba(31,28,26,.16);
+    --mark-playing-bg:rgba(31,28,26,.08); --speaker-label-bg:#ECE7E0;
+    --speaker-1:#1F1C1A; --speaker-2:#6F6962; --speaker-3:#A59E96; --speaker-4:#CFC8BF;
+    --speaker-on-1:#F4F1EC; --speaker-on-2:#F4F1EC; --speaker-on-3:#1F1C1A; --speaker-on-4:#1F1C1A;
+    --elev-1:inset 0 0 0 .5px rgba(31,28,26,.08), 0 1px 2px rgba(31,28,26,.04);
+    --font-display:"Manrope",system-ui,sans-serif; --font-body:"Inter",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",monospace;
+    --type-display-m:300 40px/46px var(--font-display); --type-body-l:400 18px/28px var(--font-body);
+    --type-body:400 15px/24px var(--font-body); --type-small:400 13px/20px var(--font-body);
+    --type-label:700 12px/16px var(--font-display); --type-mono:400 13px/20px var(--font-mono);
+    --type-name:500 12px/16px var(--font-body); --type-badge:400 10px/12px var(--font-mono);
+    --radius-xs:4px; --radius-sm:6px; --radius-lg:16px; --measure:68ch;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-canvas:#121110; --surface-raised:#1B1A18; --surface-sunken:#0C0B0A;
+      --text-primary:#F2EEE8; --text-secondary:#A9A29A; --text-tertiary:#857E77;
+      --border-subtle:rgba(242,238,232,.08); --border-strong:rgba(242,238,232,.16);
+      --mark-playing-bg:rgba(242,238,232,.10); --speaker-label-bg:#0C0B0A;
+      --speaker-1:#F2EEE8; --speaker-2:#A9A29A; --speaker-3:#6B655F; --speaker-4:#45413D;
+      --speaker-on-1:#121110; --speaker-on-2:#121110; --speaker-on-3:#F2EEE8; --speaker-on-4:#F2EEE8;
+      --elev-1:inset 0 0 0 .5px rgba(242,238,232,.08);
+    }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--surface-canvas); color:var(--text-primary); font:var(--type-body); letter-spacing:.01em; -webkit-font-smoothing:antialiased; }
+  main { max-width:calc(var(--measure) + 12rem); margin:0 auto; padding:3rem 1.5rem 4rem; }
+  .eyebrow { font:var(--type-label); letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin:0 0 .5rem; }
+  h1 { font:var(--type-display-m); letter-spacing:-.015em; margin:0 0 1rem; text-wrap:balance; }
+  h2 { font:var(--type-label); letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); margin:2.5rem 0 1rem; }
+  dl { display:flex; flex-wrap:wrap; gap:.25rem 1.5rem; margin:0; font:var(--type-mono); color:var(--text-secondary); }
+  dt { display:none; } dd { margin:0; }
+  .player { position:sticky; top:0; z-index:1; background:var(--surface-canvas); padding:1rem 0; margin-top:1.5rem; border-bottom:1px solid var(--border-subtle); }
+  audio { width:100%; }
+  .summary { background:var(--surface-raised); box-shadow:var(--elev-1); border-radius:var(--radius-lg); padding:1.5rem; white-space:pre-wrap; font:var(--type-body); max-width:var(--measure); }
+  .transcript { background:var(--surface-raised); box-shadow:var(--elev-1); border-radius:var(--radius-lg); padding:1rem 1.5rem; }
+  .seg { display:grid; grid-template-columns:4.5rem minmax(0,1fr); column-gap:1rem; padding:1rem .5rem; border-radius:10px; break-inside:avoid; }
+  .time { grid-row:1 / span 2; font:var(--type-mono); color:var(--text-tertiary); background:none; border:0; padding:.25rem 0 0; text-align:left; font-variant-numeric:tabular-nums; }
+  button.time { cursor:pointer; }
+  button.time:hover, button.time:focus-visible { color:var(--text-primary); text-decoration:underline; }
+  .who { grid-column:2; justify-self:start; display:inline-flex; align-items:center; gap:.5rem; padding:.25rem .5rem .25rem .25rem; border-radius:var(--radius-sm); background:var(--speaker-label-bg); font:var(--type-name); }
+  .abbr { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:var(--radius-xs); background:var(--spk); color:var(--spk-on); font:var(--type-badge); }
+  .spk-1 { --spk:var(--speaker-1); --spk-on:var(--speaker-on-1); } .spk-2 { --spk:var(--speaker-2); --spk-on:var(--speaker-on-2); }
+  .spk-3 { --spk:var(--speaker-3); --spk-on:var(--speaker-on-3); } .spk-4 { --spk:var(--speaker-4); --spk-on:var(--speaker-on-4); }
+  .seg p { grid-column:2; margin:.5rem 0 0; font:var(--type-body-l); max-width:var(--measure); }
+  .seg.active { background:var(--mark-playing-bg); box-shadow:inset 2px 0 0 var(--text-primary); }
+  footer { margin-top:2rem; font:var(--type-small); color:var(--text-tertiary); }
+  @media (max-width:640px) {
+    h1 { font:400 28px/34px var(--font-display); }
+    .seg { grid-template-columns:minmax(0,1fr); }
+    .time { grid-row:1; justify-self:end; }
+    .who, .seg p { grid-column:1; } .who { grid-row:1; }
+    .seg p { font:var(--type-body); }
+  }
+  @media print {
+    :root { color-scheme:light; }
+    body { background:#fff; }
+    main { padding:0; max-width:none; }
+    .player { display:none; }
+    .transcript, .summary { box-shadow:none; padding:0; }
+    .seg { padding:.4rem 0; }
+  }`;
 
     function readAsDataUrl(file) {
         return new Promise((resolve, reject) => {
@@ -156,7 +224,7 @@ window.Scribe = window.Scribe || {};
         return parts;
     }
 
-    const AUDIO_PLACEHOLDER = '__SCRIBE_AUDIO_SRC__';
+    const AUDIO_PLACEHOLDER = '__UNISONO_AUDIO_SRC__';
 
     // Returns a string, or a Blob when audio is embedded (assembled from chunks, see above).
     async function toHtml({ includeSummary = true, audioFile = null } = {}) {
@@ -164,10 +232,6 @@ window.Scribe = window.Scribe || {};
         const withTimes = S.state.hasTimes();
         const summary = includeSummary ? S.summary.getText().trim() : '';
         const audioSrc = audioFile ? await readAsDataUrl(audioFile) : null;
-        const color = seg => {
-            const i = S.state.speakerIndex(seg.speaker);
-            return i < 0 ? '#64748b' : SPEAKER_COLORS[i % SPEAKER_COLORS.length];
-        };
 
         const facts = [
             ['Datum', m.dateText],
@@ -184,8 +248,11 @@ window.Scribe = window.Scribe || {};
                     ? `<button type="button" class="time" data-start="${seg.start}">${clock(seg.start)}</button>`
                     : `<span class="time">${clock(seg.start)}</span>`)
                 : '';
-            return `<article class="seg" data-start="${seg.start}" data-end="${seg.end}" style="--spk:${color(seg)}">
-    <header>${name ? `<span class="who">${escapeHtml(name)}</span>` : ''}${time}</header>
+            const who = name
+                ? `<span class="who"><span class="abbr spk-${S.editor.tierOf(seg.speaker) || 1}" aria-hidden="true">${escapeHtml(S.editor.abbreviation(seg.speaker))}</span>${escapeHtml(name)}</span>`
+                : '';
+            return `<article class="seg" data-start="${seg.start}" data-end="${seg.end}">
+    ${time}${who}
     <p>${escapeHtml(seg.text.trim())}</p>
   </article>`;
         }).join('\n  ');
@@ -196,45 +263,21 @@ window.Scribe = window.Scribe || {};
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(m.title)}</title>
-<style>
-  :root { --ink:#1e293b; --muted:#64748b; --line:#e2e8f0; --paper:#fff; --tint:#f8fafc; --accent:#0369a1; }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--tint); color:var(--ink); font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
-  main { max-width:52rem; margin:0 auto; padding:2rem 1rem 4rem; }
-  h1 { font-size:1.6rem; line-height:1.25; margin:0 0 1rem; text-wrap:balance; }
-  h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:2rem 0 .75rem; }
-  dl { display:grid; grid-template-columns:max-content 1fr; gap:.25rem 1rem; margin:0; font-size:.9rem; }
-  dt { color:var(--muted); } dd { margin:0; }
-  .player { position:sticky; top:0; z-index:1; background:var(--tint); padding:.75rem 0; border-bottom:1px solid var(--line); }
-  audio { width:100%; }
-  .summary { background:var(--paper); border:1px solid var(--line); border-radius:.5rem; padding:1rem 1.25rem; white-space:pre-wrap; font-size:.95rem; }
-  .seg { background:var(--paper); border:1px solid var(--line); border-left:4px solid var(--spk); border-radius:.4rem; padding:.6rem .9rem; margin-bottom:.5rem; break-inside:avoid; }
-  .seg header { display:flex; gap:.75rem; align-items:baseline; font-size:.8rem; }
-  .who { font-weight:600; color:var(--spk); }
-  .time { font:inherit; font-family:ui-monospace,Menlo,monospace; color:var(--muted); background:none; border:0; padding:0; }
-  button.time { cursor:pointer; text-decoration:underline dotted; }
-  button.time:hover, button.time:focus-visible { color:var(--accent); }
-  .seg p { margin:.2rem 0 0; }
-  .seg.active { background:#f0f9ff; }
-  footer { margin-top:2rem; font-size:.8rem; color:var(--muted); }
-  @media print {
-    body { background:#fff; font-size:11pt; }
-    main { padding:0; max-width:none; }
-    .player { display:none; }
-    .seg { border:0; border-left:3px solid var(--spk); border-radius:0; padding:.2rem .6rem; margin-bottom:.35rem; }
-    .summary { border:0; padding:0; }
-  }
+<style>${HTML_STYLE}
 </style>
 </head>
 <body>
 <main>
+  <p class="eyebrow">Transkript${m.provider ? ' · ' + escapeHtml(m.provider) : ''}</p>
   <h1>${escapeHtml(m.title)}</h1>
   <dl>${facts.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join('')}</dl>
   ${audioSrc ? `<div class="player"><audio id="audio" controls preload="metadata" src="${AUDIO_PLACEHOLDER}"></audio></div>` : ''}
   ${summary ? `<h2>Zusammenfassung</h2>\n  <div class="summary">${escapeHtml(summary)}</div>` : ''}
   <h2>Transkript</h2>
+  <div class="transcript">
   ${segmentsHtml}
-  <footer>Erstellt mit Scribe Studio · ${escapeHtml(m.dateText)}</footer>
+  </div>
+  <footer>Erstellt mit Unisono · ${escapeHtml(m.dateText)}</footer>
 </main>
 ${audioSrc ? `<script>
   const audio = document.getElementById('audio');
@@ -284,7 +327,7 @@ ${audioSrc ? `<script>
         html: { build: toHtml, ext: 'html', type: 'text/html;charset=utf-8' },
         srt: { build: toSrt, ext: 'srt', type: 'application/x-subrip;charset=utf-8', timed: true },
         vtt: { build: toVtt, ext: 'vtt', type: 'text/vtt;charset=utf-8', timed: true },
-        json: { build: toJson, ext: 'scribe.json', type: 'application/json' }
+        json: { build: toJson, ext: 'unisono.json', type: 'application/json' }
     };
 
     // options: { includeSummary, audioFile } – used by md and html.
@@ -305,4 +348,4 @@ ${audioSrc ? `<script>
 
     S.format = { clock, cueTime };
     S.export = { toText, toMarkdown, toHtml, toSrt, toVtt, toJson, exportAs, download, baseName };
-})(window.Scribe);
+})(window.Unisono);

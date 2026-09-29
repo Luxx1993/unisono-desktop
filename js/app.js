@@ -1,28 +1,27 @@
 /*
- * App wiring: views, provider cards, API keys (with test ping), file handling,
- * transcription run, status line, transcript header and export menu.
+ * App wiring: views (sidebar pages), engine chips, API keys (with test ping), file handling,
+ * transcription run, status message, transcript header and export menu.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
     const $ = id => document.getElementById(id);
 
     const MB = 1024 * 1024;
     const HTML_AUDIO_WARN_BYTES = 25 * MB;
-    const KEY_PREFIX = 'scribe_key_';
+    const KEY_PREFIX = 'unisono_key_';
 
     // Keys for the AI summary; the transcription providers come from S.apis.
     const LLM_KEYS = {
         anthropic: {
             label: 'Anthropic (Claude)',
             description: 'Für Zusammenfassungen, Stichpunkte und Protokolle.',
-            icon: 'auto_awesome',
             keyUrl: 'https://console.anthropic.com/settings/keys',
             keyGuide: {
                 steps: [
                     'In der Anthropic Console (console.anthropic.com) ein Konto anlegen.',
                     'Unter „Billing“ Guthaben aufladen – die API wird vorab bezahlt, ein Claude-Abo gilt hier nicht.',
                     'Unter „Settings → API Keys“ auf „Create Key“ klicken und den Key sofort kopieren.',
-                    'Hier einfügen und mit Test-Ping prüfen.'
+                    'Hier einfügen und mit „Prüfen“ testen.'
                 ],
                 note: 'Unter „Limits“ lässt sich eine monatliche Obergrenze setzen.'
             },
@@ -34,14 +33,13 @@ window.Scribe = window.Scribe || {};
         openai: {
             label: 'OpenAI',
             description: 'Alternative für Zusammenfassungen.',
-            icon: 'psychology',
             keyUrl: 'https://platform.openai.com/api-keys',
             keyGuide: {
                 steps: [
                     'Auf platform.openai.com ein Konto anlegen.',
                     'Unter „Billing“ Guthaben aufladen – ein ChatGPT-Abo gilt für die API nicht.',
                     'Unter „API keys“ auf „Create new secret key“ klicken und den Key sofort kopieren.',
-                    'Hier einfügen und mit Test-Ping prüfen.'
+                    'Hier einfügen und mit „Prüfen“ testen.'
                 ],
                 note: 'Unter „Limits“ lässt sich eine monatliche Obergrenze setzen.'
             },
@@ -69,14 +67,14 @@ window.Scribe = window.Scribe || {};
         return node;
     }
 
-    const icon = (name, cls = '') => h('span', { class: `material-symbols-outlined ${cls}`, 'aria-hidden': 'true', text: name });
+    const icon = (name, cls = '') => S.icon(name, cls);
+    const dot = id => h('span', { class: 'provider-dot', 'data-provider': id, 'aria-hidden': 'true' });
+    const shortLabel = api => api.label.split(' (')[0];
 
     // --- Status line (shared with the other modules via S.ui) ---
     function setStatus(text, type = 'info') {
-        const icons = { info: 'progress_activity', success: 'check_circle', error: 'error' };
         clearTimeout(statusTimer);
         $('status-banner').className = 'status-banner status-' + type;
-        $('status-icon').textContent = icons[type];
         $('status-text').textContent = text;
         if (type === 'success') statusTimer = setTimeout(hideStatus, 8000);
     }
@@ -107,21 +105,22 @@ window.Scribe = window.Scribe || {};
 
     // --- Views ---
     function switchView(name) {
+        if (!$('view-' + name)) name = 'start';
         document.querySelectorAll('.view').forEach(view => {
             const show = view.id === 'view-' + name;
             view.classList.toggle('hidden', !show);
             if (show) {
                 // Restart the entrance animation.
-                view.classList.remove('page-entrance');
+                view.classList.remove('is-entering');
                 void view.offsetWidth;
-                view.classList.add('page-entrance');
+                view.classList.add('is-entering');
             }
         });
         document.querySelectorAll('.nav-item').forEach(item => {
-            const current = item.dataset.view === name;
-            item.classList.toggle('is-current', current);
-            item.setAttribute('aria-current', current ? 'page' : 'false');
+            if (item.dataset.view === name) item.setAttribute('aria-current', 'page');
+            else item.removeAttribute('aria-current');
         });
+        if (name === 'settings') S.settings.refreshData();
         window.scrollTo({ top: 0 });
         hideStatusIfSuccess();
     }
@@ -141,10 +140,9 @@ window.Scribe = window.Scribe || {};
         for (const id of allKeyIds()) {
             try { keys[id] = localStorage.getItem(KEY_PREFIX + id) || ''; } catch (_) { keys[id] = ''; }
         }
-        // Deepgram was removed; don't keep its key around.
+        // Keys and settings of the app's former name (Scribe Studio) are not carried over.
         try {
-            localStorage.removeItem(KEY_PREFIX + 'deepgram');
-            localStorage.removeItem(KEY_PREFIX + 'deepgram_proxy');
+            Object.keys(localStorage).filter(k => k.startsWith('scribe_')).forEach(k => localStorage.removeItem(k));
         } catch (_) {}
     }
 
@@ -160,7 +158,7 @@ window.Scribe = window.Scribe || {};
     }
 
     function getKey(id) {
-        if (!keys[id]) throw new Error(`Bitte zuerst den API-Key für ${keyMeta(id).label} in den Einstellungen (Zahnrad oben rechts) eintragen.`);
+        if (!keys[id]) throw new Error(`Bitte zuerst den API-Key für ${keyMeta(id).label} unter „API-Keys“ eintragen.`);
         return keys[id];
     }
 
@@ -171,80 +169,98 @@ window.Scribe = window.Scribe || {};
         S.settings.refresh();
     }
 
+    // Sidebar (and on mobile the top bar): which engines have a key.
     function renderKeyStatus() {
-        const items = Object.entries(S.apis).flatMap(([id, api], i) => [
-            i ? h('span', { class: 'text-outline-variant', text: '|' }) : null,
-            h('span', { class: 'key-status-item ' + (keys[id] ? 'is-set' : 'is-unset'), title: keys[id] ? 'Key hinterlegt' : 'Kein Key' },
-                S.brandLogo(id, 'key-status-logo') || h('span', { class: 'dot' }), api.label.split(' ')[0])
-        ]);
-        $('key-status').replaceChildren(...items.filter(Boolean));
+        const ids = Object.keys(S.apis);
+        const withKey = ids.filter(id => keys[id]).length;
+        $('topbar-keys').replaceChildren(...ids.map(id => {
+            const d = dot(id);
+            if (!keys[id]) d.classList.add('is-empty');
+            return d;
+        }));
+        $('topbar-keys').setAttribute('aria-label', `${withKey} von ${ids.length} Engines mit Key. API-Keys öffnen`);
+        $('topbar-keys').title = ids.map(id => `${shortLabel(S.apis[id])}: ${keys[id] ? 'Key hinterlegt' : 'kein Key'}`).join('\n');
+        $('provider-status').replaceChildren(...Object.entries(S.apis).map(([id, api]) =>
+            h('li', {},
+                h('button', { type: 'button', class: 'provider-status-item', onclick: () => switchView('keys') },
+                    dot(id),
+                    h('span', { class: 'provider-status-name', text: shortLabel(api) }),
+                    h('span', { class: 'status-dot ' + (keys[id] ? 'is-success' : 'is-idle'), 'aria-hidden': 'true' }),
+                    h('span', { class: 'visually-hidden', text: keys[id] ? ', Key hinterlegt' : ', kein Key' })))));
     }
 
     function renderKeyCards() {
-        const card = id => {
+        const row = id => {
             const meta = keyMeta(id);
+            const isEngine = !!S.apis[id];
             const inputId = 'key-' + id;
-            const input = h('input', { id: inputId, type: 'password', class: 'field', autocomplete: 'off', spellcheck: false, placeholder: 'Key eingeben', value: keys[id] });
-            const badge = h('span', { class: 'key-badge' });
-            const feedback = h('div', { class: 'key-feedback hidden', 'aria-live': 'polite' });
-            const setBadge = (state, text) => {
-                badge.className = 'key-badge' + (state ? ' is-' + state : '');
-                badge.replaceChildren(h('span', { class: 'dot' }), text);
+            const input = h('input', { id: inputId, type: 'password', class: 'input is-mono', autocomplete: 'off', spellcheck: false, placeholder: 'Key einfügen', value: keys[id] });
+            const status = h('span', { class: 'key-status t-small' });
+            const feedback = h('p', { class: 'key-feedback t-small hidden', 'aria-live': 'polite' });
+            const setStatusText = (state, text) => {
+                status.replaceChildren(h('span', { class: 'status-dot is-' + state, 'aria-hidden': 'true' }), text);
             };
             const showFeedback = (state, text) => {
-                feedback.className = 'key-feedback is-' + state;
-                feedback.replaceChildren(icon(state === 'ok' ? 'check_circle' : state === 'error' ? 'error' : 'info', 'text-[16px] shrink-0'), h('span', { text }));
+                feedback.className = 'key-feedback t-small is-' + state;
+                feedback.replaceChildren(h('span', { class: 'status-dot is-' + state, 'aria-hidden': 'true' }), h('span', { text }));
             };
-            const refreshBadge = () => (keys[id] ? setBadge('saved', 'Gespeichert') : setBadge(null, 'Nicht gespeichert'));
-            refreshBadge();
+            const removeBtn = h('button', { type: 'button', class: 'btn-text is-danger', onclick: () => remove() }, 'Entfernen');
+            const refreshStatus = () => {
+                removeBtn.disabled = !keys[id];
+                return keys[id] ? setStatusText('success', 'Gespeichert') : setStatusText('idle', 'Kein Key');
+            };
+            refreshStatus();
 
-            // Saved silently while typing: anything that changes on blur (badge, message) can
-            // re-wrap the card and move the buttons, so a click on "Test-Ping" would miss.
+            // Saved silently while typing: anything that changes on blur (status, message) can
+            // re-wrap the row and move the buttons, so a click on "Prüfen" would miss.
             const save = ({ quiet = false } = {}) => {
                 const persisted = storeKey(id, input.value);
-                refreshBadge();
+                refreshStatus();
                 keysChanged();
-                if (!persisted) showFeedback('error', 'Der Browser blockiert das Speichern. Der Key gilt nur bis zum Schließen der Seite.');
+                if (!persisted) showFeedback('danger', 'Der Browser blockiert das Speichern. Der Key gilt nur bis zum Schließen der Seite.');
                 else if (!quiet) showFeedback('info', keys[id] ? 'Key gespeichert.' : 'Key entfernt.');
             };
             input.addEventListener('input', () => save({ quiet: true }));
 
-            const mask = h('button', { type: 'button', class: 'icon-btn', title: 'Anzeigen / verbergen', onclick: () => {
+            const mask = h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Key anzeigen', title: 'Anzeigen / verbergen', onclick: () => {
                 input.type = input.type === 'password' ? 'text' : 'password';
-                mask.firstChild.textContent = input.type === 'password' ? 'visibility' : 'visibility_off';
-            } }, icon('visibility', 'text-[18px]'));
+                const hidden = input.type === 'password';
+                S.setIcon(mask.firstChild, hidden ? 'eye' : 'eye-off');
+                mask.setAttribute('aria-label', hidden ? 'Key anzeigen' : 'Key verbergen');
+            } }, icon('eye'));
 
             const test = async () => {
                 save({ quiet: true });
-                if (!keys[id]) return showFeedback('error', 'Bitte zuerst einen Key eintragen.');
-                setBadge(null, 'Prüfe …');
+                if (!keys[id]) return showFeedback('danger', 'Bitte zuerst einen Key eintragen.');
+                setStatusText('info', 'Prüfe …');
                 const result = await testKey(meta, keys[id]);
-                setBadge(result.ok ? 'ok' : 'error', result.ok ? 'Verbunden' : 'Fehler');
-                showFeedback(result.ok ? 'ok' : 'error', result.message);
+                setStatusText(result.ok ? 'success' : 'danger', result.ok ? 'Verbunden' : 'Fehler');
+                showFeedback(result.ok ? 'success' : 'danger', result.message);
             };
 
-            return h('div', { class: 'key-card' },
-                h('div', { class: 'flex flex-col gap-3' },
-                    h('div', { class: 'flex flex-col gap-2' },
-                        h('div', { class: 'flex items-center gap-3' },
-                            h('div', { class: 'provider-icon shrink-0' }, S.brandLogo(id) || icon(meta.icon)),
-                            h('h3', { class: 'flex-1 min-w-0 font-headline text-on-surface font-semibold text-[15px]', text: meta.label }),
-                            badge),
-                        h('p', { class: 'text-on-surface-variant text-[12px] leading-relaxed', text: meta.description })),
-                    h('div', { class: 'flex flex-col gap-1.5' },
-                        h('label', { class: 'field-label', for: inputId, text: 'API-Key' }),
-                        h('div', { class: 'key-input-wrap' }, input, mask)),
-                    feedback,
-                    keyGuide(meta)),
-                h('div', { class: 'flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-outline-variant/20' },
-                    h('div', { class: 'flex gap-2' },
-                        h('button', { class: 'btn-primary', onclick: () => save() }, 'Speichern'),
-                        h('button', { class: 'btn-ghost', onclick: test }, icon('network_ping', 'text-[16px]'), 'Test-Ping')),
-                    h('a', { href: meta.keyUrl, target: '_blank', rel: 'noopener noreferrer', class: 'link-btn' },
-                        'Key erstellen', icon('open_in_new', 'text-[13px]'))));
+            const remove = () => {
+                if (!keys[id]) return;
+                input.value = '';
+                save();
+            };
+
+            return h('div', { class: 'key-row' },
+                h('div', { class: 'key-provider' },
+                    isEngine ? dot(id) : null,
+                    h('div', { class: 'min-w-0' },
+                        h('h3', { class: 'key-name' }, meta.label, S.brandLogo(id)),
+                        h('p', { class: 't-small muted', text: meta.description }))),
+                h('div', { class: 'key-input' },
+                    h('label', { class: 'visually-hidden', for: inputId, text: `API-Key für ${meta.label}` }),
+                    h('div', { class: 'input-wrap' }, input, mask)),
+                status,
+                h('div', { class: 'key-actions' },
+                    h('button', { type: 'button', class: 'btn-secondary is-small', onclick: test }, 'Prüfen'),
+                    removeBtn),
+                h('div', { class: 'key-more' }, feedback, keyGuide(meta)));
         };
-        $('key-cards-stt').replaceChildren(...Object.keys(S.apis).map(card));
-        $('key-cards-llm').replaceChildren(...Object.keys(LLM_KEYS).map(card));
+        $('key-cards-stt').replaceChildren(...Object.keys(S.apis).map(row));
+        $('key-cards-llm').replaceChildren(...Object.keys(LLM_KEYS).map(row));
     }
 
     // Step-by-step guide to getting a key, folded away until asked for.
@@ -253,11 +269,11 @@ window.Scribe = window.Scribe || {};
         if (!guide) return null;
         const host = new URL(meta.keyUrl).hostname.replace(/^www\./, '');
         return h('details', { class: 'key-guide' },
-            h('summary', {}, icon('help', 'text-[16px]'), 'So bekommst du einen Key'),
+            h('summary', {}, icon('help'), 'So bekommst du einen Key'),
             h('ol', {}, ...guide.steps.map(step => h('li', { text: step }))),
-            guide.note ? h('p', { class: 'key-guide-note', text: guide.note }) : null,
-            h('a', { href: meta.keyUrl, target: '_blank', rel: 'noopener noreferrer', class: 'link-btn' },
-                `Key-Seite öffnen (${host})`, icon('open_in_new', 'text-[13px]')));
+            guide.note ? h('p', { class: 't-small muted', text: guide.note }) : null,
+            h('a', { href: meta.keyUrl, target: '_blank', rel: 'noopener noreferrer', class: 'btn-text' },
+                `Key-Seite öffnen (${host})`, icon('external')));
     }
 
     // A cheap GET that proves the key works – and that the provider accepts browser requests.
@@ -271,7 +287,7 @@ window.Scribe = window.Scribe || {};
         } catch (_) {
             return {
                 ok: false,
-                message: 'Anfrage wurde blockiert. Entweder fehlt die Internetverbindung, oder der Anbieter lässt keine Anfragen direkt aus dem Browser zu (CORS) – dann funktioniert er in Scribe Studio nicht.'
+                message: 'Anfrage wurde blockiert. Entweder fehlt die Internetverbindung, oder der Anbieter lässt keine Anfragen direkt aus dem Browser zu (CORS) – dann funktioniert er in Unisono nicht.'
             };
         }
     }
@@ -284,34 +300,27 @@ window.Scribe = window.Scribe || {};
         setStatus('Alle API-Keys gelöscht.', 'success');
     }
 
-    // --- Provider selection ---
+    // --- Engine selection: one chip per provider, the active one filled ---
     function renderProviderCards() {
-        const cards = Object.entries(S.apis).map(([id, api]) => {
-            const vocab = api.vocabularySupport?.(api.models[0].id);
-            const chips = [
-                h('span', { class: 'chip chip-ok' }, h('span', { class: 'dot' }), 'Sprecher'),
-                h('span', { class: 'chip' + (vocab ? ' chip-ok' : '') }, h('span', { class: 'dot' }), vocab ? 'Fachbegriffe' : 'Fachbegriffe teilweise'),
-                keys[id] ? null : h('span', { class: 'chip chip-warn' }, icon('key_off', 'text-[12px]'), 'Key fehlt')
-            ];
-            const checked = id === selectedProvider;
+        const chips = Object.entries(S.apis).map(([id, api]) => {
+            const active = id === selectedProvider;
             return h('button', {
-                type: 'button', class: 'provider-card', role: 'radio', 'aria-checked': String(checked),
+                type: 'button', class: 'engine-chip', 'aria-pressed': String(active),
                 onclick: () => selectProvider(id)
             },
-                h('div', { class: 'flex items-center justify-between gap-2' },
-                    h('div', { class: 'flex items-center gap-2.5 min-w-0' },
-                        h('span', { class: 'provider-icon' }, S.brandLogo(id) || icon(api.icon)),
-                        h('div', { class: 'min-w-0' },
-                            h('h3', { class: 'font-headline text-[16px] text-on-surface font-semibold', text: api.label }),
-                            h('p', { class: 'font-code text-outline text-[11px] truncate', text: api.models[0].name }))),
-                    icon(checked ? 'radio_button_checked' : 'radio_button_unchecked', 'provider-radio')),
-                h('p', { class: 'text-on-surface-variant text-[13px]', text: api.description }),
-                h('div', { class: 'flex flex-wrap gap-1.5 mt-auto pt-1' }, ...chips));
+                dot(id),
+                shortLabel(api),
+                keys[id] ? null : ' ',
+                keys[id] ? null : h('span', { class: 'chip-note t-mono', text: 'kein Key' }));
         });
-        $('provider-cards').replaceChildren(...cards);
+        $('provider-cards').replaceChildren(...chips);
+
+        const api = S.apis[selectedProvider];
+        const vocab = api.vocabularySupport?.($('model-select').value || api.models[0].id);
+        $('provider-info').textContent = api.description + (vocab ? '' : ' Fachbegriffe nur teilweise.');
         const missing = !keys[selectedProvider];
-        $('provider-key-note').textContent = missing ? 'Key fehlt → Einstellungen' : 'Key hinterlegt';
-        $('provider-key-note').className = 'font-code text-[11px] hover:underline ' + (missing ? 'text-error' : 'text-secondary');
+        $('provider-key-note').textContent = missing ? `Key für ${shortLabel(api)} eintragen` : '';
+        $('provider-key-note').classList.toggle('hidden', !missing);
     }
 
     function selectProvider(id, { keepModel = false } = {}) {
@@ -326,7 +335,7 @@ window.Scribe = window.Scribe || {};
     }
 
     // --- Configuration (remembered per browser) ---
-    const CONFIG_KEY = 'scribe_config';
+    const CONFIG_KEY = 'unisono_config';
     const CONFIG_FIELDS = ['model-select', 'language-select', 'diarize', 'num-speakers'];
 
     function saveConfig() {
@@ -375,7 +384,14 @@ window.Scribe = window.Scribe || {};
         $('vocab-hint-settings').textContent = vocabHint ? `Mit ${api.label}: ${vocabHint}` : '';
         $('vocab-hint-settings').classList.toggle('hidden', !vocabHint);
 
-        $('start-btn-text').textContent = `Transkription starten (${api.label.split(' ')[0]})`;
+        $('start-btn-text').textContent = `Mit ${shortLabel(api)} transkribieren`;
+        const language = $('language-select');
+        $('start-summary').textContent = [
+            $('model-select').selectedOptions[0]?.textContent.split(' (')[0],
+            api.autoLanguageOnly ? 'Sprache automatisch' : language.selectedOptions[0]?.textContent,
+            $('diarize').checked ? `Sprecher erkennen${getSpeakerCount() ? ` (${getSpeakerCount()})` : ''}` : 'ohne Sprechertrennung',
+            S.vocabulary.isEnabled() && termCount ? `${termCount} Fachbegriff${termCount === 1 ? '' : 'e'}` : null
+        ].filter(Boolean).join(' · ');
         $('start-hint').textContent = !currentFile
             ? 'Zuerst eine Datei wählen oder aufnehmen.'
             : !keys[selectedProvider]
@@ -440,7 +456,7 @@ window.Scribe = window.Scribe || {};
             if (!Number.isFinite(player.duration) || player.duration <= 0 || player.duration === currentDuration) return;
             currentDuration = player.duration;
             $('file-duration').textContent = S.format.clock(currentDuration);
-            $('file-duration-wrap').classList.replace('hidden', 'flex');
+            $('file-duration-wrap').classList.remove('hidden');
             updateHint();
         };
         player.addEventListener('loadedmetadata', update);
@@ -491,7 +507,9 @@ window.Scribe = window.Scribe || {};
         $('export-audio').checked = file.size <= HTML_AUDIO_WARN_BYTES;
         $('file-name').textContent = file.name;
         $('file-size').textContent = (file.size / MB).toFixed(1).replace('.', ',') + ' MB';
-        $('file-duration-wrap').classList.replace('flex', 'hidden');
+        $('file-duration-wrap').classList.add('hidden');
+        const ext = file.name.includes('.') ? file.name.split('.').pop().toUpperCase() : '';
+        $('file-format').textContent = ext ? ` · ${ext}` : '';
         $('file-info').classList.remove('hidden');
         $('drop-zone').classList.add('hidden');
         $('start-btn').disabled = false;
@@ -592,18 +610,16 @@ window.Scribe = window.Scribe || {};
             if (!has) return;
 
             $('transcript-title').textContent = fileName ? S.export.baseName() : 'Transkript';
+            const api = provider && S.apis[provider];
+            $('transcript-eyebrow').replaceChildren(...(api ? [dot(provider), `Transkript · ${shortLabel(api)}`] : ['Transkript']));
             const duration = segments.reduce((max, s) => Math.max(max, s.end), 0);
             const speakers = new Set(segments.map(s => s.speaker).filter(Boolean)).size;
             const words = segments.reduce((n, s) => n + (s.text.match(/\S+/g)?.length || 0), 0);
-            const item = (name, text) => h('span', { class: 'flex items-center gap-1.5' }, icon(name, 'text-[15px] text-outline'), text);
-            $('transcript-meta').replaceChildren(
-                duration > 0 ? item('schedule', S.format.clock(duration)) : null,
-                speakers ? item('groups', `${speakers} Sprecher`) : null,
-                item('notes', `${words.toLocaleString('de-DE')} Wörter`),
-                provider && S.apis[provider]
-                    ? h('span', { class: 'flex items-center gap-1.5' }, S.brandLogo(provider, 'text-outline') || icon('graphic_eq', 'text-[15px] text-outline'), S.apis[provider].label)
-                    : null
-            );
+            $('transcript-meta').replaceChildren(...[
+                duration > 0 ? S.format.clock(duration) : null,
+                speakers ? `${speakers} Sprecher` : null,
+                `${words.toLocaleString('de-DE')} Wörter`
+            ].filter(Boolean).map(text => h('span', { text })));
         });
     }
 
@@ -630,12 +646,20 @@ window.Scribe = window.Scribe || {};
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape' && !menu.classList.contains('hidden')) { setOpen(false); toggle.focus(); }
         });
-        menu.querySelectorAll('[data-export]').forEach(item => item.addEventListener('click', () => {
+        menu.querySelectorAll('[data-export]').forEach(item => item.addEventListener('click', async () => {
             setOpen(false);
-            S.export.exportAs(item.dataset.export, {
-                includeSummary: $('export-summary').checked,
-                audioFile: item.dataset.export === 'html' && $('export-audio').checked ? currentFile : null
-            });
+            // While the file is built (embedding audio can take seconds) the button says so.
+            toggle.disabled = true;
+            toggle.textContent = 'Wird erstellt …';
+            try {
+                await S.export.exportAs(item.dataset.export, {
+                    includeSummary: $('export-summary').checked,
+                    audioFile: item.dataset.export === 'html' && $('export-audio').checked ? currentFile : null
+                });
+            } finally {
+                toggle.textContent = 'Exportieren';
+                toggle.disabled = !S.state.get().segments.length;
+            }
         }));
     }
 
@@ -654,17 +678,18 @@ window.Scribe = window.Scribe || {};
         }
     }
 
-    // The header wraps on narrow screens; sticky elements below it need its real height.
-    function trackHeaderHeight() {
-        const header = $('app-header');
-        const update = () => document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
-        update();
-        if (window.ResizeObserver) new ResizeObserver(update).observe(header);
+    function setupStartOptions() {
+        const toggle = $('start-options-toggle');
+        toggle.addEventListener('click', () => {
+            const open = toggle.getAttribute('aria-expanded') !== 'true';
+            toggle.setAttribute('aria-expanded', String(open));
+            $('start-options').classList.toggle('hidden', !open);
+            S.setIcon(toggle.querySelector('.icon'), open ? 'chev-up' : 'chev-down');
+        });
     }
 
     // --- Init ---
     function init() {
-        trackHeaderHeight();
         S.ui = { setStatus, showError, copy, getKey };
         S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, switchView, openSettings: tab => S.settings.open(tab) };
 
@@ -679,6 +704,7 @@ window.Scribe = window.Scribe || {};
         loadConfig();
         CONFIG_FIELDS.forEach(id => $(id).addEventListener('change', () => { updateHint(); saveConfig(); }));
         setupDropZone();
+        setupStartOptions();
         S.recorder.init({ onRecorded: handleFile });
         fixUnknownDuration();
         trackDuration();
@@ -699,9 +725,6 @@ window.Scribe = window.Scribe || {};
             if (confirm('Transkript und alle Änderungen verwerfen?')) S.state.clear();
         });
 
-        // Footer: the providers with their marks.
-        $('footer-providers').replaceChildren(...Object.entries(S.apis).map(([id, api]) =>
-            h('span', { class: 'flex items-center gap-1.5' }, S.brandLogo(id), api.label.replace(' (Scribe)', '').replace(' (Voxtral)', ' Voxtral'))));
         S.player.init();
         S.editor.init({
             list: $('segment-list'),
@@ -719,15 +742,17 @@ window.Scribe = window.Scribe || {};
         const firstVisit = !Object.keys(S.apis).some(id => keys[id]);
         const restored = S.state.restore();
         updateTranscriptView();
-        switchView('start');
         if (firstVisit) {
-            S.settings.open('keys');
-            setStatus('Willkommen! Trage zuerst den API-Key für mindestens einen Anbieter ein.', 'success');
-        } else if (restored) {
-            const name = S.state.get().fileName;
-            setStatus(`Letztes Transkript wiederhergestellt${name ? ` (${name})` : ''}. Du findest es unter „Transkript & Export“.`, 'success');
+            switchView('keys');
+            setStatus('Willkommen. Trage zuerst den API-Key für mindestens eine Engine ein.', 'success');
+        } else {
+            switchView('start');
+            if (restored) {
+                const name = S.state.get().fileName;
+                setStatus(`Letztes Transkript wiederhergestellt${name ? ` (${name})` : ''}. Du findest es unter „Transkript“.`, 'success');
+            }
         }
     }
 
     document.addEventListener('DOMContentLoaded', init);
-})(window.Scribe);
+})(window.Unisono);

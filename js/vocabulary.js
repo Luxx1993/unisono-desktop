@@ -5,10 +5,10 @@
  * Providers describe what they accept via api.vocabularySupport(model):
  *   { maxTerms, maxChars, maxWords, note } or null when the model has no vocabulary option.
  */
-window.Scribe = window.Scribe || {};
+window.Unisono = window.Unisono || {};
 (function (S) {
-    const STORAGE_KEY = 'scribe_vocabulary';
-    const ENABLED_KEY = 'scribe_vocabulary_enabled';
+    const STORAGE_KEY = 'unisono_vocabulary';
+    const ENABLED_KEY = 'unisono_vocabulary_enabled';
     const $ = id => document.getElementById(id);
 
     const listeners = new Set();
@@ -148,4 +148,4 @@ window.Scribe = window.Scribe || {};
     }
 
     S.vocabulary = { init, getTerms, prepare, describe, onChange, parse, count, isEnabled };
-})(window.Scribe);
+})(window.Unisono);
