@@ -13,9 +13,8 @@ window.Unisono = window.Unisono || {};
     const $ = id => document.getElementById(id);
 
     function init() {
-        $('llm-provider').replaceChildren(...Object.entries(S.llms).map(([id, llm]) =>
-            Object.assign(document.createElement('option'), { value: id, textContent: llm.label })));
-        $('llm-provider').addEventListener('change', updateModels);
+        refresh();
+        $('llm-provider').addEventListener('change', () => updateModels());
         $('summary-btn').addEventListener('click', generate);
         $('summary-copy').addEventListener('click', () => S.ui.copy($('summary-text').value));
         $('summary-download').addEventListener('click', () => {
@@ -27,12 +26,27 @@ window.Unisono = window.Unisono || {};
         updateButton();
     }
 
-    function updateModels() {
+    // Only providers with a key are offered; a key saved on the key page shows up here at once.
+    function refresh() {
+        const select = $('llm-provider');
+        const previous = select.value;
+        const ids = Object.keys(S.llms).filter(id => !S.ui || S.ui.hasKey(id));
+        select.replaceChildren(...(ids.length ? ids : ['']).map(id =>
+            Object.assign(document.createElement('option'), { value: id, textContent: id ? S.llms[id].label : 'Zuerst einen API-Key eintragen' })));
+        select.disabled = !ids.length;
+        if (ids.includes(previous)) select.value = previous;
+        // A different provider resets the model (and the logo, see app.js); the same one keeps what was typed.
+        if (select.value !== previous) select.dispatchEvent(new Event('change'));
+        else updateModels(true);
+    }
+
+    function updateModels(keepModel = false) {
         const provider = $('llm-provider').value;
         const list = $('llm-model-list');
+        if (!provider) { list.replaceChildren(); $('llm-model').value = ''; return; }
         const fill = ids => list.replaceChildren(...ids.map(id => Object.assign(document.createElement('option'), { value: id })));
         fill(S.llms[provider].models);
-        $('llm-model').value = S.llms[provider].defaultModel;
+        if (!keepModel) $('llm-model').value = S.llms[provider].defaultModel;
         // The provider's own catalog follows once its key is known.
         const key = S.ui?.hasKey(provider) ? S.ui.getKey(provider) : '';
         S.llmApi.loadModels(provider, key).then(ids => { if ($('llm-provider').value === provider) fill(ids); });
@@ -80,5 +94,5 @@ window.Unisono = window.Unisono || {};
         $('summary-text').value = text || '';
     }
 
-    S.summary = { init, getText, setText, complete };
+    S.summary = { init, refresh, getText, setText, complete };
 })(window.Unisono);

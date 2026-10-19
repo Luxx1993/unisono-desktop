@@ -839,17 +839,35 @@ window.Unisono = window.Unisono || {};
 
     // --- Settings card --------------------------------------------------------------------------
     function renderSettings() {
-        $('dict-engine').replaceChildren(...Object.entries(S.apis).map(([id, api]) =>
-            el('option', { value: id, text: shortLabel(api) + (S.ui.hasKey(id) ? '' : ' (kein Key)') })));
-        $('dict-engine').value = config.engine;
+        // Only providers with a key are offered; a key saved on the key page shows up here at once.
+        const engines = Object.keys(S.apis).filter(id => S.ui.hasKey(id));
+        if (engines.length && !engines.includes(config.engine)) {
+            config.engine = engines[0];
+            config.model = S.apis[config.engine].models[0].id;
+            saveConfig();
+        }
+        $('dict-engine').replaceChildren(...(engines.length
+            ? engines.map(id => el('option', { value: id, text: shortLabel(S.apis[id]) }))
+            : [el('option', { value: '', text: 'Zuerst einen API-Key eintragen' })]));
+        $('dict-engine').disabled = !engines.length;
+        if (engines.length) $('dict-engine').value = config.engine;
         const api = S.apis[config.engine];
         $('dict-model').replaceChildren(...api.models.map(m => el('option', { value: m.id, text: m.name })));
         $('dict-model').value = config.model;
         $('dict-language').value = config.language;
         $('dict-language').disabled = !!api.autoLanguageOnly;
-        $('dict-llm-provider').replaceChildren(...Object.entries(S.llms).map(([id, llm]) =>
-            el('option', { value: id, text: llm.label + (S.ui.hasKey(id) ? '' : ' (kein Key)') })));
-        $('dict-llm-provider').value = config.llmProvider;
+        const llms = Object.keys(S.llms).filter(id => S.ui.hasKey(id));
+        if (llms.length && !llms.includes(config.llmProvider)) {
+            config.llmProvider = llms[0];
+            config.llmModel = llmDefault(config.llmProvider);
+            saveConfig();
+        }
+        $('dict-llm-provider').replaceChildren(...(llms.length
+            ? llms.map(id => el('option', { value: id, text: S.llms[id].label }))
+            : [el('option', { value: '', text: 'Zuerst einen API-Key eintragen' })]));
+        $('dict-llm-provider').disabled = !llms.length;
+        $('dict-llm-model').disabled = !llms.length;
+        if (llms.length) $('dict-llm-provider').value = config.llmProvider;
         $('dict-llm-model').value = config.llmModel;
         const provider = config.llmProvider;
         const fillModels = ids => $('dict-llm-model-list').replaceChildren(...ids.map(id => el('option', { value: id })));

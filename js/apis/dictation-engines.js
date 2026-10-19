@@ -1,6 +1,6 @@
 /*
- * More speech engines, for the Diktat page only (dictationOnly): they transcribe one short take and
- * return plain text – no speaker separation – so they are not offered for long files.
+ * More speech engines. They return plain text without speaker separation (noDiarization: true), so
+ * the file page switches "Sprecher erkennen" off for them; they suit dictations best (quick: true).
  *
  * Endpoints, field names and model ids are the ones the Android app uses, which in turn come from
  * each provider's own documentation. quick: true marks engines that answer within a second or two.
@@ -12,7 +12,7 @@ window.Unisono = window.Unisono || {};
     const plain = (text, raw) => ({ raw, segments: S.http.fallbackSegment((text || '').trim()) });
 
     function register(id, meta) {
-        S.apis[id] = { dictationOnly: true, quick: true, icon: 'graphic_eq', limits: () => ({}), ...meta };
+        S.apis[id] = { noDiarization: true, quick: true, icon: 'graphic_eq', limits: () => ({}), ...meta };
     }
 
     function guide(host, keyPage, note) {
@@ -217,6 +217,15 @@ window.Unisono = window.Unisono || {};
             return plain(raw.text, raw);
         }
     });
+
+    // What each provider accepts per request (the Android app's figures, from the providers' documentation).
+    const MB = 1024 * 1024;
+    const LIMITS = {
+        openai: { maxBytes: 25 * MB }, groq: { maxBytes: 25 * MB }, scaleway: { maxBytes: 25 * MB }, openrouter: { maxBytes: 25 * MB },
+        siliconflow: { maxBytes: 50 * MB }, xai: { maxBytes: 500 * 1000 * 1000 }, deepgram: { maxBytes: 2048 * MB }, ovhcloud: { maxBytes: 2048 * MB },
+        assemblyai_sync: { maxBytes: 256 * MB, maxSeconds: 20 * 60 }, soniox: { maxSeconds: 300 * 60 }
+    };
+    for (const [id, limit] of Object.entries(LIMITS)) S.apis[id].limits = () => limit;
 
     // The older engines: mark the quick ones (the Diktat page names the slower ones).
     for (const id of ['elevenlabs', 'mistral']) if (S.apis[id]) S.apis[id].quick = true;

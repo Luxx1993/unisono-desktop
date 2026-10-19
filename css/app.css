@@ -1049,3 +1049,8 @@ button.seg-time:hover { color: var(--text-primary); text-decoration: underline; 
 .mini-item { display: flex; align-items: center; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm); background: none; color: var(--text-primary); font: var(--type-small); text-align: left; cursor: pointer; }
 .mini-item:hover, .mini-item:focus-visible { background: var(--surface-sunken); outline: none; }
 .mini-item .icon, .mini-item-gap { width: 16px; height: 16px; flex: none; }
+
+/* ---------------- API-Keys: Filter und Tags der Anbieter ---------------- */
+#key-filters { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
+.tag-row { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
+.tag { display: inline-block; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--surface-sunken); color: var(--text-secondary); font: var(--type-small); font-size: 12px; line-height: 20px; }
