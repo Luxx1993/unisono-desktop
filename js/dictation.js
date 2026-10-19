@@ -38,13 +38,13 @@ window.Unisono = window.Unisono || {};
     const BITRATE = 64000;
     const MIN_SECONDS = 0.7;          // shorter takes are accidents
     const TICK_MS = 100;
-    const LLM_DEFAULTS = { anthropic: 'claude-haiku-5-5', openai: 'gpt-5-mini' };
+    const llmDefault = provider => S.llms[provider]?.defaultModel || '';
     const MAX_TERMS_FOR_CLEANUP = 100;
 
     const config = {
         engine: null, model: null, language: 'de', mode: 'tap', task: 'dictate', longDictation: true,
         miniSkin: 'cloud', miniPalette: S.orbs.DEFAULT_PALETTE, miniDim: true,
-        style: 'cleanup', llmProvider: 'anthropic', llmModel: LLM_DEFAULTS.anthropic, autoCopy: true
+        style: 'cleanup', llmProvider: 'anthropic', llmModel: 'claude-haiku-5-5', autoCopy: true
     };
     let customStyles = [];
     let history = [];
@@ -123,8 +123,8 @@ window.Unisono = window.Unisono || {};
         if (config.miniSkin !== 'wave') config.miniSkin = 'cloud';
         config.miniPalette = S.orbs.paletteById(config.miniPalette).id;
         config.miniDim = config.miniDim !== false;
-        if (!LLM_DEFAULTS[config.llmProvider]) config.llmProvider = 'anthropic';
-        if (!config.llmModel) config.llmModel = LLM_DEFAULTS[config.llmProvider];
+        if (!S.llms[config.llmProvider]) config.llmProvider = 'anthropic';
+        if (!config.llmModel) config.llmModel = llmDefault(config.llmProvider);
         if (config.style !== core.RAW_STYLE_ID && !core.findStyle(config.style, customStyles)) config.style = 'cleanup';
         if (!config.engine) config.engine = pickEngine();
         const api = S.apis[config.engine];
@@ -219,7 +219,7 @@ window.Unisono = window.Unisono || {};
         pendingEnd = null;
     }
 
-    const llmLabel = () => ({ anthropic: 'Anthropic (Claude)', openai: 'OpenAI' })[config.llmProvider];
+    const llmLabel = () => S.llms[config.llmProvider].label;
 
     // One MediaRecorder per part of the recording; all of them listen to the same microphone stream.
     function startSegment(r) {
@@ -839,17 +839,42 @@ window.Unisono = window.Unisono || {};
 
     // --- Settings card --------------------------------------------------------------------------
     function renderSettings() {
-        $('dict-engine').replaceChildren(...Object.entries(S.apis).map(([id, api]) =>
-            el('option', { value: id, text: shortLabel(api) + (S.ui.hasKey(id) ? '' : ' (kein Key)') })));
-        $('dict-engine').value = config.engine;
+        // Only providers with a key are offered; a key saved on the key page shows up here at once.
+        const engines = Object.keys(S.apis).filter(id => S.ui.hasKey(id));
+        if (engines.length && !engines.includes(config.engine)) {
+            config.engine = engines[0];
+            config.model = S.apis[config.engine].models[0].id;
+            saveConfig();
+        }
+        $('dict-engine').replaceChildren(...(engines.length
+            ? engines.map(id => el('option', { value: id, text: shortLabel(S.apis[id]) }))
+            : [el('option', { value: '', text: 'Zuerst einen API-Key eintragen' })]));
+        $('dict-engine').disabled = !engines.length;
+        if (engines.length) $('dict-engine').value = config.engine;
         const api = S.apis[config.engine];
         $('dict-model').replaceChildren(...api.models.map(m => el('option', { value: m.id, text: m.name })));
         $('dict-model').value = config.model;
         $('dict-language').value = config.language;
         $('dict-language').disabled = !!api.autoLanguageOnly;
-        $('dict-llm-provider').value = config.llmProvider;
-        $('dict-llm-model').value = config.llmModel;
-        $('dict-llm-model-list').replaceChildren(...S.summary.MODELS[config.llmProvider].map(id => el('option', { value: id })));
+        const llms = Object.keys(S.llms).filter(id => S.ui.hasKey(id));
+        if (llms.length && !llms.includes(config.llmProvider)) {
+            config.llmProvider = llms[0];
+            config.llmModel = llmDefault(config.llmProvider);
+            saveConfig();
+        }
+        $('dict-llm-provider').replaceChildren(...(llms.length
+            ? llms.map(id => el('option', { value: id, text: S.llms[id].label }))
+            : [el('option', { value: '', text: 'Zuerst einen API-Key eintragen' })]));
+        $('dict-llm-provider').disabled = !llms.length;
+        $('dict-llm-model').disabled = !llms.length;
+        if (llms.length) $('dict-llm-provider').value = config.llmProvider;
+        const provider = config.llmProvider;
+        if (llms.length) {
+            S.llmApi.fillModelSelect($('dict-llm-model'), provider, S.ui.hasKey(provider) ? S.ui.getKey(provider) : '', config.llmModel,
+                pick => { config.llmModel = pick; saveConfig(); });
+        } else {
+            $('dict-llm-model').replaceChildren(el('option', { value: '', text: 'Zuerst einen API-Key eintragen' }));
+        }
         $('dict-autocopy').checked = config.autoCopy;
         $('dict-longdictation').checked = config.longDictation;
         $('dict-mini-skin').value = config.miniSkin;
@@ -867,7 +892,7 @@ window.Unisono = window.Unisono || {};
                 onclick: () => { config.mode = id; saveConfig(); renderSettings(); setPhase(phase); }
             })));
         const notes = [];
-        if (!['elevenlabs', 'mistral'].includes(config.engine)) notes.push(`${shortLabel(api)} liefert das Ergebnis erst nach einigen Sekunden Wartezeit; ElevenLabs und Mistral sind für Diktate schneller.`);
+        if (!api.quick) notes.push(`${shortLabel(api)} liefert das Ergebnis erst nach einigen Sekunden Wartezeit; für Diktate sind die schnellen Engines (z. B. ElevenLabs, Groq, Deepgram) angenehmer.`);
         if (api.autoLanguageOnly) notes.push(`${shortLabel(api)} erkennt die Sprache automatisch.`);
         const vocab = api.vocabularySupport?.(config.model) ? S.vocabulary.describe(api.vocabularySupport(config.model)) : '';
         if (vocab) notes.push(vocab);
@@ -885,12 +910,13 @@ window.Unisono = window.Unisono || {};
         $('dict-language').addEventListener('change', e => { config.language = e.target.value; saveConfig(); });
         $('dict-llm-provider').addEventListener('change', e => {
             config.llmProvider = e.target.value;
-            config.llmModel = LLM_DEFAULTS[config.llmProvider];
+            config.llmModel = llmDefault(config.llmProvider);
             saveConfig(); renderSettings();
         });
         $('dict-llm-model').addEventListener('change', e => {
-            config.llmModel = e.target.value.trim() || LLM_DEFAULTS[config.llmProvider];
-            saveConfig(); renderSettings();
+            if (e.target.value === '__custom') return;   // see fillModelSelect: the typed-in id follows as a new change
+            config.llmModel = e.target.value || llmDefault(config.llmProvider);
+            saveConfig();
         });
         $('dict-autocopy').addEventListener('change', e => { config.autoCopy = e.target.checked; saveConfig(); });
         $('dict-longdictation').addEventListener('change', e => { config.longDictation = e.target.checked; saveConfig(); });

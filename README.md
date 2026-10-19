@@ -7,7 +7,7 @@ Audio und Video transkribieren, lesen, korrigieren und exportieren, komplett im 
 ## Auf einen Blick
 
 - **Läuft einfach so:** `index.html` per Doppelklick öffnen. Kein Node.js, kein Server, keine Installation, keine Verbindung zu Google Fonts. Ideal für Dienstrechner.
-- **Vier Engines:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral), jeweils mit Sprechererkennung.
+- **Viele Engines:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral) mit Sprechererkennung, dazu OpenAI, Groq, Deepgram, Soniox, Gemini, xAI u. a. ohne Sprechertrennung. Zur Auswahl stehen nur Engines, für die ein Key hinterlegt ist.
 - **Diktat:** sprechen, die KI räumt den Text auf (Stile wie Aufräumen, E-Mail oder Aktenvermerk), er liegt sofort in der Zwischenablage. Mit schwebendem Fenster, Umformulieren, Langdiktat, Ersetzungsregeln, Verlauf und Statistik.
 - **Aufnehmen im Browser:** Mikrofonaufnahme mit Pause, Pegelanzeige und Absturzsicherung.
 - **Fachbegriffe:** eine Liste mit Namen und Fachwörtern, die in passender Form an jede Engine geht.
@@ -41,10 +41,10 @@ Links steht die Seitenleiste. Auf dem Handy gibt es unten eine Tab-Leiste mit Da
 | **Transkribieren** | Vorhandene Audio- oder Videodatei ablegen, Engine wählen, Optionen, Start. Während des Laufs der Fortschritt. |
 | **Transkript** | Player, Transkript-Editor, Suche, Sprecher und Redezeit, Zusammenfassung, Export. |
 | **Fachbegriffe** | Begriffsliste mit Import und Export, dazu Ersetzungsregeln für das Diktat. |
-| **API-Keys** | Keys für die Engines und die Zusammenfassung, jeweils mit **Prüfen**, **Entfernen** und der Anleitung „So bekommst du einen Key“. |
+| **API-Keys** | Keys aller Anbieter, jeweils mit **Prüfen**, **Entfernen** und der Anleitung „So bekommst du einen Key“. Filter wie in der Android-App: Transkription, Umformulierung, Echtzeit, EU. |
 | **Einstellungen** | Darstellung (Hell, Dunkel, Wie System) sowie Daten und Datenschutz: Keys, Transkript, Aufnahme-Sicherung, Diktat-Verlauf und Diktat-Statistik einzeln löschen oder alles zurücksetzen. |
 
-Unten in der Seitenleiste steht, für welche Engine ein Key hinterlegt ist.
+Unten in der Seitenleiste stehen die Engines mit hinterlegtem Key. Auf den Seiten „Transkribieren“, „Diktat“ und bei der Zusammenfassung zeigen die Auswahllisten nur Anbieter mit Key; ein neu gespeicherter Key erscheint sofort.
 
 <img src="docs/screenshots/keys.png" alt="API-Keys mit Status, Prüfen und Anleitung" width="100%">
 
@@ -102,7 +102,7 @@ Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt i
 
 <img src="docs/screenshots/dictation.png" alt="Diktat mit Aufnahmeknopf, Stilwahl, Ergebnis und Verlauf" width="720">
 
-**Ablauf:** aufnehmen → mit der gewählten Engine transkribieren (ohne Sprechertrennung, mit deinen Fachbegriffen) → mit dem gewählten **Stil** von Claude oder OpenAI aufräumen → **Ersetzungen** anwenden → anzeigen, kopieren, im Verlauf merken.
+**Ablauf:** aufnehmen → mit der gewählten Engine transkribieren (ohne Sprechertrennung, mit deinen Fachbegriffen) → mit dem gewählten **Stil** von einer KI deiner Wahl aufräumen → **Ersetzungen** anwenden → anzeigen, kopieren, im Verlauf merken.
 
 - **Bedienung:** *Antippen* (Knopf oder Leertaste startet und beendet) oder *Halten* (Knopf oder Leertaste gedrückt halten, solange du sprichst). **Esc** verwirft. Die Leertaste gilt, solange die Seite „Diktat“ oder das schwebende Fenster den Fokus hat und kein Textfeld. Ein roter Punkt an „Diktat“ zeigt, dass eine Aufnahme läuft.
 - **Stile:** *Rohtext* (nur das Transkript), *Aufräumen*, *Wörtlich*, *E-Mail*, *Chat* und *Aktenvermerk*, mit demselben Wortlaut wie in der Android-App. Unter **Stile verwalten** legst du eigene Stile an (Name und Anweisung), bearbeitest oder löschst sie; die eingebauten dienen als Vorlage für Kopien.
@@ -111,6 +111,9 @@ Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt i
 - **Ersetzungen:** Unter **Fachbegriffe** stehen feste Regeln „aus → in“ (ganzes Wort oder Teilstück, mit oder ohne Groß/Klein), die nach der KI auf den fertigen Text und auf den Rohtext laufen, von oben nach unten. Leeres Ziel löscht das Wort. Die Fachbegriffe selbst gehen als Hinweis an die Engine und zusätzlich an die KI, damit Namen wie gelistet geschrieben werden.
 - **Verlauf:** die letzten 50 Diktate (Zeit, Stil, Text) mit Kopieren, Anzeigen und Löschen; löschbar unter **Einstellungen → Daten und Datenschutz**.
 - **Einstellungen der Seite:** Engine (Standard: ElevenLabs, wenn ein Key da ist, sonst die erste Engine mit Key), Modell, Sprache, KI-Anbieter und -Modell (Standard Claude Haiku 5.5, schnell und günstig), automatisch kopieren, Langdiktat. ElevenLabs und Mistral antworten in einem Schritt, Gladia und AssemblyAI brauchen einige Sekunden länger.
+
+- **Mehr Anbieter für das Diktat:** Für die Spracherkennung zusätzlich OpenAI, Groq, Scaleway, OVHcloud, SiliconFlow, OpenRouter, xAI (Grok), Deepgram, Soniox, Google Gemini und AssemblyAI Sync (die Ein-Anfrage-Variante von AssemblyAI, gleicher Key wie AssemblyAI). Zum Aufräumen die KI von Anthropic, OpenAI, Groq, Google Gemini, Mistral, OpenRouter, Together AI, DeepInfra, xAI, DeepSeek, Cerebras, SiliconFlow, Scaleway oder OVHcloud. Wer einen Anbieter schon für die Spracherkennung eingetragen hat, nutzt denselben Key zum Aufräumen. Modelle und Adressen sind dieselben wie in der Android-App; bei Anbietern ohne feste Modellliste lädt Unisono die Liste des Anbieters, sobald ein Key da ist. Diese Engines gibt es auch für Dateien; dort ist „Sprecher erkennen“ für sie abgeschaltet, und die Grenzen des Anbieters (Größe, Länge) werden vor dem Upload geprüft.
+- **Nicht dabei:** Azure Speech (eigene Adresse je Konto), Ollama und eigene Server (laufen im lokalen Netz, ein Browser darf sie nicht ohne Weiteres ansprechen) und die Offline-Modelle auf dem Gerät. Ob Cerebras und Scaleway Anfragen aus dem Browser zulassen, ließ sich ohne Key nicht prüfen; **Prüfen** unter „API-Keys“ zeigt es.
 - **Falls die KI ausfällt** (Key fehlt, Netzwerk): Das Rohtext-Ergebnis steht trotzdem bereit, mit dem Grund in der Meldung.
 
 ### Schwebendes Fenster

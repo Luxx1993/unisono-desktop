@@ -40,7 +40,7 @@ window.Unisono = window.Unisono || {};
 
     S.apis.mistral = {
         label: 'Mistral (Voxtral)',
-        description: 'Europäischer Anbieter, schnell und günstig. Sprache wird automatisch erkannt.',
+        description: 'Europäischer Anbieter, schnell und günstig. Sprache wird automatisch erkannt. Derselbe Key dient zum Aufräumen.',
         icon: 'graphic_eq',
         models: [
             { id: 'voxtral-mini-latest', name: 'Voxtral Mini Transcribe (aktuell)' }

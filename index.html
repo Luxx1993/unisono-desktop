@@ -19,6 +19,8 @@
     <script src="js/apis/elevenlabs.js" defer></script>
     <script src="js/apis/assembly.js" defer></script>
     <script src="js/apis/mistral.js" defer></script>
+    <script src="js/apis/dictation-engines.js" defer></script>
+    <script src="js/apis/llm.js" defer></script>
     <script src="js/export.js" defer></script>
     <script src="js/vocabulary.js" defer></script>
     <script src="js/recording-backup.js" defer></script>
@@ -181,18 +183,11 @@
                             <button type="button" id="file-clear" class="icon-btn" aria-label="Auswahl aufheben"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
                         </div>
 
-                        <div class="engine-row">
-                            <span class="t-label">Engine</span>
-                            <div id="provider-cards" class="chips" role="group" aria-label="Engine wählen"></div>
-                        </div>
-                        <p id="provider-info" class="t-small muted"></p>
-
-                        <div class="run-summary">
-                            <p id="start-summary" class="t-small muted"></p>
-                            <button type="button" id="start-options-toggle" class="btn-text" aria-expanded="false" aria-controls="start-options">Optionen<svg class="icon" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
-                        </div>
-
-                        <div id="start-options" class="options-grid hidden">
+                        <div id="start-options" class="options-grid">
+                            <div class="field">
+                                <label for="engine-select">Engine</label>
+                                <select id="engine-select" class="input"></select>
+                            </div>
                             <div class="field">
                                 <label for="model-select">Modell</label>
                                 <select id="model-select" class="input"></select>
@@ -217,6 +212,7 @@
                                 <input type="number" id="num-speakers" min="1" max="32" placeholder="automatisch" class="input">
                             </div>
                         </div>
+                        <p id="provider-info" class="t-small muted"></p>
 
                         <p id="model-hint" class="notice-line hidden"></p>
 
@@ -346,15 +342,11 @@
                         </div>
                         <div class="field">
                             <label for="dict-llm-provider">KI zum Aufräumen</label>
-                            <select id="dict-llm-provider" class="input">
-                                <option value="anthropic">Anthropic (Claude)</option>
-                                <option value="openai">OpenAI</option>
-                            </select>
+                            <select id="dict-llm-provider" class="input"></select>
                         </div>
                         <div class="field">
                             <label for="dict-llm-model">KI-Modell</label>
-                            <input id="dict-llm-model" class="input is-mono" list="dict-llm-model-list" autocomplete="off" spellcheck="false">
-                            <datalist id="dict-llm-model-list"></datalist>
+                            <select id="dict-llm-model" class="input"></select>
                         </div>
                     </div>
                     <label class="check"><input type="checkbox" id="dict-autocopy" checked> Ergebnis sofort in die Zwischenablage kopieren</label>
@@ -611,10 +603,7 @@
                                 <div class="options-grid is-two">
                                     <div class="field">
                                         <label for="llm-provider">Anbieter <span id="llm-logo" class="llm-logo"></span></label>
-                                        <select id="llm-provider" class="input">
-                                            <option value="anthropic">Anthropic (Claude)</option>
-                                            <option value="openai">OpenAI</option>
-                                        </select>
+                                        <select id="llm-provider" class="input"></select>
                                     </div>
                                     <div class="field">
                                         <label for="summary-mode">Art</label>
@@ -627,8 +616,7 @@
                                 </div>
                                 <div class="field">
                                     <label for="llm-model">Modell</label>
-                                    <input id="llm-model" list="llm-model-list" autocomplete="off" class="input is-mono">
-                                    <datalist id="llm-model-list"></datalist>
+                                    <select id="llm-model" class="input"></select>
                                 </div>
                                 <button type="button" id="summary-btn" disabled class="btn-secondary is-wide">Zusammenfassung erstellen</button>
                                 <div class="field">
@@ -689,13 +677,14 @@
                     </div>
                 </header>
 
-                <section class="card" aria-labelledby="keys-stt-title">
-                    <h2 id="keys-stt-title" class="t-label">Transkription</h2>
-                    <div id="key-cards-stt" class="key-list"></div>
-                </section>
-                <section class="card" aria-labelledby="keys-llm-title">
-                    <h2 id="keys-llm-title" class="t-label">Zusammenfassung (optional)</h2>
-                    <div id="key-cards-llm" class="key-list"></div>
+                <section class="card" aria-labelledby="keys-list-title">
+                    <div class="card-head">
+                        <h2 id="keys-list-title" class="t-label">Anbieter</h2>
+                        <span id="key-filter-count" class="t-small muted"></span>
+                    </div>
+                    <div id="key-filters" class="segmented" role="radiogroup" aria-label="Anbieter filtern"></div>
+                    <p id="key-filter-note" class="t-small muted hidden"></p>
+                    <div id="key-cards" class="key-list"></div>
                 </section>
                 <details class="card key-guide is-general">
                     <summary><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg>Allgemeine Hinweise zu API-Keys</summary>

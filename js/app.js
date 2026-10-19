@@ -10,42 +10,19 @@ window.Unisono = window.Unisono || {};
     const HTML_AUDIO_WARN_BYTES = 25 * MB;
     const KEY_PREFIX = 'unisono_key_';
 
-    // Keys for the AI summary; the transcription providers come from S.apis.
-    const LLM_KEYS = {
-        anthropic: {
-            label: 'Anthropic (Claude)',
-            description: 'Für Zusammenfassungen, Stichpunkte und Protokolle.',
-            keyUrl: 'https://console.anthropic.com/settings/keys',
-            keyGuide: {
-                steps: [
-                    'In der Anthropic Console (console.anthropic.com) ein Konto anlegen.',
-                    'Unter „Billing“ Guthaben aufladen – die API wird vorab bezahlt, ein Claude-Abo gilt hier nicht.',
-                    'Unter „Settings → API Keys“ auf „Create Key“ klicken und den Key sofort kopieren.',
-                    'Hier einfügen und mit „Prüfen“ testen.'
-                ],
-                note: 'Unter „Limits“ lässt sich eine monatliche Obergrenze setzen.'
-            },
-            test: key => ({
-                url: 'https://api.anthropic.com/v1/models',
-                headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }
-            })
-        },
-        openai: {
-            label: 'OpenAI',
-            description: 'Alternative für Zusammenfassungen.',
-            keyUrl: 'https://platform.openai.com/api-keys',
-            keyGuide: {
-                steps: [
-                    'Auf platform.openai.com ein Konto anlegen.',
-                    'Unter „Billing“ Guthaben aufladen – ein ChatGPT-Abo gilt für die API nicht.',
-                    'Unter „API keys“ auf „Create new secret key“ klicken und den Key sofort kopieren.',
-                    'Hier einfügen und mit „Prüfen“ testen.'
-                ],
-                note: 'Unter „Limits“ lässt sich eine monatliche Obergrenze setzen.'
-            },
-            test: key => ({ url: 'https://api.openai.com/v1/models', headers: { 'Authorization': 'Bearer ' + key } })
-        }
+    // Keys of the text AI providers (S.llms) that have no speech engine of their own. A provider that
+    // is both (OpenAI, Groq, Gemini, …) has one row under S.apis, and that key serves both purposes.
+    const LLM_KEYS = {};
+    const refreshLlmKeys = () => {
+        for (const id of Object.keys(LLM_KEYS)) delete LLM_KEYS[id];
+        for (const [id, llm] of Object.entries(S.llms)) if (!S.apis[id]) LLM_KEYS[id] = llm;
     };
+    // Every speech engine can transcribe files; those without speaker separation (noDiarization) say so.
+    const engineIds = () => Object.keys(S.apis);
+    const hasEngineKey = id => !!keys[keyIdOf(id)];
+    const engineIdsWithKey = () => engineIds().filter(hasEngineKey);
+    // An engine may share the key of another entry (AssemblyAI Sync uses the AssemblyAI key).
+    const keyIdOf = id => S.apis[id]?.keyId || id;
 
     let currentFile = null;
     let currentDuration = null;  // seconds, once the player has read the file
@@ -130,7 +107,7 @@ window.Unisono = window.Unisono || {};
     const keys = {};
 
     function allKeyIds() {
-        return [...Object.keys(S.apis), ...Object.keys(LLM_KEYS)];
+        return [...Object.keys(S.apis).filter(id => !S.apis[id].keyId), ...Object.keys(LLM_KEYS)];
     }
 
     function keyMeta(id) {
@@ -159,36 +136,73 @@ window.Unisono = window.Unisono || {};
     }
 
     function getKey(id) {
+        id = keyIdOf(id);
         if (!keys[id]) throw new Error(`Bitte zuerst den API-Key für ${keyMeta(id).label} unter „API-Keys“ eintragen.`);
         return keys[id];
     }
 
     function keysChanged() {
         renderKeyStatus();
-        renderProviderCards();
-        updateHint();
+        selectProvider(selectedProvider, { keepModel: true });
         S.settings.refresh();
         S.dictation?.refresh();
+        S.summary?.refresh();
     }
 
     // Sidebar (and on mobile the top bar): which engines have a key.
     function renderKeyStatus() {
-        const ids = Object.keys(S.apis);
-        const withKey = ids.filter(id => keys[id]).length;
-        $('topbar-keys').replaceChildren(...ids.map(id => {
-            const d = dot(id);
-            if (!keys[id]) d.classList.add('is-empty');
-            return d;
-        }));
-        $('topbar-keys').setAttribute('aria-label', `${withKey} von ${ids.length} Engines mit Key. API-Keys öffnen`);
-        $('topbar-keys').title = ids.map(id => `${shortLabel(S.apis[id])}: ${keys[id] ? 'Key hinterlegt' : 'kein Key'}`).join('\n');
-        $('provider-status').replaceChildren(...Object.entries(S.apis).map(([id, api]) =>
+        const ids = engineIdsWithKey();
+        $('topbar-keys').replaceChildren(...ids.map(id => dot(id)));
+        $('topbar-keys').setAttribute('aria-label', ids.length
+            ? `${ids.length} Engines mit Key. API-Keys öffnen`
+            : 'Noch kein Key hinterlegt. API-Keys öffnen');
+        $('topbar-keys').title = ids.length ? ids.map(id => shortLabel(S.apis[id])).join('\n') : 'Noch kein Key hinterlegt';
+        $('provider-status').replaceChildren(...(ids.length ? ids : [null]).map(id =>
             h('li', {},
                 h('button', { type: 'button', class: 'provider-status-item', onclick: () => switchView('keys') },
-                    dot(id),
-                    h('span', { class: 'provider-status-name', text: shortLabel(api) }),
-                    h('span', { class: 'status-dot ' + (keys[id] ? 'is-success' : 'is-idle'), 'aria-hidden': 'true' }),
-                    h('span', { class: 'visually-hidden', text: keys[id] ? ', Key hinterlegt' : ', kein Key' })))));
+                    id ? dot(id) : null,
+                    h('span', { class: 'provider-status-name', text: id ? shortLabel(S.apis[id]) : 'Noch kein Key' }),
+                    h('span', { class: 'status-dot ' + (id ? 'is-success' : 'is-idle'), 'aria-hidden': 'true' }),
+                    h('span', { class: 'visually-hidden', text: id ? ', Key hinterlegt' : ', API-Keys öffnen' })))));
+    }
+
+    // What a provider does, for the filter chips on the key page (the same filters as the Android app).
+    const TAG_LABELS = { stt: 'Transkription', llm: 'Umformulierung', realtime: 'Echtzeit', eu: 'EU' };
+    // Providers that can transcribe live (from the Android app's catalog); Unisono itself records whole takes.
+    const REALTIME_IDS = new Set(['openai', 'gemini', 'soniox', 'elevenlabs', 'deepgram', 'assembly', 'xai']);
+    // Providers that keep the data in the EU by default (Gladia, Mistral, Scaleway, OVHcloud).
+    const EU_IDS = new Set(['gladia', 'mistral', 'scaleway', 'ovhcloud']);
+    let keyFilter = 'all';
+
+    function providerTags(id) {
+        const tags = [];
+        if (S.apis[id]) tags.push('stt');
+        if (S.llms[id]) tags.push('llm');
+        if (S.apis[id] && REALTIME_IDS.has(id)) tags.push('realtime');
+        if (EU_IDS.has(id)) tags.push('eu');
+        return tags;
+    }
+
+    function applyKeyFilter() {
+        let shown = 0;
+        document.querySelectorAll('#key-cards .key-row').forEach(rowEl => {
+            const match = keyFilter === 'all' || rowEl.dataset.tags.split(' ').includes(keyFilter);
+            rowEl.classList.toggle('hidden', !match);
+            if (match) shown++;
+        });
+        document.querySelectorAll('#key-filters button').forEach(chip => chip.setAttribute('aria-checked', String(chip.dataset.filter === keyFilter)));
+        const note = $('key-filter-note');
+        note.textContent = keyFilter === 'realtime'
+            ? 'Diese Anbieter können live mitschreiben. Unisono nimmt bisher ganze Aufnahmen auf und schickt sie danach.'
+            : keyFilter === 'eu' ? 'Diese Anbieter verarbeiten die Daten standardmäßig in der EU.' : '';
+        note.classList.toggle('hidden', !note.textContent);
+        $('key-filter-count').textContent = `${shown} Anbieter`;
+    }
+
+    function renderKeyFilters() {
+        $('key-filters').replaceChildren(...[['all', 'Alle'], ...Object.entries(TAG_LABELS)].map(([id, label]) =>
+            h('button', { type: 'button', role: 'radio', 'data-filter': id, 'aria-checked': 'false', text: label,
+                onclick: () => { keyFilter = id; applyKeyFilter(); } })));
     }
 
     function renderKeyCards() {
@@ -246,12 +260,13 @@ window.Unisono = window.Unisono || {};
                 save();
             };
 
-            return h('div', { class: 'key-row' },
+            return h('div', { class: 'key-row', 'data-tags': providerTags(id).join(' ') },
                 h('div', { class: 'key-provider' },
                     isEngine ? dot(id) : null,
                     h('div', { class: 'min-w-0' },
                         h('h3', { class: 'key-name' }, meta.label, S.brandLogo(id)),
-                        h('p', { class: 't-small muted', text: meta.description }))),
+                        h('p', { class: 't-small muted', text: meta.description }),
+                        h('div', { class: 'tag-row' }, ...providerTags(id).map(tag => h('span', { class: 'tag', text: TAG_LABELS[tag] }))))),
                 h('div', { class: 'key-input' },
                     h('label', { class: 'visually-hidden', for: inputId, text: `API-Key für ${meta.label}` }),
                     h('div', { class: 'input-wrap' }, input, mask)),
@@ -261,8 +276,9 @@ window.Unisono = window.Unisono || {};
                     removeBtn),
                 h('div', { class: 'key-more' }, feedback, keyGuide(meta)));
         };
-        $('key-cards-stt').replaceChildren(...Object.keys(S.apis).map(row));
-        $('key-cards-llm').replaceChildren(...Object.keys(LLM_KEYS).map(row));
+        $('key-cards').replaceChildren(...[...Object.keys(S.apis).filter(id => !S.apis[id].keyId), ...Object.keys(LLM_KEYS)].map(row));
+        renderKeyFilters();
+        applyKeyFilter();
     }
 
     // Step-by-step guide to getting a key, folded away until asked for.
@@ -302,31 +318,31 @@ window.Unisono = window.Unisono || {};
         setStatus('Alle API-Keys gelöscht.', 'success');
     }
 
-    // --- Engine selection: one chip per provider, the active one filled ---
+    // --- Engine selection: a drop-down with the engines that have a key (like on the Diktat page) ---
     function renderProviderCards() {
-        const chips = Object.entries(S.apis).map(([id, api]) => {
-            const active = id === selectedProvider;
-            return h('button', {
-                type: 'button', class: 'engine-chip', 'aria-pressed': String(active),
-                onclick: () => selectProvider(id)
-            },
-                dot(id),
-                shortLabel(api),
-                keys[id] ? null : ' ',
-                keys[id] ? null : h('span', { class: 'chip-note t-mono', text: 'kein Key' }));
-        });
-        $('provider-cards').replaceChildren(...chips);
+        const withKey = engineIdsWithKey();
+        const select = $('engine-select');
+        select.replaceChildren(...(withKey.length
+            ? withKey.map(id => h('option', { value: id, text: shortLabel(S.apis[id]) }))
+            : [h('option', { value: '', text: 'Zuerst einen API-Key eintragen' })]));
+        select.disabled = !withKey.length;
+        if (withKey.length) select.value = selectedProvider;
 
         const api = S.apis[selectedProvider];
         const vocab = api.vocabularySupport?.($('model-select').value || api.models[0].id);
-        $('provider-info').textContent = api.description + (vocab ? '' : ' Fachbegriffe nur teilweise.');
-        const missing = !keys[selectedProvider];
-        $('provider-key-note').textContent = missing ? `Key für ${shortLabel(api)} eintragen` : '';
+        const notes = [api.description];
+        if (!vocab) notes.push('Fachbegriffe nur teilweise.');
+        if (api.noDiarization) notes.push(`${shortLabel(api)} trennt keine Sprecher.`);
+        $('provider-info').textContent = notes.join(' ');
+        const missing = !hasEngineKey(selectedProvider);
+        $('provider-key-note').textContent = missing ? 'API-Key eintragen' : '';
         $('provider-key-note').classList.toggle('hidden', !missing);
     }
 
+    // The engine of the file page: the wanted one if it has a key, else the first with a key.
     function selectProvider(id, { keepModel = false } = {}) {
-        selectedProvider = S.apis[id] ? id : Object.keys(S.apis)[0];
+        const withKey = engineIdsWithKey();
+        selectedProvider = S.apis[id] && hasEngineKey(id) ? id : (withKey[0] || (S.apis.gladia ? 'gladia' : engineIds()[0]));
         const api = S.apis[selectedProvider];
         const previousModel = $('model-select').value;
         $('model-select').replaceChildren(...api.models.map(m => h('option', { value: m.id, text: m.name })));
@@ -349,7 +365,7 @@ window.Unisono = window.Unisono || {};
     function loadConfig() {
         let values = {};
         try { values = JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}') || {}; } catch (_) {}
-        selectProvider(values.provider || values['provider-select'] || 'gladia');
+        selectProvider(values.provider || values['provider-select']);
         for (const id of CONFIG_FIELDS) {
             if (!(id in values)) continue;
             if ($(id).type === 'checkbox') $(id).checked = values[id];
@@ -365,7 +381,8 @@ window.Unisono = window.Unisono || {};
 
     function updateHint() {
         const api = S.apis[selectedProvider];
-        $('speaker-options').classList.toggle('hidden', !$('diarize').checked);
+        $('diarize').disabled = !!api.noDiarization;
+        $('speaker-options').classList.toggle('hidden', !$('diarize').checked || !!api.noDiarization);
         $('language-select').disabled = !!api.autoLanguageOnly;
 
         const hints = [];
@@ -388,16 +405,10 @@ window.Unisono = window.Unisono || {};
 
         $('start-btn-text').textContent = `Mit ${shortLabel(api)} transkribieren`;
         const language = $('language-select');
-        $('start-summary').textContent = [
-            $('model-select').selectedOptions[0]?.textContent.split(' (')[0],
-            api.autoLanguageOnly ? 'Sprache automatisch' : language.selectedOptions[0]?.textContent,
-            $('diarize').checked ? `Sprecher erkennen${getSpeakerCount() ? ` (${getSpeakerCount()})` : ''}` : 'ohne Sprechertrennung',
-            S.vocabulary.isEnabled() && termCount ? `${termCount} Fachbegriff${termCount === 1 ? '' : 'e'}` : null
-        ].filter(Boolean).join(' · ');
         $('start-hint').textContent = !currentFile
             ? 'Zuerst eine Datei wählen oder aufnehmen.'
-            : !keys[selectedProvider]
-                ? `Für ${api.label} fehlt noch der API-Key.`
+            : !hasEngineKey(selectedProvider)
+                ? 'Zuerst unter „API-Keys“ einen Key eintragen.'
                 : `Bereit: ${currentFile.name}${currentDuration ? ` · ${S.format.clock(currentDuration)}` : ''}`;
     }
 
@@ -425,7 +436,7 @@ window.Unisono = window.Unisono || {};
     function limitMessage(providerId) {
         const problems = limitProblems(providerId);
         if (!problems.length) return '';
-        const fitting = Object.keys(S.apis).filter(id => id !== providerId && !limitProblems(id).length);
+        const fitting = engineIdsWithKey().filter(id => id !== providerId && !limitProblems(id).length);
         return problems.join(' ') + (fitting.length
             ? ` Passende Anbieter: ${fitting.map(id => S.apis[id].label).join(', ')}.`
             : ' Bitte die Datei kürzen oder teilen.');
@@ -569,7 +580,7 @@ window.Unisono = window.Unisono || {};
             const limitMsg = limitMessage(provider);
             if (limitMsg) throw new Error(limitMsg);
 
-            const diarize = $('diarize').checked;
+            const diarize = $('diarize').checked && !S.apis[provider].noDiarization;
             const { terms: vocabulary } = S.vocabulary.prepare(S.vocabulary.getTerms(), vocabularySupport());
             const startedAt = Date.now();
             const { raw, segments } = await S.apis[provider].transcribe(file, {
@@ -682,21 +693,12 @@ window.Unisono = window.Unisono || {};
         }
     }
 
-    function setupStartOptions() {
-        const toggle = $('start-options-toggle');
-        toggle.addEventListener('click', () => {
-            const open = toggle.getAttribute('aria-expanded') !== 'true';
-            toggle.setAttribute('aria-expanded', String(open));
-            $('start-options').classList.toggle('hidden', !open);
-            S.setIcon(toggle.querySelector('.icon'), open ? 'chev-up' : 'chev-down');
-        });
-    }
-
     // --- Init ---
     function init() {
-        S.ui = { setStatus, hideStatus, showError, copy, getKey, hasKey: id => !!keys[id] };
+        S.ui = { setStatus, hideStatus, showError, copy, getKey, hasKey: id => !!keys[keyIdOf(id)] };
         S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, switchView, openSettings: tab => S.settings.open(tab) };
 
+        refreshLlmKeys();
         loadKeys();
         renderKeyCards();
         renderKeyStatus();
@@ -707,8 +709,8 @@ window.Unisono = window.Unisono || {};
         });
         loadConfig();
         CONFIG_FIELDS.forEach(id => $(id).addEventListener('change', () => { updateHint(); saveConfig(); }));
+        $('engine-select').addEventListener('change', e => selectProvider(e.target.value));
         setupDropZone();
-        setupStartOptions();
         S.recorder.init({ onRecorded: handleFile });
         fixUnknownDuration();
         trackDuration();
@@ -746,7 +748,7 @@ window.Unisono = window.Unisono || {};
         showLlmLogo();
         S.state.subscribe(type => { if (type !== 'text') updateTranscriptView(); });
 
-        const firstVisit = !Object.keys(S.apis).some(id => keys[id]);
+        const firstVisit = !allKeyIds().some(id => keys[id]);
         const restored = S.state.restore();
         updateTranscriptView();
         if (firstVisit) {
