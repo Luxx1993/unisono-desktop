@@ -2,7 +2,7 @@
 window.Unisono = window.Unisono || {};
 (function (S) {
     const MODELS = {
-        anthropic: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5'],
+        anthropic: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-5-5', 'claude-haiku-4-5'],
         openai: ['gpt-5', 'gpt-5-mini']
     };
     const PROMPTS = {
@@ -54,9 +54,7 @@ window.Unisono = window.Unisono || {};
         try {
             if (!model) throw new Error('Bitte ein Modell angeben.');
             const key = S.ui.getKey(provider);
-            const text = provider === 'anthropic'
-                ? await viaAnthropic(key, model, user)
-                : await viaOpenAI(key, model, user);
+            const text = await complete({ provider, key, model, user });
             $('summary-text').value = text.trim();
             S.ui.setStatus('Zusammenfassung erstellt.', 'success');
         } catch (err) {
@@ -67,14 +65,21 @@ window.Unisono = window.Unisono || {};
         }
     }
 
-    async function viaAnthropic(key, model, user) {
+    // One request to the chosen LLM: the text of the answer. Also used by the dictation page.
+    function complete({ provider, key, model, user, system = SYSTEM }) {
+        return provider === 'anthropic'
+            ? viaAnthropic(key, model, user, system)
+            : viaOpenAI(key, model, user, system);
+    }
+
+    async function viaAnthropic(key, model, user, system) {
         const headers = {
             'x-api-key': key,
             'anthropic-version': '2023-06-01',
             'anthropic-dangerous-direct-browser-access': 'true',
             'content-type': 'application/json'
         };
-        const body = { model, max_tokens: 16000, system: SYSTEM, messages: [{ role: 'user', content: user }] };
+        const body = { model, max_tokens: 16000, system, messages: [{ role: 'user', content: user }] };
         // On a safety decline, let the API re-run the request on a fallback model instead of stopping.
         if (['claude-opus-5', 'claude-fable-5-1'].includes(model)) {
             headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
@@ -91,13 +96,13 @@ window.Unisono = window.Unisono || {};
         return data.stop_reason === 'max_tokens' ? text + '\n\n[… Ausgabe wegen Längenlimit abgeschnitten]' : text;
     }
 
-    async function viaOpenAI(key, model, user) {
+    async function viaOpenAI(key, model, user, system) {
         const data = await S.http.fetchJson('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 model,
-                messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: user }]
+                messages: [{ role: 'system', content: system }, { role: 'user', content: user }]
             })
         }, 'OpenAI');
         return data.choices?.[0]?.message?.content || '';
@@ -111,5 +116,5 @@ window.Unisono = window.Unisono || {};
         $('summary-text').value = text || '';
     }
 
-    S.summary = { init, getText, setText };
+    S.summary = { init, getText, setText, complete, MODELS };
 })(window.Unisono);

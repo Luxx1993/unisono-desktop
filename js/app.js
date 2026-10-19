@@ -168,6 +168,7 @@ window.Unisono = window.Unisono || {};
         renderProviderCards();
         updateHint();
         S.settings.refresh();
+        S.dictation?.refresh();
     }
 
     // Sidebar (and on mobile the top bar): which engines have a key.
@@ -693,7 +694,7 @@ window.Unisono = window.Unisono || {};
 
     // --- Init ---
     function init() {
-        S.ui = { setStatus, hideStatus, showError, copy, getKey };
+        S.ui = { setStatus, hideStatus, showError, copy, getKey, hasKey: id => !!keys[id] };
         S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, switchView, openSettings: tab => S.settings.open(tab) };
 
         loadKeys();
@@ -738,6 +739,7 @@ window.Unisono = window.Unisono || {};
         S.markers.init();
         S.search.init();
         S.summary.init();
+        S.dictation.init();
         const showLlmLogo = () => $('llm-logo').replaceChildren(...[S.brandLogo($('llm-provider').value)].filter(Boolean));
         $('llm-provider').addEventListener('change', showLlmLogo);
         showLlmLogo();

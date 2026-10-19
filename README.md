@@ -8,6 +8,7 @@ Audio und Video transkribieren, lesen, korrigieren und exportieren, komplett im 
 
 - **Läuft einfach so:** `index.html` per Doppelklick öffnen. Kein Node.js, kein Server, keine Installation, keine Verbindung zu Google Fonts. Ideal für Dienstrechner.
 - **Vier Engines:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral), jeweils mit Sprechererkennung.
+- **Diktat:** sprechen, die KI räumt den Text auf (Stile wie Aufräumen, E-Mail oder Aktenvermerk), er liegt sofort in der Zwischenablage. Mit Ersetzungsregeln und Verlauf.
 - **Aufnehmen im Browser:** Mikrofonaufnahme mit Pause, Pegelanzeige und Absturzsicherung.
 - **Fachbegriffe:** eine Liste mit Namen und Fachwörtern, die in passender Form an jede Engine geht.
 - **Live-Fortschritt:** Hochladen mit echtem Prozentwert und Tempo, Verarbeitungszeit, jederzeit abbrechbar.
@@ -35,10 +36,11 @@ Links steht die Seitenleiste. Auf dem Handy gibt es unten eine Tab-Leiste mit Da
 
 | Seite | Inhalt |
 |---|---|
+| **Diktat** | Sprechen, aufräumen lassen, kopieren: Stile, Verlauf, Einstellungen. Siehe „Diktat“. |
 | **Aufnahme** | Live aufnehmen (vor Ort, Diktat) mit Merkern; danach „Transkribieren“ oder „Aufnahme sichern“. Auf Handy und Tablet die Startseite. |
 | **Transkribieren** | Vorhandene Audio- oder Videodatei ablegen, Engine wählen, Optionen, Start. Während des Laufs der Fortschritt. |
 | **Transkript** | Player, Transkript-Editor, Suche, Sprecher und Redezeit, Zusammenfassung, Export. |
-| **Fachbegriffe** | Begriffsliste mit Import und Export. |
+| **Fachbegriffe** | Begriffsliste mit Import und Export, dazu Ersetzungsregeln für das Diktat. |
 | **API-Keys** | Keys für die Engines und die Zusammenfassung, jeweils mit **Prüfen**, **Entfernen** und der Anleitung „So bekommst du einen Key“. |
 | **Einstellungen** | Darstellung (Hell, Dunkel, Wie System) sowie Daten und Datenschutz: Keys, Transkript und Aufnahme-Sicherung einzeln löschen oder alles zurücksetzen. |
 
@@ -94,6 +96,24 @@ Auf der Seite **Aufnahme** nimmst du Diktate oder Besprechungen direkt im Browse
 - **Bildschirm nicht sperren:** Handy-Browser schalten das Mikrofon ab, sobald der Bildschirm gesperrt oder die App gewechselt wird. Unisono hält den Bildschirm während der Aufnahme wach und weist darauf hin.
 - **Unterbrechungen:** Passiert es doch, bleibt das Bisherige gesichert. Beim Zurückkehren nimmt Unisono in **dieselbe Datei** weiter auf (oder bietet **Weiter aufnehmen** an, wenn der Browser das Mikrofon nur nach einem Tipp freigibt). Die Lücke wird als Merker „Unterbrechung (… ohne Ton)“ vermerkt; Zeitanzeige und Merker bleiben dabei deckungsgleich mit der Audiodatei.
 
+## Diktat
+
+Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt in der Zwischenablage. Dann mit **Strg+V** (am Mac **⌘V**) in jedes Programm einfügen. Das ist die Browser-Fassung der Android-App „diktat“.
+
+<img src="docs/screenshots/dictation.png" alt="Diktat mit Aufnahmeknopf, Stilwahl, Ergebnis und Verlauf" width="720">
+
+**Ablauf:** aufnehmen → mit der gewählten Engine transkribieren (ohne Sprechertrennung, mit deinen Fachbegriffen) → mit dem gewählten **Stil** von Claude oder OpenAI aufräumen → **Ersetzungen** anwenden → anzeigen, kopieren, im Verlauf merken.
+
+- **Bedienung:** *Antippen* (Knopf oder Leertaste startet und beendet) oder *Halten* (Knopf oder Leertaste gedrückt halten, solange du sprichst). **Esc** verwirft. Die Leertaste gilt, solange die Seite „Diktat“ offen ist und kein Textfeld den Fokus hat. Ein roter Punkt an „Diktat“ zeigt, dass eine Aufnahme läuft.
+- **Stile:** *Rohtext* (nur das Transkript), *Aufräumen*, *Wörtlich*, *E-Mail*, *Chat* und *Aktenvermerk*, mit demselben Wortlaut wie in der Android-App. Unter **Stile verwalten** legst du eigene Stile an (Name und Anweisung), bearbeitest oder löschst sie; die eingebauten dienen als Vorlage für Kopien.
+- **Ergebnis:** bei Aufräumen lässt sich zwischen aufgeräumtem Text und **Rohtext** umschalten, der Text ist direkt bearbeitbar. **Neu aufräumen** wendet einen anderen Stil auf dasselbe Diktat an, ohne neu zu sprechen.
+- **Zwischenablage:** Das Ergebnis wird sofort kopiert (abschaltbar). Blockiert der Browser das, bleibt der Knopf **Kopieren**.
+- **Ersetzungen:** Unter **Fachbegriffe** stehen feste Regeln „aus → in“ (ganzes Wort oder Teilstück, mit oder ohne Groß/Klein), die nach der KI auf den fertigen Text und auf den Rohtext laufen, von oben nach unten. Leeres Ziel löscht das Wort. Die Fachbegriffe selbst gehen als Hinweis an die Engine und zusätzlich an die KI, damit Namen wie gelistet geschrieben werden.
+- **Verlauf:** die letzten 50 Diktate (Zeit, Stil, Text) mit Kopieren, Anzeigen und Löschen; löschbar unter **Einstellungen → Daten und Datenschutz**.
+- **Einstellungen der Seite:** Engine (Standard: ElevenLabs, wenn ein Key da ist, sonst die erste Engine mit Key), Modell, Sprache, KI-Anbieter und -Modell (Standard Claude Haiku 5.5, schnell und günstig). ElevenLabs und Mistral antworten in einem Schritt, Gladia und AssemblyAI brauchen einige Sekunden länger.
+- **Falls die KI ausfällt** (Key fehlt, Netzwerk): Das Rohtext-Ergebnis steht trotzdem bereit, mit dem Grund in der Meldung.
+- **Grenzen des Browsers:** Unisono kann nicht in andere Programme tippen und hört nicht auf Tastenkürzel, wenn ein anderes Fenster aktiv ist. Das Ergebnis kommt deshalb über die Zwischenablage. Ein schwebendes Fenster und ein systemweites Kürzel wären spätere Ausbaustufen.
+
 ## Grenzen der Anbieter
 
 Vor dem Upload prüft Unisono Dateigröße und Länge gegen die Grenzen des gewählten Anbieters und schlägt passende Alternativen vor – so schlägt nichts erst nach einem langen Upload fehl.
@@ -118,7 +138,7 @@ Unter **Fachbegriffe** pflegst du eine Liste mit Namen, Firmen, Fachwörtern und
 | AssemblyAI | `keyterms_prompt` (Universal-3.5 Pro), `word_boost` (Universal-2) | max. 1.000 Begriffe à 6 Wörter |
 | Mistral | `context_bias` | max. 100 Begriffe (für Deutsch laut Mistral noch experimentell) |
 
-Unter „Transkribieren“ steht, wie viele Begriffe bei der gewählten Engine ankommen und welche wegen der Grenzen übersprungen werden.
+Unter „Transkribieren“ steht, wie viele Begriffe bei der gewählten Engine ankommen und welche wegen der Grenzen übersprungen werden. Dieselbe Seite enthält die **Ersetzungen** für das Diktat (siehe „Diktat“).
 
 <img src="docs/screenshots/vocab.png" alt="Fachbegriffe" width="720">
 
@@ -169,10 +189,10 @@ Jede Engine hat eine feste Farbe (Punkt in Chips, Fortschrittslinie, Seitenleist
 
 | Anbieter | Modelle (frei änderbar) | Hinweis |
 |---|---|---|
-| Anthropic | `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5` | Direktzugriff aus dem Browser über den Header `anthropic-dangerous-direct-browser-access` |
+| Anthropic | `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-5-5`, `claude-haiku-4-5` | Direktzugriff aus dem Browser über den Header `anthropic-dangerous-direct-browser-access` |
 | OpenAI | `gpt-5`, `gpt-5-mini` | Chat Completions API |
 
-Zusammengefasst wird immer der aktuelle (ggf. von dir korrigierte) Text im Ergebnisfeld.
+Zusammengefasst wird immer der aktuelle (ggf. von dir korrigierte) Text im Ergebnisfeld. Dieselben Keys nutzt das Aufräumen im Diktat.
 
 ## Handy und Tablet
 
@@ -188,7 +208,7 @@ Auf schmalen Bildschirmen ersetzt eine Tab-Leiste unten die Seitenleiste, Karten
 ## Datenschutz
 
 - Es gibt keinen Server von Unisono. Audio und Keys gehen nur an den Anbieter, den du auswählst.
-- API-Keys, das zuletzt bearbeitete Transkript, Fachbegriffe und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme liegt in IndexedDB.
+- API-Keys, das zuletzt bearbeitete Transkript, Fachbegriffe, Ersetzungen, eigene Diktat-Stile, der Diktat-Verlauf und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme liegt in IndexedDB.
 - Alles lässt sich unter **Einstellungen → Daten und Datenschutz** einzeln löschen oder komplett zurücksetzen.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.
 
@@ -213,7 +233,10 @@ js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem b
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
 js/recorder.js          Mikrofonaufnahme, Pegel, Pause, Merker, Großansicht, Weiteraufnahme nach Unterbrechung
 js/recording-backup.js  Laufende Sicherung der Aufnahme in IndexedDB, Wiederherstellung
-js/summary.js           Zusammenfassung (Anthropic / OpenAI)
+js/summary.js           Zusammenfassung (Anthropic / OpenAI), `complete()` auch für das Diktat
+js/dictation-core.js    Diktat ohne Seite: Stile, KI-Anweisung, Ersetzungsregeln, Verlauf (mit Node testbar)
+js/dictation.js         Seite „Diktat“: Aufnahme, Ablauf, Stile, Verlauf, Ersetzungen
+tests/                  `node tests/dictation-core.test.js`
 js/appearance.js        Hell, Dunkel oder wie System, wird vor dem ersten Zeichnen gesetzt
 js/settings.js          Seite „Einstellungen“: Darstellung, Daten löschen
 js/app.js               Seiten, Keys, Engine-Auswahl, Datei-Upload, Ablauf der Transkription

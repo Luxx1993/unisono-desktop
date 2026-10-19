@@ -27,6 +27,8 @@
     <script src="js/segment-editor.js" defer></script>
     <script src="js/markers.js" defer></script>
     <script src="js/summary.js" defer></script>
+    <script src="js/dictation-core.js" defer></script>
+    <script src="js/dictation.js" defer></script>
     <script src="js/brand-logos.js" defer></script>
     <script src="js/progress.js" defer></script>
     <script src="js/player.js" defer></script>
@@ -70,6 +72,7 @@
             <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v3.7h3.7M12 8.5V12l2.5 1.5"/></symbol>
             <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 20.5v-16M6 4.5h11l-2.5 4 2.5 4H6"/></symbol>
             <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4.5 9V4.5H9M19.5 9V4.5H15M4.5 15v4.5H9M19.5 15v4.5H15"/></symbol>
+            <symbol id="i-dictate" viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4.5v15M16 8v8M20 10.5v3"/></symbol>
             <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.5 7.5 0 1 1 9.5 4.5a6 6 0 0 0 10 10z"/></symbol>
         </defs>
     </svg>
@@ -91,6 +94,7 @@
                 <span class="wordmark" aria-label="Unisono">unısono</span>
             </span>
             <nav class="side-nav" aria-label="Bereiche">
+                <button type="button" class="nav-item" data-view="dictation"><svg class="icon" aria-hidden="true"><use href="#i-dictate"/></svg>Diktat<span class="nav-dict-dot" aria-hidden="true"></span></button>
                 <button type="button" class="nav-item" data-view="record"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Aufnahme<span class="nav-rec-dot" aria-hidden="true"></span></button>
                 <button type="button" class="nav-item" data-view="start"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Transkribieren</button>
                 <button type="button" class="nav-item" data-view="transcript"><svg class="icon" aria-hidden="true"><use href="#i-text"/></svg>Transkript</button>
@@ -237,6 +241,129 @@
                         </section>
                     </aside>
                 </div>
+            </section>
+
+            <!-- ================= VIEW: Diktat ================= -->
+            <section id="view-dictation" class="view hidden" aria-labelledby="dictation-title">
+                <header class="page-head">
+                    <div>
+                        <p class="t-label eyebrow">Schnell</p>
+                        <h1 id="dictation-title" class="page-title">Diktat</h1>
+                        <p class="page-intro muted">Sprechen, die KI räumt den Text auf, er liegt in der Zwischenablage. Mit Strg+V überall einfügen.</p>
+                    </div>
+                </header>
+
+                <section class="card dictation-card" aria-label="Diktat aufnehmen">
+                    <div id="dict-recorder" class="recorder">
+                        <div class="rec-display">
+                            <p class="rec-display-status"><span class="status-dot rec-dot" aria-hidden="true"></span><span id="dict-state" class="t-label">Bereit</span></p>
+                            <p id="dict-time" class="rec-display-time" aria-live="off">00:00</p>
+                            <div class="rec-level is-large" aria-hidden="true"><div id="dict-level" class="rec-level-bar"></div></div>
+                        </div>
+                        <div class="rec-actions">
+                            <button type="button" id="dict-main" class="rec-mark-btn"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span id="dict-main-text">Diktat starten</span></button>
+                            <button type="button" id="dict-cancel" class="btn-text is-invisible">Verwerfen</button>
+                        </div>
+                        <p id="dict-keys-hint" class="t-small muted dict-keys-hint"></p>
+                        <p id="dict-key-missing" class="t-small hidden"></p>
+                    </div>
+                    <div class="field">
+                        <span id="dict-style-label" class="field-label">Stil</span>
+                        <div id="dict-styles" class="chips" role="group" aria-labelledby="dict-style-label"></div>
+                        <p id="dict-style-hint" class="t-small muted"></p>
+                    </div>
+                </section>
+
+                <section id="dict-result" class="card dictation-card hidden" aria-labelledby="dict-result-title">
+                    <div class="card-head">
+                        <h2 id="dict-result-title" class="t-label">Ergebnis</h2>
+                        <div id="dict-view" class="segmented hidden" role="radiogroup" aria-label="Fassung"></div>
+                    </div>
+                    <label class="visually-hidden" for="dict-text">Diktierter Text</label>
+                    <textarea id="dict-text" rows="7" class="input is-area" spellcheck="false"></textarea>
+                    <p id="dict-meta" class="t-mono muted"></p>
+                    <div class="button-row">
+                        <button type="button" id="dict-copy" class="btn-primary"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Kopieren</button>
+                    </div>
+                    <div class="dict-rerun">
+                        <label for="dict-rerun-style" class="field-label">Nochmal aufräumen als</label>
+                        <select id="dict-rerun-style" class="input"></select>
+                        <button type="button" id="dict-rerun" class="btn-secondary">Neu aufräumen</button>
+                    </div>
+                </section>
+
+                <details class="card key-guide is-general dictation-card dict-options">
+                    <summary><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg>Einstellungen</summary>
+                    <div class="options-grid">
+                        <div class="field">
+                            <label for="dict-engine">Engine</label>
+                            <select id="dict-engine" class="input"></select>
+                        </div>
+                        <div class="field">
+                            <label for="dict-model">Modell</label>
+                            <select id="dict-model" class="input"></select>
+                        </div>
+                        <div class="field">
+                            <label for="dict-language">Sprache</label>
+                            <select id="dict-language" class="input">
+                                <option value="de">Deutsch</option>
+                                <option value="en">Englisch</option>
+                                <option value="fr">Französisch</option>
+                                <option value="es">Spanisch</option>
+                                <option value="it">Italienisch</option>
+                                <option value="auto">Automatisch erkennen</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <span id="dict-mode-label" class="field-label">Bedienung</span>
+                            <div id="dict-mode" class="segmented" role="radiogroup" aria-labelledby="dict-mode-label"></div>
+                        </div>
+                        <div class="field">
+                            <label for="dict-llm-provider">KI zum Aufräumen</label>
+                            <select id="dict-llm-provider" class="input">
+                                <option value="anthropic">Anthropic (Claude)</option>
+                                <option value="openai">OpenAI</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="dict-llm-model">KI-Modell</label>
+                            <input id="dict-llm-model" class="input is-mono" list="dict-llm-model-list" autocomplete="off" spellcheck="false">
+                            <datalist id="dict-llm-model-list"></datalist>
+                        </div>
+                    </div>
+                    <label class="check"><input type="checkbox" id="dict-autocopy" checked> Ergebnis sofort in die Zwischenablage kopieren</label>
+                    <p id="dict-engine-note" class="t-small muted"></p>
+                    <p class="t-small muted">Fachbegriffe und Ersetzungen findest du unter „Fachbegriffe“. Keys unter „API-Keys“.</p>
+                </details>
+
+                <details class="card key-guide is-general dictation-card dict-styles-manage">
+                    <summary><svg class="icon" aria-hidden="true"><use href="#i-text"/></svg>Stile verwalten</summary>
+                    <ul id="dict-style-list" class="dict-style-list"></ul>
+                    <form id="dict-style-form" class="dict-style-form" autocomplete="off">
+                        <h3 id="dict-style-form-title" class="t-label">Neuer Stil</h3>
+                        <div class="field">
+                            <label for="dict-style-name">Name</label>
+                            <input id="dict-style-name" class="input" maxlength="40" placeholder="z. B. SMS">
+                        </div>
+                        <div class="field">
+                            <label for="dict-style-prompt">Anweisung an die KI</label>
+                            <textarea id="dict-style-prompt" rows="5" class="input is-area" placeholder="Schreibe den Text als kurze SMS. Behalte Bedeutung und Sprache bei. Gib nur den Text zurück."></textarea>
+                        </div>
+                        <div class="button-row">
+                            <button type="submit" id="dict-style-save" class="btn-secondary">Stil speichern</button>
+                            <button type="button" id="dict-style-reset" class="btn-text hidden">Abbrechen</button>
+                        </div>
+                    </form>
+                </details>
+
+                <section class="card dictation-card" aria-labelledby="dict-history-title">
+                    <div class="card-head">
+                        <h2 id="dict-history-title" class="t-label">Verlauf</h2>
+                        <button type="button" id="dict-history-clear" class="btn-text is-danger">Verlauf löschen</button>
+                    </div>
+                    <p id="dict-history-empty" class="t-small muted">Noch keine Diktate. Die letzten 50 bleiben in diesem Browser.</p>
+                    <ul id="dict-history" class="dict-history"></ul>
+                </section>
             </section>
 
             <!-- ================= VIEW: Aufnahme (live, e.g. on site) ================= -->
@@ -490,6 +617,17 @@
                         <input type="file" id="vocab-file" accept=".txt,.csv,text/plain,text/csv" class="hidden">
                     </div>
                 </section>
+                <section class="card narrow-card" aria-labelledby="repl-title">
+                    <div class="card-head">
+                        <h2 id="repl-title" class="t-label">Ersetzungen</h2>
+                        <span id="repl-count" class="t-mono muted"></span>
+                    </div>
+                    <p class="t-small muted">Feste Regeln „aus → in“, die nach jedem Diktat auf den fertigen Text angewendet werden, etwa für eine Schreibweise, die die Engine immer gleich falsch erkennt. Die Fachbegriffe oben helfen der Engine beim Erkennen, die Ersetzungen ändern den Text danach. Die Regeln laufen von oben nach unten.</p>
+                    <div id="repl-list" class="repl-list"></div>
+                    <div class="button-row">
+                        <button type="button" id="repl-add" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Regel hinzufügen</button>
+                    </div>
+                </section>
             </section>
 
             <!-- ================= VIEW: API-Keys ================= -->
@@ -564,8 +702,15 @@
                         </div>
                         <div class="data-row">
                             <div class="min-w-0">
+                                <p class="data-title">Diktat-Verlauf</p>
+                                <p id="data-dictation-info" class="t-small muted"></p>
+                            </div>
+                            <button type="button" id="clear-dictation" class="btn-text is-danger">Löschen</button>
+                        </div>
+                        <div class="data-row">
+                            <div class="min-w-0">
                                 <p class="data-title">Alles zurücksetzen</p>
-                                <p class="t-small muted">Löscht Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe und alle Einstellungen. Die Seite lädt danach neu.</p>
+                                <p class="t-small muted">Löscht Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf und alle Einstellungen. Die Seite lädt danach neu.</p>
                             </div>
                             <button type="button" id="reset-all" class="btn-text is-danger">Zurücksetzen</button>
                         </div>
@@ -610,6 +755,7 @@
     <!-- Mobile: tab bar at the bottom -->
     <nav class="tabbar" aria-label="Bereiche">
         <button type="button" class="nav-item" data-view="start"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg><span>Datei</span></button>
+        <button type="button" class="nav-item" data-view="dictation"><svg class="icon" aria-hidden="true"><use href="#i-dictate"/></svg><span>Diktat</span><span class="nav-dict-dot" aria-hidden="true"></span></button>
         <button type="button" class="nav-item" data-view="transcript"><svg class="icon" aria-hidden="true"><use href="#i-text"/></svg><span>Transkript</span></button>
         <button type="button" class="nav-item" data-view="record"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span>Aufnahme</span><span class="nav-rec-dot" aria-hidden="true"></span></button>
         <button type="button" class="nav-item" data-view="vocab"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>Begriffe</span></button>
