@@ -4,6 +4,8 @@ Audio und Video transkribieren, lesen, korrigieren und exportieren, komplett im 
 
 <img src="docs/screenshots/transcript.png" alt="Transkript mit einfarbiger Wellenform, Sprecherspur, Redezeit und Zusammenfassung" width="100%">
 
+**Live ansehen:** https://unisono-app-seven.vercel.app/
+
 ## Auf einen Blick
 
 - **Läuft einfach so:** `index.html` per Doppelklick öffnen. Kein Node.js, kein Server, keine Installation, keine Verbindung zu Google Fonts. Ideal für Dienstrechner.
