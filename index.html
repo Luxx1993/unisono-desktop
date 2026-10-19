@@ -28,7 +28,9 @@
     <script src="js/markers.js" defer></script>
     <script src="js/summary.js" defer></script>
     <script src="js/dictation-core.js" defer></script>
+    <script src="js/orbs.js" defer></script>
     <script src="js/dictation.js" defer></script>
+    <script src="js/dictation-mini.js" defer></script>
     <script src="js/brand-logos.js" defer></script>
     <script src="js/progress.js" defer></script>
     <script src="js/player.js" defer></script>
@@ -255,6 +257,7 @@
 
                 <section class="card dictation-card" aria-label="Diktat aufnehmen">
                     <div id="dict-recorder" class="recorder">
+                        <div id="dict-task" class="segmented dict-task" role="radiogroup" aria-label="Aufgabe"></div>
                         <div class="rec-display">
                             <p class="rec-display-status"><span class="status-dot rec-dot" aria-hidden="true"></span><span id="dict-state" class="t-label">Bereit</span></p>
                             <p id="dict-time" class="rec-display-time" aria-live="off">00:00</p>
@@ -266,8 +269,31 @@
                         </div>
                         <p id="dict-keys-hint" class="t-small muted dict-keys-hint"></p>
                         <p id="dict-key-missing" class="t-small hidden"></p>
+                        <div class="dict-mini-row">
+                            <div id="dict-mini-preview" class="dict-mini-preview hidden"></div>
+                            <button type="button" id="dict-mini-open" class="btn-text hidden"><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>Schwebendes Fenster öffnen</button>
+                            <p id="dict-mini-note" class="t-small muted hidden"></p>
+                        </div>
                     </div>
-                    <div class="field">
+                    <div id="dict-reword" class="dict-reword hidden">
+                        <div class="field">
+                            <label for="dict-reword-source">Text, der umformuliert werden soll</label>
+                            <textarea id="dict-reword-source" rows="5" class="input is-area" spellcheck="false" placeholder="Text hier einfügen oder tippen"></textarea>
+                            <div class="button-row">
+                                <button type="button" id="dict-reword-paste" class="btn-secondary is-small">Aus Zwischenablage einfügen</button>
+                                <button type="button" id="dict-reword-use" class="btn-secondary is-small">Ergebnis übernehmen</button>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="dict-reword-instruction">Anweisung (sprechen oder tippen)</label>
+                            <div class="dict-reword-line">
+                                <input id="dict-reword-instruction" class="input" autocomplete="off" placeholder="z. B. kürzer und freundlicher">
+                                <button type="button" id="dict-reword-run" class="btn-secondary">Umformulieren</button>
+                            </div>
+                            <div id="dict-reword-chips" class="chips"></div>
+                        </div>
+                    </div>
+                    <div id="dict-style-field" class="field">
                         <span id="dict-style-label" class="field-label">Stil</span>
                         <div id="dict-styles" class="chips" role="group" aria-labelledby="dict-style-label"></div>
                         <p id="dict-style-hint" class="t-small muted"></p>
@@ -285,7 +311,7 @@
                     <div class="button-row">
                         <button type="button" id="dict-copy" class="btn-primary"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Kopieren</button>
                     </div>
-                    <div class="dict-rerun">
+                    <div id="dict-rerun-wrap" class="dict-rerun">
                         <label for="dict-rerun-style" class="field-label">Nochmal aufräumen als</label>
                         <select id="dict-rerun-style" class="input"></select>
                         <button type="button" id="dict-rerun" class="btn-secondary">Neu aufräumen</button>
@@ -332,6 +358,21 @@
                         </div>
                     </div>
                     <label class="check"><input type="checkbox" id="dict-autocopy" checked> Ergebnis sofort in die Zwischenablage kopieren</label>
+                    <label class="check"><input type="checkbox" id="dict-longdictation" checked> Langdiktat: lange Aufnahmen an Pausen teilen und schon beim Sprechen transkribieren (nur bei „Antippen“)</label>
+                    <div class="options-grid">
+                        <div class="field">
+                            <label for="dict-mini-skin">Schwebendes Fenster: Aussehen</label>
+                            <select id="dict-mini-skin" class="input">
+                                <option value="cloud">Wolke</option>
+                                <option value="wave">Welle</option>
+                            </select>
+                        </div>
+                        <div id="dict-mini-palette-field" class="field">
+                            <span id="dict-mini-palette-label" class="field-label">Farbe der Wolke</span>
+                            <div id="dict-mini-palette" class="palette-row" role="radiogroup" aria-labelledby="dict-mini-palette-label"></div>
+                        </div>
+                    </div>
+                    <label class="check"><input type="checkbox" id="dict-mini-dim" checked> Schwebendes Fenster bei Nichtnutzung verkleinern und transparent machen</label>
                     <p id="dict-engine-note" class="t-small muted"></p>
                     <p class="t-small muted">Fachbegriffe und Ersetzungen findest du unter „Fachbegriffe“. Keys unter „API-Keys“.</p>
                 </details>
@@ -363,6 +404,14 @@
                     </div>
                     <p id="dict-history-empty" class="t-small muted">Noch keine Diktate. Die letzten 50 bleiben in diesem Browser.</p>
                     <ul id="dict-history" class="dict-history"></ul>
+                </section>
+
+                <section class="card dictation-card" aria-labelledby="dict-stats-title">
+                    <div class="card-head">
+                        <h2 id="dict-stats-title" class="t-label">Statistik</h2>
+                        <button type="button" id="dict-stats-reset" class="btn-text is-danger hidden">Zurücksetzen</button>
+                    </div>
+                    <div id="dict-stats" class="dict-stats"></div>
                 </section>
             </section>
 
@@ -702,6 +751,13 @@
                         </div>
                         <div class="data-row">
                             <div class="min-w-0">
+                                <p class="data-title">Diktat-Statistik</p>
+                                <p id="data-stats-info" class="t-small muted"></p>
+                            </div>
+                            <button type="button" id="clear-stats" class="btn-text is-danger">Löschen</button>
+                        </div>
+                        <div class="data-row">
+                            <div class="min-w-0">
                                 <p class="data-title">Diktat-Verlauf</p>
                                 <p id="data-dictation-info" class="t-small muted"></p>
                             </div>
@@ -710,7 +766,7 @@
                         <div class="data-row">
                             <div class="min-w-0">
                                 <p class="data-title">Alles zurücksetzen</p>
-                                <p class="t-small muted">Löscht Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf und alle Einstellungen. Die Seite lädt danach neu.</p>
+                                <p class="t-small muted">Löscht Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf, Diktat-Statistik und alle Einstellungen. Die Seite lädt danach neu.</p>
                             </div>
                             <button type="button" id="reset-all" class="btn-text is-danger">Zurücksetzen</button>
                         </div>
