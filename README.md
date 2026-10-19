@@ -102,7 +102,7 @@ Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt i
 
 <img src="docs/screenshots/dictation.png" alt="Diktat mit Aufnahmeknopf, Stilwahl, Ergebnis und Verlauf" width="720">
 
-**Ablauf:** aufnehmen → mit der gewählten Engine transkribieren (ohne Sprechertrennung, mit deinen Fachbegriffen) → mit dem gewählten **Stil** von Claude oder OpenAI aufräumen → **Ersetzungen** anwenden → anzeigen, kopieren, im Verlauf merken.
+**Ablauf:** aufnehmen → mit der gewählten Engine transkribieren (ohne Sprechertrennung, mit deinen Fachbegriffen) → mit dem gewählten **Stil** von einer KI deiner Wahl aufräumen → **Ersetzungen** anwenden → anzeigen, kopieren, im Verlauf merken.
 
 - **Bedienung:** *Antippen* (Knopf oder Leertaste startet und beendet) oder *Halten* (Knopf oder Leertaste gedrückt halten, solange du sprichst). **Esc** verwirft. Die Leertaste gilt, solange die Seite „Diktat“ oder das schwebende Fenster den Fokus hat und kein Textfeld. Ein roter Punkt an „Diktat“ zeigt, dass eine Aufnahme läuft.
 - **Stile:** *Rohtext* (nur das Transkript), *Aufräumen*, *Wörtlich*, *E-Mail*, *Chat* und *Aktenvermerk*, mit demselben Wortlaut wie in der Android-App. Unter **Stile verwalten** legst du eigene Stile an (Name und Anweisung), bearbeitest oder löschst sie; die eingebauten dienen als Vorlage für Kopien.
@@ -111,6 +111,9 @@ Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt i
 - **Ersetzungen:** Unter **Fachbegriffe** stehen feste Regeln „aus → in“ (ganzes Wort oder Teilstück, mit oder ohne Groß/Klein), die nach der KI auf den fertigen Text und auf den Rohtext laufen, von oben nach unten. Leeres Ziel löscht das Wort. Die Fachbegriffe selbst gehen als Hinweis an die Engine und zusätzlich an die KI, damit Namen wie gelistet geschrieben werden.
 - **Verlauf:** die letzten 50 Diktate (Zeit, Stil, Text) mit Kopieren, Anzeigen und Löschen; löschbar unter **Einstellungen → Daten und Datenschutz**.
 - **Einstellungen der Seite:** Engine (Standard: ElevenLabs, wenn ein Key da ist, sonst die erste Engine mit Key), Modell, Sprache, KI-Anbieter und -Modell (Standard Claude Haiku 5.5, schnell und günstig), automatisch kopieren, Langdiktat. ElevenLabs und Mistral antworten in einem Schritt, Gladia und AssemblyAI brauchen einige Sekunden länger.
+
+- **Mehr Anbieter für das Diktat:** Für die Spracherkennung zusätzlich OpenAI, Groq, Scaleway, OVHcloud, SiliconFlow, OpenRouter, xAI (Grok), Deepgram, Soniox, Google Gemini und AssemblyAI Sync (die Ein-Anfrage-Variante von AssemblyAI, gleicher Key wie AssemblyAI). Zum Aufräumen die KI von Anthropic, OpenAI, Groq, Google Gemini, Mistral, OpenRouter, Together AI, DeepInfra, xAI, DeepSeek, Cerebras, SiliconFlow, Scaleway oder OVHcloud. Wer einen Anbieter schon für die Spracherkennung eingetragen hat, nutzt denselben Key zum Aufräumen. Modelle und Adressen sind dieselben wie in der Android-App; bei Anbietern ohne feste Modellliste lädt Unisono die Liste des Anbieters, sobald ein Key da ist. Diese Engines gibt es nur auf der Seite „Diktat“ (ohne Sprechertrennung), nicht für Dateien.
+- **Nicht dabei:** Azure Speech (eigene Adresse je Konto), Ollama und eigene Server (laufen im lokalen Netz, ein Browser darf sie nicht ohne Weiteres ansprechen) und die Offline-Modelle auf dem Gerät. Ob Cerebras und Scaleway Anfragen aus dem Browser zulassen, ließ sich ohne Key nicht prüfen; **Prüfen** unter „API-Keys“ zeigt es.
 - **Falls die KI ausfällt** (Key fehlt, Netzwerk): Das Rohtext-Ergebnis steht trotzdem bereit, mit dem Grund in der Meldung.
 
 ### Schwebendes Fenster

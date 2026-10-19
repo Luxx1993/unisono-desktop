@@ -19,6 +19,8 @@
     <script src="js/apis/elevenlabs.js" defer></script>
     <script src="js/apis/assembly.js" defer></script>
     <script src="js/apis/mistral.js" defer></script>
+    <script src="js/apis/dictation-engines.js" defer></script>
+    <script src="js/apis/llm.js" defer></script>
     <script src="js/export.js" defer></script>
     <script src="js/vocabulary.js" defer></script>
     <script src="js/recording-backup.js" defer></script>
@@ -346,10 +348,7 @@
                         </div>
                         <div class="field">
                             <label for="dict-llm-provider">KI zum Aufräumen</label>
-                            <select id="dict-llm-provider" class="input">
-                                <option value="anthropic">Anthropic (Claude)</option>
-                                <option value="openai">OpenAI</option>
-                            </select>
+                            <select id="dict-llm-provider" class="input"></select>
                         </div>
                         <div class="field">
                             <label for="dict-llm-model">KI-Modell</label>
@@ -611,10 +610,7 @@
                                 <div class="options-grid is-two">
                                     <div class="field">
                                         <label for="llm-provider">Anbieter <span id="llm-logo" class="llm-logo"></span></label>
-                                        <select id="llm-provider" class="input">
-                                            <option value="anthropic">Anthropic (Claude)</option>
-                                            <option value="openai">OpenAI</option>
-                                        </select>
+                                        <select id="llm-provider" class="input"></select>
                                     </div>
                                     <div class="field">
                                         <label for="summary-mode">Art</label>
@@ -690,11 +686,11 @@
                 </header>
 
                 <section class="card" aria-labelledby="keys-stt-title">
-                    <h2 id="keys-stt-title" class="t-label">Transkription</h2>
+                    <h2 id="keys-stt-title" class="t-label">Spracherkennung (bei vielen Anbietern auch zum Aufräumen)</h2>
                     <div id="key-cards-stt" class="key-list"></div>
                 </section>
                 <section class="card" aria-labelledby="keys-llm-title">
-                    <h2 id="keys-llm-title" class="t-label">Zusammenfassung (optional)</h2>
+                    <h2 id="keys-llm-title" class="t-label">Nur zum Aufräumen und Zusammenfassen (optional)</h2>
                     <div id="key-cards-llm" class="key-list"></div>
                 </section>
                 <details class="card key-guide is-general">

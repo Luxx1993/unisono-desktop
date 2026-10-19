@@ -10,42 +10,17 @@ window.Unisono = window.Unisono || {};
     const HTML_AUDIO_WARN_BYTES = 25 * MB;
     const KEY_PREFIX = 'unisono_key_';
 
-    // Keys for the AI summary; the transcription providers come from S.apis.
-    const LLM_KEYS = {
-        anthropic: {
-            label: 'Anthropic (Claude)',
-            description: 'Für Zusammenfassungen, Stichpunkte und Protokolle.',
-            keyUrl: 'https://console.anthropic.com/settings/keys',
-            keyGuide: {
-                steps: [
-                    'In der Anthropic Console (console.anthropic.com) ein Konto anlegen.',
-                    'Unter „Billing“ Guthaben aufladen – die API wird vorab bezahlt, ein Claude-Abo gilt hier nicht.',
-                    'Unter „Settings → API Keys“ auf „Create Key“ klicken und den Key sofort kopieren.',
-                    'Hier einfügen und mit „Prüfen“ testen.'
-                ],
-                note: 'Unter „Limits“ lässt sich eine monatliche Obergrenze setzen.'
-            },
-            test: key => ({
-                url: 'https://api.anthropic.com/v1/models',
-                headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }
-            })
-        },
-        openai: {
-            label: 'OpenAI',
-            description: 'Alternative für Zusammenfassungen.',
-            keyUrl: 'https://platform.openai.com/api-keys',
-            keyGuide: {
-                steps: [
-                    'Auf platform.openai.com ein Konto anlegen.',
-                    'Unter „Billing“ Guthaben aufladen – ein ChatGPT-Abo gilt für die API nicht.',
-                    'Unter „API keys“ auf „Create new secret key“ klicken und den Key sofort kopieren.',
-                    'Hier einfügen und mit „Prüfen“ testen.'
-                ],
-                note: 'Unter „Limits“ lässt sich eine monatliche Obergrenze setzen.'
-            },
-            test: key => ({ url: 'https://api.openai.com/v1/models', headers: { 'Authorization': 'Bearer ' + key } })
-        }
+    // Keys of the text AI providers (S.llms) that have no speech engine of their own. A provider that
+    // is both (OpenAI, Groq, Gemini, …) has one row under S.apis, and that key serves both purposes.
+    const LLM_KEYS = {};
+    const refreshLlmKeys = () => {
+        for (const id of Object.keys(LLM_KEYS)) delete LLM_KEYS[id];
+        for (const [id, llm] of Object.entries(S.llms)) if (!S.apis[id]) LLM_KEYS[id] = llm;
     };
+    // Engines for transcribing files: the Diktat page has more (dictationOnly), which don't separate speakers.
+    const fileEngineIds = () => Object.keys(S.apis).filter(id => !S.apis[id].dictationOnly);
+    // An engine may share the key of another entry (AssemblyAI Sync uses the AssemblyAI key).
+    const keyIdOf = id => S.apis[id]?.keyId || id;
 
     let currentFile = null;
     let currentDuration = null;  // seconds, once the player has read the file
@@ -130,7 +105,7 @@ window.Unisono = window.Unisono || {};
     const keys = {};
 
     function allKeyIds() {
-        return [...Object.keys(S.apis), ...Object.keys(LLM_KEYS)];
+        return [...Object.keys(S.apis).filter(id => !S.apis[id].keyId), ...Object.keys(LLM_KEYS)];
     }
 
     function keyMeta(id) {
@@ -159,6 +134,7 @@ window.Unisono = window.Unisono || {};
     }
 
     function getKey(id) {
+        id = keyIdOf(id);
         if (!keys[id]) throw new Error(`Bitte zuerst den API-Key für ${keyMeta(id).label} unter „API-Keys“ eintragen.`);
         return keys[id];
     }
@@ -173,7 +149,7 @@ window.Unisono = window.Unisono || {};
 
     // Sidebar (and on mobile the top bar): which engines have a key.
     function renderKeyStatus() {
-        const ids = Object.keys(S.apis);
+        const ids = fileEngineIds();
         const withKey = ids.filter(id => keys[id]).length;
         $('topbar-keys').replaceChildren(...ids.map(id => {
             const d = dot(id);
@@ -182,7 +158,7 @@ window.Unisono = window.Unisono || {};
         }));
         $('topbar-keys').setAttribute('aria-label', `${withKey} von ${ids.length} Engines mit Key. API-Keys öffnen`);
         $('topbar-keys').title = ids.map(id => `${shortLabel(S.apis[id])}: ${keys[id] ? 'Key hinterlegt' : 'kein Key'}`).join('\n');
-        $('provider-status').replaceChildren(...Object.entries(S.apis).map(([id, api]) =>
+        $('provider-status').replaceChildren(...ids.map(id => [id, S.apis[id]]).map(([id, api]) =>
             h('li', {},
                 h('button', { type: 'button', class: 'provider-status-item', onclick: () => switchView('keys') },
                     dot(id),
@@ -261,7 +237,7 @@ window.Unisono = window.Unisono || {};
                     removeBtn),
                 h('div', { class: 'key-more' }, feedback, keyGuide(meta)));
         };
-        $('key-cards-stt').replaceChildren(...Object.keys(S.apis).map(row));
+        $('key-cards-stt').replaceChildren(...Object.keys(S.apis).filter(id => !S.apis[id].keyId).map(row));
         $('key-cards-llm').replaceChildren(...Object.keys(LLM_KEYS).map(row));
     }
 
@@ -304,7 +280,7 @@ window.Unisono = window.Unisono || {};
 
     // --- Engine selection: one chip per provider, the active one filled ---
     function renderProviderCards() {
-        const chips = Object.entries(S.apis).map(([id, api]) => {
+        const chips = fileEngineIds().map(id => [id, S.apis[id]]).map(([id, api]) => {
             const active = id === selectedProvider;
             return h('button', {
                 type: 'button', class: 'engine-chip', 'aria-pressed': String(active),
@@ -326,7 +302,7 @@ window.Unisono = window.Unisono || {};
     }
 
     function selectProvider(id, { keepModel = false } = {}) {
-        selectedProvider = S.apis[id] ? id : Object.keys(S.apis)[0];
+        selectedProvider = S.apis[id] && !S.apis[id].dictationOnly ? id : fileEngineIds()[0];
         const api = S.apis[selectedProvider];
         const previousModel = $('model-select').value;
         $('model-select').replaceChildren(...api.models.map(m => h('option', { value: m.id, text: m.name })));
@@ -425,7 +401,7 @@ window.Unisono = window.Unisono || {};
     function limitMessage(providerId) {
         const problems = limitProblems(providerId);
         if (!problems.length) return '';
-        const fitting = Object.keys(S.apis).filter(id => id !== providerId && !limitProblems(id).length);
+        const fitting = fileEngineIds().filter(id => id !== providerId && !limitProblems(id).length);
         return problems.join(' ') + (fitting.length
             ? ` Passende Anbieter: ${fitting.map(id => S.apis[id].label).join(', ')}.`
             : ' Bitte die Datei kürzen oder teilen.');
@@ -694,9 +670,10 @@ window.Unisono = window.Unisono || {};
 
     // --- Init ---
     function init() {
-        S.ui = { setStatus, hideStatus, showError, copy, getKey, hasKey: id => !!keys[id] };
+        S.ui = { setStatus, hideStatus, showError, copy, getKey, hasKey: id => !!keys[keyIdOf(id)] };
         S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, switchView, openSettings: tab => S.settings.open(tab) };
 
+        refreshLlmKeys();
         loadKeys();
         renderKeyCards();
         renderKeyStatus();
@@ -746,7 +723,7 @@ window.Unisono = window.Unisono || {};
         showLlmLogo();
         S.state.subscribe(type => { if (type !== 'text') updateTranscriptView(); });
 
-        const firstVisit = !Object.keys(S.apis).some(id => keys[id]);
+        const firstVisit = !allKeyIds().some(id => keys[id]);
         const restored = S.state.restore();
         updateTranscriptView();
         if (firstVisit) {
