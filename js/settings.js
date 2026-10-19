@@ -57,6 +57,12 @@ window.Unisono = window.Unisono || {};
             : 'Kein Verlauf gespeichert.';
         $('clear-dictation').disabled = !dictations;
 
+        const counted = S.dictation.statsCount();
+        $('data-stats-info').textContent = counted
+            ? `${counted} Eintr${counted === 1 ? 'ag' : 'äge'} in der Statistik.`
+            : 'Keine Statistik gespeichert.';
+        $('clear-stats').disabled = !counted;
+
         if (S.recorder.isActive()) {
             $('data-recording-info').textContent = 'Gerade läuft eine Aufnahme – die Sicherung wird gebraucht.';
             $('clear-recordings').disabled = true;
@@ -88,6 +94,13 @@ window.Unisono = window.Unisono || {};
         refreshData();
     }
 
+    function clearStats() {
+        if (!confirm('Die Statistik der Diktate zurücksetzen?')) return;
+        S.dictation.clearStats();
+        S.ui.setStatus('Diktat-Statistik gelöscht.', 'success');
+        refreshData();
+    }
+
     async function clearRecordings() {
         if (!confirm('Die Sicherung der unterbrochenen Aufnahme endgültig löschen?')) return;
         await S.recorder.discardBackup();
@@ -97,7 +110,7 @@ window.Unisono = window.Unisono || {};
 
     async function resetAll() {
         if (S.recorder.isActive() || S.dictation.isActive()) return S.ui.setStatus('Bitte zuerst die laufende Aufnahme beenden.', 'error');
-        if (!confirm('Wirklich alles löschen – Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf und Einstellungen?')) return;
+        if (!confirm('Wirklich alles löschen – Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf, Diktat-Statistik und Einstellungen?')) return;
         S.state.clear();
         $('vocab-text').value = '';
         await S.recorder.discardBackup();
@@ -111,6 +124,7 @@ window.Unisono = window.Unisono || {};
         options = opts;
         $('clear-session').addEventListener('click', clearSession);
         $('clear-dictation').addEventListener('click', clearDictation);
+        $('clear-stats').addEventListener('click', clearStats);
         $('clear-recordings').addEventListener('click', clearRecordings);
         $('reset-all').addEventListener('click', resetAll);
 

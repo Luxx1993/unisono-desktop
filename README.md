@@ -8,7 +8,7 @@ Audio und Video transkribieren, lesen, korrigieren und exportieren, komplett im 
 
 - **Läuft einfach so:** `index.html` per Doppelklick öffnen. Kein Node.js, kein Server, keine Installation, keine Verbindung zu Google Fonts. Ideal für Dienstrechner.
 - **Vier Engines:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral), jeweils mit Sprechererkennung.
-- **Diktat:** sprechen, die KI räumt den Text auf (Stile wie Aufräumen, E-Mail oder Aktenvermerk), er liegt sofort in der Zwischenablage. Mit Ersetzungsregeln und Verlauf.
+- **Diktat:** sprechen, die KI räumt den Text auf (Stile wie Aufräumen, E-Mail oder Aktenvermerk), er liegt sofort in der Zwischenablage. Mit schwebendem Fenster, Umformulieren, Langdiktat, Ersetzungsregeln, Verlauf und Statistik.
 - **Aufnehmen im Browser:** Mikrofonaufnahme mit Pause, Pegelanzeige und Absturzsicherung.
 - **Fachbegriffe:** eine Liste mit Namen und Fachwörtern, die in passender Form an jede Engine geht.
 - **Live-Fortschritt:** Hochladen mit echtem Prozentwert und Tempo, Verarbeitungszeit, jederzeit abbrechbar.
@@ -36,13 +36,13 @@ Links steht die Seitenleiste. Auf dem Handy gibt es unten eine Tab-Leiste mit Da
 
 | Seite | Inhalt |
 |---|---|
-| **Diktat** | Sprechen, aufräumen lassen, kopieren: Stile, Verlauf, Einstellungen. Siehe „Diktat“. |
+| **Diktat** | Sprechen, aufräumen lassen, kopieren; Umformulieren; schwebendes Fenster; Stile, Verlauf, Statistik, Einstellungen. Siehe „Diktat“. |
 | **Aufnahme** | Live aufnehmen (vor Ort, Diktat) mit Merkern; danach „Transkribieren“ oder „Aufnahme sichern“. Auf Handy und Tablet die Startseite. |
 | **Transkribieren** | Vorhandene Audio- oder Videodatei ablegen, Engine wählen, Optionen, Start. Während des Laufs der Fortschritt. |
 | **Transkript** | Player, Transkript-Editor, Suche, Sprecher und Redezeit, Zusammenfassung, Export. |
 | **Fachbegriffe** | Begriffsliste mit Import und Export, dazu Ersetzungsregeln für das Diktat. |
 | **API-Keys** | Keys für die Engines und die Zusammenfassung, jeweils mit **Prüfen**, **Entfernen** und der Anleitung „So bekommst du einen Key“. |
-| **Einstellungen** | Darstellung (Hell, Dunkel, Wie System) sowie Daten und Datenschutz: Keys, Transkript und Aufnahme-Sicherung einzeln löschen oder alles zurücksetzen. |
+| **Einstellungen** | Darstellung (Hell, Dunkel, Wie System) sowie Daten und Datenschutz: Keys, Transkript, Aufnahme-Sicherung, Diktat-Verlauf und Diktat-Statistik einzeln löschen oder alles zurücksetzen. |
 
 Unten in der Seitenleiste steht, für welche Engine ein Key hinterlegt ist.
 
@@ -104,15 +104,44 @@ Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt i
 
 **Ablauf:** aufnehmen → mit der gewählten Engine transkribieren (ohne Sprechertrennung, mit deinen Fachbegriffen) → mit dem gewählten **Stil** von Claude oder OpenAI aufräumen → **Ersetzungen** anwenden → anzeigen, kopieren, im Verlauf merken.
 
-- **Bedienung:** *Antippen* (Knopf oder Leertaste startet und beendet) oder *Halten* (Knopf oder Leertaste gedrückt halten, solange du sprichst). **Esc** verwirft. Die Leertaste gilt, solange die Seite „Diktat“ offen ist und kein Textfeld den Fokus hat. Ein roter Punkt an „Diktat“ zeigt, dass eine Aufnahme läuft.
+- **Bedienung:** *Antippen* (Knopf oder Leertaste startet und beendet) oder *Halten* (Knopf oder Leertaste gedrückt halten, solange du sprichst). **Esc** verwirft. Die Leertaste gilt, solange die Seite „Diktat“ oder das schwebende Fenster den Fokus hat und kein Textfeld. Ein roter Punkt an „Diktat“ zeigt, dass eine Aufnahme läuft.
 - **Stile:** *Rohtext* (nur das Transkript), *Aufräumen*, *Wörtlich*, *E-Mail*, *Chat* und *Aktenvermerk*, mit demselben Wortlaut wie in der Android-App. Unter **Stile verwalten** legst du eigene Stile an (Name und Anweisung), bearbeitest oder löschst sie; die eingebauten dienen als Vorlage für Kopien.
 - **Ergebnis:** bei Aufräumen lässt sich zwischen aufgeräumtem Text und **Rohtext** umschalten, der Text ist direkt bearbeitbar. **Neu aufräumen** wendet einen anderen Stil auf dasselbe Diktat an, ohne neu zu sprechen.
 - **Zwischenablage:** Das Ergebnis wird sofort kopiert (abschaltbar). Blockiert der Browser das, bleibt der Knopf **Kopieren**.
 - **Ersetzungen:** Unter **Fachbegriffe** stehen feste Regeln „aus → in“ (ganzes Wort oder Teilstück, mit oder ohne Groß/Klein), die nach der KI auf den fertigen Text und auf den Rohtext laufen, von oben nach unten. Leeres Ziel löscht das Wort. Die Fachbegriffe selbst gehen als Hinweis an die Engine und zusätzlich an die KI, damit Namen wie gelistet geschrieben werden.
 - **Verlauf:** die letzten 50 Diktate (Zeit, Stil, Text) mit Kopieren, Anzeigen und Löschen; löschbar unter **Einstellungen → Daten und Datenschutz**.
-- **Einstellungen der Seite:** Engine (Standard: ElevenLabs, wenn ein Key da ist, sonst die erste Engine mit Key), Modell, Sprache, KI-Anbieter und -Modell (Standard Claude Haiku 5.5, schnell und günstig). ElevenLabs und Mistral antworten in einem Schritt, Gladia und AssemblyAI brauchen einige Sekunden länger.
+- **Einstellungen der Seite:** Engine (Standard: ElevenLabs, wenn ein Key da ist, sonst die erste Engine mit Key), Modell, Sprache, KI-Anbieter und -Modell (Standard Claude Haiku 5.5, schnell und günstig), automatisch kopieren, Langdiktat. ElevenLabs und Mistral antworten in einem Schritt, Gladia und AssemblyAI brauchen einige Sekunden länger.
 - **Falls die KI ausfällt** (Key fehlt, Netzwerk): Das Rohtext-Ergebnis steht trotzdem bereit, mit dem Grund in der Meldung.
-- **Grenzen des Browsers:** Unisono kann nicht in andere Programme tippen und hört nicht auf Tastenkürzel, wenn ein anderes Fenster aktiv ist. Das Ergebnis kommt deshalb über die Zwischenablage. Ein schwebendes Fenster und ein systemweites Kürzel wären spätere Ausbaustufen.
+
+### Schwebendes Fenster
+
+<img src="docs/screenshots/dictation-mini.png" alt="Schwebendes Diktat-Fenster mit Aufnahmeknopf, Stil und Ergebnis" width="340">
+
+**Schwebendes Fenster öffnen** (unter dem Aufnahmeknopf) setzt ein kleines Fenster mit Aufnahmeknopf, Stilwahl, Ergebnis und **Kopieren** über alle anderen Programme. So diktierst du, während ein anderes Programm den Fokus hat: In das Programm klicken, im schwebenden Fenster aufnehmen, danach im Programm mit Strg+V einfügen. Das Ergebnis wird aus dem schwebenden Fenster heraus kopiert, weil der Browser dem Tab dahinter das Kopieren verbietet, solange er nicht den Fokus hat.
+
+- Gibt es in **Chrome und Edge ab Version 116** („Document Picture-in-Picture“). Firefox und Safari kennen es nicht; dort steht an der Stelle ein Hinweis und das Diktat bleibt in diesem Tab.
+- Die Leertaste, Esc und der Knopf wirken im schwebenden Fenster wie auf der Seite. Der Tab „Unisono“ muss offen bleiben, er macht die Arbeit (Aufnahme, Transkription, KI).
+- Ein Tastenkürzel, das auch bei einem anderen aktiven Programm greift, kann eine Webseite nicht anbieten; dafür wäre eine Browser-Erweiterung nötig.
+
+### Umformulieren
+
+<img src="docs/screenshots/dictation-reword.png" alt="Umformulieren: Text, Anweisung und Vorschläge" width="640">
+
+Oben auf der Seite von **Diktieren** auf **Umformulieren** umschalten. Dann gibt es ein Feld für den **Text** (einfügen, tippen, **Aus Zwischenablage einfügen** oder **Ergebnis übernehmen** für die nächste Runde) und eine **Anweisung**, die du sprichst („mach das kürzer und freundlicher“) oder tippst. Fertige Vorschläge (*Kürzer fassen*, *Freundlicher*, *Förmlicher*, *Rechtschreibung korrigieren*, *Auf Englisch*, *Als Stichpunkte*) führen sich mit einem Klick aus.
+
+- Die KI wendet nur die Anweisung an und lässt Inhalt, Namen, Zahlen und Sprache sonst stehen. Deine Fachbegriffe und Ersetzungen gelten auch hier.
+- Das Ergebnis lässt sich auf **Vorher** zurückschalten und landet mit der Anweisung im Verlauf. Es wird wie beim Diktat kopiert.
+- Es braucht den Key des KI-Anbieters; ein Rohtext-Ersatz wie beim Diktat gibt es hier nicht.
+
+### Langdiktat
+
+Bei **Antippen** teilt Unisono eine lange Aufnahme an Sprechpausen in Teile (mindestens 20 Sekunden und eine Pause von etwa einer Sekunde; ein Teil wird nie länger als etwa 90 Sekunden) und transkribiert jedes Teil schon, während du weiterredest. Beim Stopp ist der Text fast sofort da, und die KI räumt den ganzen Text in **einem** Durchgang auf. Die Anzeige nennt, wie viele Teile schon transkribiert sind. Ein fehlgeschlagener Teil wird einmal wiederholt. Bei **Halten** und beim Umformulieren wird nicht geteilt; unter „Einstellungen“ der Seite lässt sich das Langdiktat abschalten.
+
+### Statistik
+
+<img src="docs/screenshots/dictation-stats.png" alt="Statistik der Diktate: gesparte Zeit, Kennzahlen, letzte sieben Tage" width="480">
+
+Die Karte **Statistik** zählt wie die Android-App: Diktate, Wörter, Zeichen, gesprochene Zeit, Wörter je Diktat, Tempo (Wörter pro Minute), KI-Durchgänge (Aufräumen und Umformulieren), die Serie aufeinanderfolgender Tage, die Wörter dieses Monats und ein Balkendiagramm der letzten sieben Tage. **Gesparte Zeit** vergleicht mit dem Tippen von 40 Wörtern pro Minute. Alles bleibt im Browser; zurücksetzen geht in der Karte oder unter **Einstellungen → Daten und Datenschutz**.
 
 ## Grenzen der Anbieter
 
@@ -208,7 +237,7 @@ Auf schmalen Bildschirmen ersetzt eine Tab-Leiste unten die Seitenleiste, Karten
 ## Datenschutz
 
 - Es gibt keinen Server von Unisono. Audio und Keys gehen nur an den Anbieter, den du auswählst.
-- API-Keys, das zuletzt bearbeitete Transkript, Fachbegriffe, Ersetzungen, eigene Diktat-Stile, der Diktat-Verlauf und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme liegt in IndexedDB.
+- API-Keys, das zuletzt bearbeitete Transkript, Fachbegriffe, Ersetzungen, eigene Diktat-Stile, der Diktat-Verlauf, die Diktat-Statistik und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme liegt in IndexedDB.
 - Alles lässt sich unter **Einstellungen → Daten und Datenschutz** einzeln löschen oder komplett zurücksetzen.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.
 
@@ -234,8 +263,9 @@ js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, A
 js/recorder.js          Mikrofonaufnahme, Pegel, Pause, Merker, Großansicht, Weiteraufnahme nach Unterbrechung
 js/recording-backup.js  Laufende Sicherung der Aufnahme in IndexedDB, Wiederherstellung
 js/summary.js           Zusammenfassung (Anthropic / OpenAI), `complete()` auch für das Diktat
-js/dictation-core.js    Diktat ohne Seite: Stile, KI-Anweisung, Ersetzungsregeln, Verlauf (mit Node testbar)
-js/dictation.js         Seite „Diktat“: Aufnahme, Ablauf, Stile, Verlauf, Ersetzungen
+js/dictation-core.js    Diktat ohne Seite: Stile, KI-Anweisungen, Ersetzungsregeln, Verlauf, Teilung an Pausen, Statistik (mit Node testbar)
+js/dictation.js         Seite „Diktat“: Aufnahme, Langdiktat, Ablauf, Umformulieren, Stile, Verlauf, Statistik, Ersetzungen
+js/dictation-mini.js    Schwebendes Fenster (Document Picture-in-Picture) für das Diktat
 tests/                  `node tests/dictation-core.test.js`
 js/appearance.js        Hell, Dunkel oder wie System, wird vor dem ersten Zeichnen gesetzt
 js/settings.js          Seite „Einstellungen“: Darstellung, Daten löschen

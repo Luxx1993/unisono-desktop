@@ -740,6 +740,7 @@ window.Unisono = window.Unisono || {};
         S.search.init();
         S.summary.init();
         S.dictation.init();
+        S.dictationMini.init();
         const showLlmLogo = () => $('llm-logo').replaceChildren(...[S.brandLogo($('llm-provider').value)].filter(Boolean));
         $('llm-provider').addEventListener('change', showLlmLogo);
         showLlmLogo();
