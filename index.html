@@ -346,8 +346,7 @@
                         </div>
                         <div class="field">
                             <label for="dict-llm-model">KI-Modell</label>
-                            <input id="dict-llm-model" class="input is-mono" list="dict-llm-model-list" autocomplete="off" spellcheck="false">
-                            <datalist id="dict-llm-model-list"></datalist>
+                            <select id="dict-llm-model" class="input"></select>
                         </div>
                     </div>
                     <label class="check"><input type="checkbox" id="dict-autocopy" checked> Ergebnis sofort in die Zwischenablage kopieren</label>
@@ -617,8 +616,7 @@
                                 </div>
                                 <div class="field">
                                     <label for="llm-model">Modell</label>
-                                    <input id="llm-model" list="llm-model-list" autocomplete="off" class="input is-mono">
-                                    <datalist id="llm-model-list"></datalist>
+                                    <select id="llm-model" class="input"></select>
                                 </div>
                                 <button type="button" id="summary-btn" disabled class="btn-secondary is-wide">Zusammenfassung erstellen</button>
                                 <div class="field">
@@ -684,7 +682,7 @@
                         <h2 id="keys-list-title" class="t-label">Anbieter</h2>
                         <span id="key-filter-count" class="t-small muted"></span>
                     </div>
-                    <div id="key-filters" class="chips" role="group" aria-label="Anbieter filtern"></div>
+                    <div id="key-filters" class="segmented" role="radiogroup" aria-label="Anbieter filtern"></div>
                     <p id="key-filter-note" class="t-small muted hidden"></p>
                     <div id="key-cards" class="key-list"></div>
                 </section>

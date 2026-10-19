@@ -868,14 +868,13 @@ window.Unisono = window.Unisono || {};
         $('dict-llm-provider').disabled = !llms.length;
         $('dict-llm-model').disabled = !llms.length;
         if (llms.length) $('dict-llm-provider').value = config.llmProvider;
-        $('dict-llm-model').value = config.llmModel;
         const provider = config.llmProvider;
-        const fillModels = ids => $('dict-llm-model-list').replaceChildren(...ids.map(id => el('option', { value: id })));
-        fillModels(S.llms[provider].models);
-        // The provider's own catalog follows once its key is known.
-        S.llmApi.loadModels(provider, S.ui.hasKey(provider) ? S.ui.getKey(provider) : '')
-            .then(ids => { if (config.llmProvider === provider) fillModels(ids); });
-        $('dict-llm-model').placeholder = S.llms[provider].defaultModel ? '' : 'Modell eintragen oder aus der Liste wählen';
+        if (llms.length) {
+            S.llmApi.fillModelSelect($('dict-llm-model'), provider, S.ui.hasKey(provider) ? S.ui.getKey(provider) : '', config.llmModel,
+                pick => { config.llmModel = pick; saveConfig(); });
+        } else {
+            $('dict-llm-model').replaceChildren(el('option', { value: '', text: 'Zuerst einen API-Key eintragen' }));
+        }
         $('dict-autocopy').checked = config.autoCopy;
         $('dict-longdictation').checked = config.longDictation;
         $('dict-mini-skin').value = config.miniSkin;
@@ -915,8 +914,9 @@ window.Unisono = window.Unisono || {};
             saveConfig(); renderSettings();
         });
         $('dict-llm-model').addEventListener('change', e => {
-            config.llmModel = e.target.value.trim() || llmDefault(config.llmProvider);
-            saveConfig(); renderSettings();
+            if (e.target.value === '__custom') return;   // see fillModelSelect: the typed-in id follows as a new change
+            config.llmModel = e.target.value || llmDefault(config.llmProvider);
+            saveConfig();
         });
         $('dict-autocopy').addEventListener('change', e => { config.autoCopy = e.target.checked; saveConfig(); });
         $('dict-longdictation').addEventListener('change', e => { config.longDictation = e.target.checked; saveConfig(); });

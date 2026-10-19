@@ -178,22 +178,74 @@ window.Unisono = window.Unisono || {};
         models: ['Mistral-Small-3.2-24B-Instruct-2506', 'Meta-Llama-3_3-70B-Instruct']
     });
 
-    // The provider's own model list (OpenAI-style GET /models), merged with the curated ids.
-    // Never throws: an offline or blocked list just leaves the curated ones.
+    // The provider's own model list (OpenAI-style GET /models), merged with the curated ids, without the
+    // models that obviously are no chat models. Debounced: while a key is typed, only the last one is
+    // sent. Resolves to null when a newer call replaced this one, and to the curated ids when offline.
+    const CUSTOM = '__custom';
     const catalogs = new Map();
+    const latest = {};
+    const NOT_CHAT = /embed|whisper|tts|transcribe|moderation|dall-e|image|audio|realtime|rerank|speech/i;
     async function loadModels(id, key) {
         const llm = llms[id];
         if (!llm) return [];
         if (!llm.live || !key) return llm.models;
         const cacheKey = id + '|' + key;
+        const token = latest[id] = (latest[id] || 0) + 1;
         if (!catalogs.has(cacheKey)) {
-            catalogs.set(cacheKey, fetch(llm.base + 'models', { headers: { Authorization: 'Bearer ' + key, ...llm.headers } })
-                .then(res => res.ok ? res.json() : null)
-                .then(data => (data?.data || []).map(m => String(m.id).replace(/^models\//, '')).filter(Boolean))
-                .catch(() => []));
+            await new Promise(resolve => setTimeout(resolve, 600));
+            if (token !== latest[id]) return null;
+            if (!catalogs.has(cacheKey)) {
+                catalogs.set(cacheKey, fetch(llm.base + 'models', { headers: { Authorization: 'Bearer ' + key, ...llm.headers } })
+                    .then(res => res.ok ? res.json() : null)
+                    .then(data => (data?.data || []).map(m => String(m.id).replace(/^models\//, '')).filter(m => m && !NOT_CHAT.test(m)))
+                    .catch(() => []));
+            }
         }
         const live = await catalogs.get(cacheKey);
+        if (token !== latest[id]) return null;
         return [...new Set([...llm.models, ...live])];
+    }
+
+    // Fills a model drop-down with the models of one provider: the curated ones at once, the provider's own
+    // catalog once it has arrived. The current model stays selected if the provider has it; otherwise the
+    // provider's default (or its first model) is picked and reported through onPick.
+    function fillModelSelect(select, provider, key, current, onPick) {
+        const llm = llms[provider];
+        select.dataset.provider = provider;
+        const option = (value, text) => Object.assign(document.createElement('option'), { value, textContent: text || value });
+        const set = (ids, loading) => {
+            if (select.dataset.provider !== provider) return;
+            const list = [...ids];
+            if (loading && current && !list.includes(current)) list.unshift(current);   // until the catalog says otherwise
+            const options = list.map(id => option(id));
+            if (!list.length) options.push(option('', loading ? 'Modelle werden geladen …' : 'Modelle nicht abrufbar'));
+            options.push(option(CUSTOM, 'Anderes Modell eintragen …'));
+            select.replaceChildren(...options);
+            select.disabled = false;
+            if (list.includes(current)) select.value = current;
+            else if (list.length) {
+                const pick = list.includes(llm.defaultModel) ? llm.defaultModel : list[0];
+                select.value = pick;
+                onPick?.(pick);
+            } else select.value = '';
+            select.dataset.last = select.value;
+        };
+        // A model the list does not show can still be typed in (a new model, or a catalog that is out of reach).
+        if (!select.dataset.bound) {
+            select.dataset.bound = '1';
+            select.addEventListener('change', () => {
+                if (select.value !== CUSTOM) { select.dataset.last = select.value; return; }
+                const id = (window.prompt('Modell-ID des Anbieters:') || '').trim();
+                if (!id) { select.value = select.dataset.last || ''; return; }
+                if (![...select.options].some(o => o.value === id)) select.insertBefore(option(id), select.lastElementChild);
+                select.value = id;
+                select.dataset.last = id;
+                select.dispatchEvent(new Event('change'));
+            });
+        }
+        const live = llm.live && !!key;
+        set(llm.models, live);
+        if (live) loadModels(provider, key).then(ids => { if (ids) set(ids, false); });
     }
 
     // One request to the chosen provider: the text of the answer.
@@ -205,5 +257,5 @@ window.Unisono = window.Unisono || {};
     }
 
     S.llms = llms;
-    S.llmApi = { loadModels, chat };
+    S.llmApi = { loadModels, fillModelSelect, chat };
 })(window.Unisono);

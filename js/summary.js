@@ -42,14 +42,11 @@ window.Unisono = window.Unisono || {};
 
     function updateModels(keepModel = false) {
         const provider = $('llm-provider').value;
-        const list = $('llm-model-list');
-        if (!provider) { list.replaceChildren(); $('llm-model').value = ''; return; }
-        const fill = ids => list.replaceChildren(...ids.map(id => Object.assign(document.createElement('option'), { value: id })));
-        fill(S.llms[provider].models);
-        if (!keepModel) $('llm-model').value = S.llms[provider].defaultModel;
-        // The provider's own catalog follows once its key is known.
+        const select = $('llm-model');
+        if (!provider) { select.replaceChildren(Object.assign(document.createElement('option'), { value: '', textContent: 'Zuerst einen API-Key eintragen' })); select.disabled = true; return; }
         const key = S.ui?.hasKey(provider) ? S.ui.getKey(provider) : '';
-        S.llmApi.loadModels(provider, key).then(ids => { if ($('llm-provider').value === provider) fill(ids); });
+        const current = keepModel && select.dataset.provider === provider ? select.value : S.llms[provider].defaultModel;
+        S.llmApi.fillModelSelect(select, provider, key, current);
     }
 
     function updateButton() {

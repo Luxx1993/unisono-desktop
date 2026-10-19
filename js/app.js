@@ -190,7 +190,7 @@ window.Unisono = window.Unisono || {};
             rowEl.classList.toggle('hidden', !match);
             if (match) shown++;
         });
-        document.querySelectorAll('#key-filters .engine-chip').forEach(chip => chip.setAttribute('aria-pressed', String(chip.dataset.filter === keyFilter)));
+        document.querySelectorAll('#key-filters button').forEach(chip => chip.setAttribute('aria-checked', String(chip.dataset.filter === keyFilter)));
         const note = $('key-filter-note');
         note.textContent = keyFilter === 'realtime'
             ? 'Diese Anbieter können live mitschreiben. Unisono nimmt bisher ganze Aufnahmen auf und schickt sie danach.'
@@ -201,7 +201,7 @@ window.Unisono = window.Unisono || {};
 
     function renderKeyFilters() {
         $('key-filters').replaceChildren(...[['all', 'Alle'], ...Object.entries(TAG_LABELS)].map(([id, label]) =>
-            h('button', { type: 'button', class: 'engine-chip', 'data-filter': id, 'aria-pressed': 'false', text: label,
+            h('button', { type: 'button', role: 'radio', 'data-filter': id, 'aria-checked': 'false', text: label,
                 onclick: () => { keyFilter = id; applyKeyFilter(); } })));
     }
 
