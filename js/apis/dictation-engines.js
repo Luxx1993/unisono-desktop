@@ -75,10 +75,15 @@ window.Unisono = window.Unisono || {};
         base: 'https://api.siliconflow.cn/v1/', models: ['FunAudioLLM/SenseVoiceSmall', 'TeleAI/TeleSpeechASR'],
         keyUrl: 'https://cloud.siliconflow.cn/account/ak', host: 'cloud.siliconflow.cn', keyPage: 'Unter „API Keys“ einen Key anlegen.'
     });
+    multipartEngine('together', {
+        label: 'Together AI', description: 'Whisper und Parakeet als Dienst; derselbe Key dient zum Aufräumen.',
+        base: 'https://api.together.xyz/v1/', models: ['openai/whisper-large-v3', 'nvidia/parakeet-tdt-0.6b-v3'], keyUrl: 'https://api.together.ai/settings/api-keys',
+        host: 'together.ai', keyPage: 'Unter „Settings → API Keys“ einen Key anlegen.'
+    });
     multipartEngine('openrouter', {
         label: 'OpenRouter', description: 'Mehrere Spracherkennungs-Modelle über einen Key; derselbe Key dient zum Aufräumen.',
         base: 'https://openrouter.ai/api/v1/', headers: { 'X-Title': 'Unisono' },
-        models: ['openai/gpt-transcribe', 'microsoft/mai-transcribe-2', 'mistralai/voxtral-mini-transcribe', 'deepgram/nova-3', 'openai/whisper-large-v3-turbo', 'openai/whisper-large-v3'],
+        models: ['openai/gpt-transcribe', 'microsoft/mai-transcribe-2', 'google/gemini-3.5-transcribe', 'elevenlabs/scribe-v2', 'x-ai/grok-stt-1.0', 'assemblyai/universal-3-6-pro', 'mistralai/voxtral-mini-transcribe', 'deepgram/nova-3', 'nvidia/parakeet-tdt-0.6b-v3', 'openai/whisper-large-v3-turbo', 'openai/whisper-large-v3'],
         keyUrl: 'https://openrouter.ai/keys', host: 'openrouter.ai', keyPage: '„Keys“ öffnen.'
     });
 
@@ -175,7 +180,7 @@ window.Unisono = window.Unisono || {};
     register('gemini', {
         label: 'Google Gemini', description: 'Gemini schreibt die Aufnahme mit; derselbe Key dient zum Aufräumen.',
         keyUrl: 'https://aistudio.google.com/app/apikey', keyGuide: guide('aistudio.google.com', '„Get API key“ öffnen.'),
-        models: ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'].map(m => ({ id: m, name: m })),
+        models: ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite'].map(m => ({ id: m, name: m })),
         test: key => ({ url: 'https://generativelanguage.googleapis.com/v1beta/models', headers: { 'x-goog-api-key': key } }),
         vocabularySupport: promptSupport,
         limits: () => ({ maxBytes: 15 * 1024 * 1024 }),

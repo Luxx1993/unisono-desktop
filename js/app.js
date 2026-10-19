@@ -169,9 +169,10 @@ window.Unisono = window.Unisono || {};
     // What a provider does, for the filter chips on the key page (the same filters as the Android app).
     const TAG_LABELS = { stt: 'Transkription', llm: 'Umformulierung', realtime: 'Echtzeit', eu: 'EU' };
     // Providers that can transcribe live (from the Android app's catalog); Unisono itself records whole takes.
-    const REALTIME_IDS = new Set(['openai', 'gemini', 'soniox', 'elevenlabs', 'deepgram', 'assembly', 'xai']);
-    // Providers that keep the data in the EU by default (Gladia, Mistral, Scaleway, OVHcloud).
-    const EU_IDS = new Set(['gladia', 'mistral', 'scaleway', 'ovhcloud']);
+    const REALTIME_IDS = new Set(['openai', 'gemini', 'soniox', 'elevenlabs', 'deepgram', 'assembly', 'xai', 'mistral', 'gladia']);
+    // Providers that keep the data in the EU by default, by their own documentation (Mistral, Scaleway, OVHcloud).
+    // Gladia is French, but its documentation promises EU processing only for live transcription.
+    const EU_IDS = new Set(['mistral', 'scaleway', 'ovhcloud']);
     let keyFilter = 'all';
 
     function providerTags(id) {
@@ -194,7 +195,7 @@ window.Unisono = window.Unisono || {};
         const note = $('key-filter-note');
         note.textContent = keyFilter === 'realtime'
             ? 'Diese Anbieter können live mitschreiben. Unisono nimmt bisher ganze Aufnahmen auf und schickt sie danach.'
-            : keyFilter === 'eu' ? 'Diese Anbieter verarbeiten die Daten standardmäßig in der EU.' : '';
+            : keyFilter === 'eu' ? 'Diese Anbieter verarbeiten die Daten laut ihrer Doku standardmäßig in der EU. Eine EU-Region zum Auswählen gibt es außerdem bei AssemblyAI, Soniox, Deepgram und OpenRouter; Unisono nutzt dort die Standard-Adresse.' : '';
         note.classList.toggle('hidden', !note.textContent);
         $('key-filter-count').textContent = `${shown} Anbieter`;
     }

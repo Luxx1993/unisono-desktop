@@ -63,7 +63,7 @@ window.Unisono = window.Unisono || {};
                 'Einen Key erzeugen und sofort kopieren.',
                 'Hier einfügen und mit „Prüfen“ testen.'
             ],
-            note: 'Gladia sitzt in Frankreich (EU). Zum Ausprobieren gibt es ein kostenloses Kontingent, danach wird nach Audio-Stunden abgerechnet.'
+            note: 'Gladia sitzt in Frankreich. Ob Dateien ausschließlich in der EU verarbeitet werden, nennt die Doku nicht (nur für Live gibt es die Region EU-West). Zum Ausprobieren gibt es ein kostenloses Kontingent, danach wird nach Audio-Stunden abgerechnet.'
         },
         test: key => ({ url: 'https://api.gladia.io/v2/pre-recorded?limit=1', headers: { 'x-gladia-key': key } }),
         models: [
