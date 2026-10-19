@@ -43,6 +43,7 @@ window.Unisono = window.Unisono || {};
 
     const config = {
         engine: null, model: null, language: 'de', mode: 'tap', task: 'dictate', longDictation: true,
+        miniSkin: 'cloud', miniPalette: S.orbs.DEFAULT_PALETTE, miniDim: true,
         style: 'cleanup', llmProvider: 'anthropic', llmModel: LLM_DEFAULTS.anthropic, autoCopy: true
     };
     let customStyles = [];
@@ -119,6 +120,9 @@ window.Unisono = window.Unisono || {};
         if (config.mode !== 'hold') config.mode = 'tap';
         if (config.task !== 'reword') config.task = 'dictate';
         config.longDictation = config.longDictation !== false;
+        if (config.miniSkin !== 'wave') config.miniSkin = 'cloud';
+        config.miniPalette = S.orbs.paletteById(config.miniPalette).id;
+        config.miniDim = config.miniDim !== false;
         if (!LLM_DEFAULTS[config.llmProvider]) config.llmProvider = 'anthropic';
         if (!config.llmModel) config.llmModel = LLM_DEFAULTS[config.llmProvider];
         if (config.style !== core.RAW_STYLE_ID && !core.findStyle(config.style, customStyles)) config.style = 'cleanup';
@@ -343,7 +347,7 @@ window.Unisono = window.Unisono || {};
             await finishTake(r, seconds);
         } catch (err) {
             if (err.name === 'AbortError') say('Diktat abgebrochen.', 'note');
-            else sayError(rewording() ? 'Umformulieren fehlgeschlagen' : 'Diktat fehlgeschlagen', err);
+            else { sayError(rewording() ? 'Umformulieren fehlgeschlagen' : 'Diktat fehlgeschlagen', err); emit('done', { ok: false }); }
         } finally {
             abortController = null;
             setPhase('idle');
@@ -455,6 +459,7 @@ window.Unisono = window.Unisono || {};
         }
         // A failed clean-up keeps its message in the status line; the copy then happens without a note.
         const copied = config.autoCopy && await copyQuietly(entry.text);
+        emit('done', { ok: !failed });
         if (failed) return;
         if (!config.autoCopy) say('Fertig.', 'success');
         else if (copied) say('Fertig. Der Text liegt in der Zwischenablage.', 'success');
@@ -539,11 +544,20 @@ window.Unisono = window.Unisono || {};
             await runReword(instruction, abortController.signal);
         } catch (err) {
             if (err.name === 'AbortError') say('Abgebrochen.', 'note');
-            else sayError('Umformulieren fehlgeschlagen', err);
+            else { sayError('Umformulieren fehlgeschlagen', err); emit('done', { ok: false }); }
         } finally {
             abortController = null;
             setPhase('idle');
         }
+    }
+
+    function setTask(task) {
+        if (phase !== 'idle' || (task !== 'dictate' && task !== 'reword')) return;
+        config.task = task;
+        saveConfig();
+        renderTask();
+        setPhase(phase);
+        emit('task', getState());
     }
 
     function renderTask() {
@@ -553,7 +567,7 @@ window.Unisono = window.Unisono || {};
         $('dict-task').replaceChildren(...[['dictate', 'Diktieren'], ['reword', 'Umformulieren']].map(([id, label]) =>
             el('button', {
                 type: 'button', role: 'radio', 'aria-checked': String(config.task === id), text: label,
-                onclick: () => { if (phase !== 'idle') return; config.task = id; saveConfig(); renderTask(); setPhase(phase); emit('task'); }
+                onclick: () => setTask(id)
             })));
         $('dict-reword-chips').replaceChildren(...core.REWORD_SUGGESTIONS.map(text =>
             el('button', { type: 'button', class: 'engine-chip', text, onclick: () => rewordTyped(text) })));
@@ -619,7 +633,7 @@ window.Unisono = window.Unisono || {};
             await deliver(last.source, last.seconds, styleId, abortController.signal);
         } catch (err) {
             if (err.name === 'AbortError') say('Abgebrochen.', 'note');
-            else sayError('Aufräumen fehlgeschlagen', err);
+            else { sayError('Aufräumen fehlgeschlagen', err); emit('done', { ok: false }); }
         } finally {
             abortController = null;
             setPhase('idle');
@@ -675,12 +689,18 @@ window.Unisono = window.Unisono || {};
             : 'Leertaste oder Knopf zum Starten und Beenden. Esc verwirft.';
     }
 
+    function styleNameOf(id) {
+        return id === core.RAW_STYLE_ID ? 'Rohtext' : core.findStyle(id, customStyles)?.name || 'Aufräumen';
+    }
+
     function getState() {
         return {
             phase, task: config.task, mode: config.mode, style: config.style,
             styles: [{ id: core.RAW_STYLE_ID, name: 'Rohtext' }, ...core.allStyles(customStyles).map(s => ({ id: s.id, name: s.name }))],
             stateText: stateText(), seconds: lastSeconds, level: lastLevel,
-            buttonText: mainButtonText(), result: currentResult(), hint: $('dict-keys-hint').textContent
+            buttonText: mainButtonText(), result: currentResult(), hint: $('dict-keys-hint').textContent,
+            skin: config.miniSkin, palette: config.miniPalette, dim: config.miniDim,
+            suggestions: core.REWORD_SUGGESTIONS, styleName: styleNameOf(config.style)
         };
     }
 
@@ -832,6 +852,15 @@ window.Unisono = window.Unisono || {};
         $('dict-llm-model-list').replaceChildren(...S.summary.MODELS[config.llmProvider].map(id => el('option', { value: id })));
         $('dict-autocopy').checked = config.autoCopy;
         $('dict-longdictation').checked = config.longDictation;
+        $('dict-mini-skin').value = config.miniSkin;
+        $('dict-mini-dim').checked = config.miniDim;
+        $('dict-mini-palette-field').classList.toggle('hidden', config.miniSkin !== 'cloud');
+        $('dict-mini-palette').replaceChildren(...S.orbs.PALETTES.map(p =>
+            el('button', {
+                type: 'button', class: 'palette-dot', role: 'radio', 'aria-checked': String(p.id === config.miniPalette),
+                'aria-label': p.name, title: p.name, style: `background: ${S.orbs.surfaceGradient(p.id)}`,
+                onclick: () => { config.miniPalette = p.id; saveConfig(); renderSettings(); emit('config', getState()); }
+            })));
         $('dict-mode').replaceChildren(...[['tap', 'Antippen'], ['hold', 'Halten']].map(([id, label]) =>
             el('button', {
                 type: 'button', role: 'radio', 'aria-checked': String(config.mode === id), text: label,
@@ -865,6 +894,8 @@ window.Unisono = window.Unisono || {};
         });
         $('dict-autocopy').addEventListener('change', e => { config.autoCopy = e.target.checked; saveConfig(); });
         $('dict-longdictation').addEventListener('change', e => { config.longDictation = e.target.checked; saveConfig(); });
+        $('dict-mini-skin').addEventListener('change', e => { config.miniSkin = e.target.value; saveConfig(); renderSettings(); emit('config', getState()); });
+        $('dict-mini-dim').addEventListener('change', e => { config.miniDim = e.target.checked; saveConfig(); emit('config', getState()); });
     }
 
     // --- History --------------------------------------------------------------------------------
@@ -1039,7 +1070,8 @@ window.Unisono = window.Unisono || {};
         statsCount: () => stats.dictations + stats.rewordings, clearStats,
         getRules: () => rules.map(r => ({ ...r })),
         // For the floating window
-        on, getState, down: onDown, up: onUp, cancel, setStyle, keyDown, keyUp,
+        on, getState, down: onDown, up: onUp, cancel, setStyle, setTask, keyDown, keyUp,
+        reword: rewordTyped,
         setCopyHost: win => { copyHost = win; },
         editResult: text => { $('dict-text').value = text; $('dict-text').dispatchEvent(new Event('input')); }
     };

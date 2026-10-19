@@ -115,9 +115,9 @@ Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt i
 
 ### Schwebendes Fenster
 
-<img src="docs/screenshots/dictation-mini.png" alt="Schwebendes Diktat-Fenster mit Aufnahmeknopf, Stil und Ergebnis" width="340">
+<img src="docs/screenshots/dictation-mini.png" alt="Schwebendes Diktat-Fenster mit der Wolke während der Aufnahme" width="270">
 
-**Schwebendes Fenster öffnen** (unter dem Aufnahmeknopf) setzt ein kleines Fenster mit Aufnahmeknopf, Stilwahl, Ergebnis und **Kopieren** über alle anderen Programme. So diktierst du, während ein anderes Programm den Fokus hat: In das Programm klicken, im schwebenden Fenster aufnehmen, danach im Programm mit Strg+V einfügen. Das Ergebnis wird aus dem schwebenden Fenster heraus kopiert, weil der Browser dem Tab dahinter das Kopieren verbietet, solange er nicht den Fokus hat.
+**Schwebendes Fenster öffnen** (unter dem Aufnahmeknopf) setzt ein kleines Fenster über alle anderen Programme. Es sieht aus und funktioniert wie der schwebende Button der Android-App: eine Kugel (**Wolke** in fünf Farben oder **Welle**), die beim Sprechen auf die Lautstärke reagiert, beim Verarbeiten einen Spinner zeigt und danach kurz ein Häkchen oder Kreuz. Ein rundes Kreuz daneben verwirft die Aufnahme, ein **langer Druck** auf die Kugel öffnet das Menü (Diktieren oder Umformulieren, Stil bzw. Anweisung), und nach ein paar Sekunden ohne Nutzung wird die Kugel kleiner und durchsichtiger. Aussehen, Farbe und Verkleinern stellst du unter „Einstellungen“ der Seite Diktat ein; eine Vorschau der Kugel steht unter dem Aufnahmeknopf. Das Ergebnis erscheint darunter mit **Kopieren**. So diktierst du, während ein anderes Programm den Fokus hat: In das Programm klicken, im schwebenden Fenster aufnehmen, danach im Programm mit Strg+V einfügen. Das Ergebnis wird aus dem schwebenden Fenster heraus kopiert, weil der Browser dem Tab dahinter das Kopieren verbietet, solange er nicht den Fokus hat.
 
 - Gibt es in **Chrome und Edge ab Version 116** („Document Picture-in-Picture“). Firefox und Safari kennen es nicht; dort steht an der Stelle ein Hinweis und das Diktat bleibt in diesem Tab.
 - Die Leertaste, Esc und der Knopf wirken im schwebenden Fenster wie auf der Seite. Der Tab „Unisono“ muss offen bleiben, er macht die Arbeit (Aufnahme, Transkription, KI).
@@ -265,6 +265,7 @@ js/recording-backup.js  Laufende Sicherung der Aufnahme in IndexedDB, Wiederhers
 js/summary.js           Zusammenfassung (Anthropic / OpenAI), `complete()` auch für das Diktat
 js/dictation-core.js    Diktat ohne Seite: Stile, KI-Anweisungen, Ersetzungsregeln, Verlauf, Teilung an Pausen, Statistik (mit Node testbar)
 js/dictation.js         Seite „Diktat“: Aufnahme, Langdiktat, Ablauf, Umformulieren, Stile, Verlauf, Statistik, Ersetzungen
+js/orbs.js              Kugeln Wolke (WebGL-Shader) und Welle (Canvas) wie im Android-Button
 js/dictation-mini.js    Schwebendes Fenster (Document Picture-in-Picture) für das Diktat
 tests/                  `node tests/dictation-core.test.js`
 js/appearance.js        Hell, Dunkel oder wie System, wird vor dem ersten Zeichnen gesetzt
