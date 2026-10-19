@@ -101,7 +101,7 @@ a { color: inherit; }
     padding: var(--space-8) var(--space-12) var(--space-16);
     border-left: 1px solid var(--border-subtle);
 }
-.view { max-width: var(--content-max); margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-6); }
+.view { width: 100%; max-width: var(--content-max); margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-6); }
 .view.is-entering { animation: view-in var(--dur-slow) var(--ease-out); }
 @keyframes view-in { from { opacity: 0; transform: translateY(var(--space-2)); } }
 
@@ -130,7 +130,6 @@ a { color: inherit; }
 .card > .t-label, .card-head .t-label { color: var(--text-secondary); }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
 .card-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; padding-top: var(--space-2); }
-.narrow-card { max-width: calc(var(--measure) + 2 * var(--space-6)); }
 .head-icons { display: flex; gap: var(--space-1); }
 
 /* ---------------- Buttons ---------------- */
@@ -359,8 +358,6 @@ select.input { appearance: none; padding-right: var(--space-8); background-image
 .file-name { font: var(--type-button); }
 
 /* ---------------- Aufnahme ---------------- */
-.record-card { max-width: calc(var(--measure) + 2 * var(--space-6)); }
-#rec-result { max-width: calc(var(--measure) + 2 * var(--space-6)); }
 .recorder { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-6); }
 .rec-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--control-height); }
 .rec-display { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; text-align: center; }
@@ -518,7 +515,6 @@ select.input { appearance: none; padding-right: var(--space-8); background-image
 .foot-actions { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; margin-left: auto; }
 
 /* ---------------- Progress ---------------- */
-.progress-card { max-width: calc(var(--measure) + 2 * var(--space-6)); }
 .progress-file { display: flex; align-items: center; gap: var(--space-3); }
 .progress-file .provider-dot { width: var(--space-3); height: var(--space-3); }
 .progress-line { position: relative; height: var(--line-thin); background: var(--border-subtle); border-radius: var(--radius-pill); overflow: hidden; }
@@ -937,7 +933,6 @@ button.seg-time:hover { color: var(--text-primary); text-decoration: underline; 
 }
 
 /* ---------------- Diktat ---------------- */
-.dictation-card { max-width: calc(var(--measure) + 2 * var(--space-6)); }
 .dictation-card .rec-mark-btn { user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 .dictation-card .rec-mark-btn:disabled { opacity: .55; }
 .dictation-card .rec-display { padding: 0; }
@@ -983,4 +978,18 @@ button.seg-time:hover { color: var(--text-primary); text-decoration: underline; 
     .repl-fields { grid-template-columns: minmax(0, 1fr); }
     .repl-arrow { display: none; }
     .tabbar .nav-item span:not(.nav-rec-dot):not(.nav-dict-dot) { font-size: 11px; }
+}
+
+/* ---------------- Wide windows: the pages use the width they get ---------------- */
+.page-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+.page-col { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
+@media (min-width: 1280px) {
+    .page-grid.is-dictation { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+    .page-grid.is-even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .page-grid.is-settings { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+}
+
+/* The big record button stays thumb-sized on a desktop instead of stretching across the whole card. */
+@media (min-width: 901px) {
+    .rec-actions .rec-mark-btn { max-width: calc(var(--measure) + var(--space-12)); }
 }

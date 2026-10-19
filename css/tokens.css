@@ -114,7 +114,7 @@
   --space-24: 96px; --space-32: 128px;
 
   /* ---- Layout ---- */
-  --content-max: 1200px;
+  --content-max: 2000px;   /* only a ceiling for very large screens; below it pages fill the window */
   --measure: 68ch;
   --sidebar-width: 240px;
 

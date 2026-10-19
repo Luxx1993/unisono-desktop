@@ -253,6 +253,8 @@
                     </div>
                 </header>
 
+                <div class="page-grid is-dictation">
+                    <div class="page-col">
                 <section class="card dictation-card" aria-label="Diktat aufnehmen">
                     <div id="dict-recorder" class="recorder">
                         <div class="rec-display">
@@ -292,6 +294,8 @@
                     </div>
                 </section>
 
+                    </div>
+                    <div class="page-col">
                 <details class="card key-guide is-general dictation-card dict-options">
                     <summary><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg>Einstellungen</summary>
                     <div class="options-grid">
@@ -364,6 +368,8 @@
                     <p id="dict-history-empty" class="t-small muted">Noch keine Diktate. Die letzten 50 bleiben in diesem Browser.</p>
                     <ul id="dict-history" class="dict-history"></ul>
                 </section>
+                    </div>
+                </div>
             </section>
 
             <!-- ================= VIEW: Aufnahme (live, e.g. on site) ================= -->
@@ -601,6 +607,7 @@
                         <p class="page-intro muted">Namen, Firmen und Fachwörter, die die Engine richtig schreiben soll. Die Liste gilt für alle Transkriptionen und bleibt in diesem Browser gespeichert.</p>
                     </div>
                 </header>
+                <div class="page-grid is-even">
                 <section class="card narrow-card">
                     <div class="card-head">
                         <label class="check"><input type="checkbox" id="vocab-enabled" checked> Bei der Transkription mitschicken</label>
@@ -628,6 +635,7 @@
                         <button type="button" id="repl-add" class="btn-secondary"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Regel hinzufügen</button>
                     </div>
                 </section>
+                </div>
             </section>
 
             <!-- ================= VIEW: API-Keys ================= -->
@@ -669,6 +677,7 @@
                     </div>
                 </header>
 
+                <div class="page-grid is-settings">
                 <section class="card narrow-card" aria-labelledby="appearance-title">
                     <h2 id="appearance-title" class="t-label">Darstellung</h2>
                     <div id="mode-options" class="segmented" role="radiogroup" aria-labelledby="appearance-title"></div>
@@ -716,6 +725,7 @@
                         </div>
                     </div>
                 </section>
+                </div>
             </section>
         </main>
     </div>
