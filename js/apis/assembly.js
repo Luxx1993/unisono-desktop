@@ -50,7 +50,7 @@ window.Unisono = window.Unisono || {};
         label: 'AssemblyAI',
         description: 'Bewährte Sprechertrennung für lange Meetings, bis 10 Stunden.',
         icon: 'groups',
-        keyUrl: 'https://www.assemblyai.com/app/api-keys',
+        keyUrl: 'https://www.assemblyai.com/dashboard/api-keys',
         keyGuide: {
             steps: [
                 'Auf assemblyai.com ein Konto anlegen.',

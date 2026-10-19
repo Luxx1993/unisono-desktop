@@ -68,7 +68,7 @@ window.Unisono = window.Unisono || {};
             url: 'https://api.anthropic.com/v1/models',
             headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }
         }),
-        models: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-5-5', 'claude-haiku-4-5'],
+        models: ['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5', 'claude-fable-5-1'],
         defaultModel: 'claude-haiku-5-5',
         chat: anthropicChat
     };
@@ -116,12 +116,14 @@ window.Unisono = window.Unisono || {};
         label: 'Google Gemini', description: 'Aufräumen und Zusammenfassungen mit Gemini.',
         base: 'https://generativelanguage.googleapis.com/v1beta/openai/', keyUrl: 'https://aistudio.google.com/app/apikey', host: 'aistudio.google.com',
         keyPage: '„Get API key“ öffnen.',
-        models: ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']
+        models: ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']
     });
     compat('mistral', {
         label: 'Mistral AI', description: 'Europäischer Anbieter (Frankreich).',
         base: 'https://api.mistral.ai/v1/', keyUrl: 'https://console.mistral.ai/api-keys', host: 'console.mistral.ai',
-        keyPage: '„API Keys“ öffnen.'
+        keyPage: '„API Keys“ öffnen.',
+        // From Mistral's changelog (2026-10-19); the live list follows once a key is there.
+        models: ['mistral-small-2603'], defaultModel: ''
     });
     compat('openrouter', {
         label: 'OpenRouter', description: 'Ein Key für sehr viele Modelle verschiedener Anbieter.',
@@ -143,13 +145,17 @@ window.Unisono = window.Unisono || {};
     compat('xai', {
         label: 'xAI (Grok)', description: 'Aufräumen und Zusammenfassungen mit Grok.',
         base: 'https://api.x.ai/v1/', keyUrl: 'https://console.x.ai/team/default/api-keys', host: 'console.x.ai',
-        keyPage: 'Unter „API Keys“ einen Key anlegen.'
+        keyPage: 'Unter „API Keys“ einen Key anlegen.',
+        // From xAI's model list (2026-10-19); no default, the live list decides.
+        models: ['grok-4.7', 'grok-4.6'], defaultModel: ''
     });
     compat('deepseek', {
         label: 'DeepSeek', description: 'Günstige Modelle aus China.',
         base: 'https://api.deepseek.com/v1/', keyUrl: 'https://platform.deepseek.com/api_keys', host: 'platform.deepseek.com',
         keyPage: 'Unter „API keys“ einen Key anlegen.',
-        note: 'Die Server stehen in China.'
+        note: 'Die Server stehen in China.',
+        // From DeepSeek's pricing page (2026-10-19); no default, the live list decides.
+        models: ['deepseek-flash', 'deepseek-v4-pro'], defaultModel: ''
     });
     compat('cerebras', {
         label: 'Cerebras', description: 'Extrem schnelle Antworten offener Modelle.',
@@ -175,7 +181,7 @@ window.Unisono = window.Unisono || {};
         label: 'OVHcloud', description: 'Europäischer Anbieter, Daten bleiben in der EU.',
         base: 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/', keyUrl: 'https://manager.eu.ovhcloud.com/#/public-cloud/pci/projects', host: 'manager.eu.ovhcloud.com',
         keyPage: 'Im Public-Cloud-Projekt unter „AI Endpoints“ einen Key anlegen.',
-        models: ['Mistral-Small-3.2-24B-Instruct-2506', 'Meta-Llama-3_3-70B-Instruct']
+        models: ['Mistral-Small-3.2-24B-Instruct-2506', 'Meta-Llama-3_3-70B-Instruct', 'gpt-oss-120b', 'gpt-oss-20b', 'Qwen3.8-27B']
     });
 
     // The provider's own model list (OpenAI-style GET /models), merged with the curated ids, without the
@@ -203,7 +209,9 @@ window.Unisono = window.Unisono || {};
         }
         const live = await catalogs.get(cacheKey);
         if (token !== latest[id]) return null;
-        return [...new Set([...llm.models, ...live])];
+        const ids = [...new Set([...llm.models, ...live])];
+        ids.fromCatalog = live.length > 0;   // false: the catalog was out of reach, so nothing is known beyond the curated ids
+        return ids;
     }
 
     // Fills a model drop-down with the models of one provider: the curated ones at once, the provider's own
@@ -213,10 +221,11 @@ window.Unisono = window.Unisono || {};
         const llm = llms[provider];
         select.dataset.provider = provider;
         const option = (value, text) => Object.assign(document.createElement('option'), { value, textContent: text || value });
-        const set = (ids, loading) => {
+        const set = (ids, keepCurrent, loading) => {
             if (select.dataset.provider !== provider) return;
             const list = [...ids];
-            if (loading && current && !list.includes(current)) list.unshift(current);   // until the catalog says otherwise
+            // The current model stays while the catalog is loading or out of reach (a model typed in by hand survives that).
+            if (keepCurrent && current && !list.includes(current)) list.unshift(current);
             const options = list.map(id => option(id));
             if (!list.length) options.push(option('', loading ? 'Modelle werden geladen …' : 'Modelle nicht abrufbar'));
             options.push(option(CUSTOM, 'Anderes Modell eintragen …'));
@@ -244,8 +253,8 @@ window.Unisono = window.Unisono || {};
             });
         }
         const live = llm.live && !!key;
-        set(llm.models, live);
-        if (live) loadModels(provider, key).then(ids => { if (ids) set(ids, false); });
+        set(llm.models, true, live);
+        if (live) loadModels(provider, key).then(ids => { if (ids) set(ids, !ids.fromCatalog, false); });
     }
 
     // One request to the chosen provider: the text of the answer.

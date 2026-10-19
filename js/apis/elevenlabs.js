@@ -52,7 +52,7 @@ window.Unisono = window.Unisono || {};
         label: 'ElevenLabs (Scribe)',
         description: 'Sehr genaue Wortzeiten und bis zu 32 Sprecher. Ergebnis kommt in einem Schritt.',
         icon: 'waves',
-        keyUrl: 'https://elevenlabs.io/app/settings/api-keys',
+        keyUrl: 'https://elevenlabs.io/app/developers/api-keys',
         keyGuide: {
             steps: [
                 'Auf elevenlabs.io ein Konto anlegen.',
@@ -64,8 +64,7 @@ window.Unisono = window.Unisono || {};
         },
         test: key => ({ url: 'https://api.elevenlabs.io/v1/models', headers: { 'xi-api-key': key } }),
         models: [
-            { id: 'scribe_v2', name: 'Scribe v2 (neuestes Modell)' },
-            { id: 'scribe_v1', name: 'Scribe v1' }
+            { id: 'scribe_v2', name: 'Scribe v2 (neuestes Modell)' }
         ],
         limits: () => ({ maxBytes: 3 * 1024 * 1024 * 1024, maxSeconds: 10 * 3600 }),
         // Keyterms exist only on Scribe v2 and cost extra.
