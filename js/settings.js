@@ -51,6 +51,12 @@ window.Unisono = window.Unisono || {};
             : 'Kein Transkript gespeichert.';
         $('clear-session').disabled = !segments.length;
 
+        const dictations = S.dictation.historyCount();
+        $('data-dictation-info').textContent = dictations
+            ? `${dictations} Diktat${dictations === 1 ? '' : 'e'} in diesem Browser gespeichert.`
+            : 'Kein Verlauf gespeichert.';
+        $('clear-dictation').disabled = !dictations;
+
         if (S.recorder.isActive()) {
             $('data-recording-info').textContent = 'Gerade läuft eine Aufnahme – die Sicherung wird gebraucht.';
             $('clear-recordings').disabled = true;
@@ -75,6 +81,13 @@ window.Unisono = window.Unisono || {};
         refreshData();
     }
 
+    function clearDictation() {
+        if (!confirm('Den Verlauf der Diktate in diesem Browser löschen?')) return;
+        S.dictation.clearHistory();
+        S.ui.setStatus('Diktat-Verlauf gelöscht.', 'success');
+        refreshData();
+    }
+
     async function clearRecordings() {
         if (!confirm('Die Sicherung der unterbrochenen Aufnahme endgültig löschen?')) return;
         await S.recorder.discardBackup();
@@ -83,8 +96,8 @@ window.Unisono = window.Unisono || {};
     }
 
     async function resetAll() {
-        if (S.recorder.isActive()) return S.ui.setStatus('Bitte zuerst die laufende Aufnahme beenden.', 'error');
-        if (!confirm('Wirklich alles löschen – Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe und Einstellungen?')) return;
+        if (S.recorder.isActive() || S.dictation.isActive()) return S.ui.setStatus('Bitte zuerst die laufende Aufnahme beenden.', 'error');
+        if (!confirm('Wirklich alles löschen – Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf und Einstellungen?')) return;
         S.state.clear();
         $('vocab-text').value = '';
         await S.recorder.discardBackup();
@@ -97,6 +110,7 @@ window.Unisono = window.Unisono || {};
     function init(opts) {
         options = opts;
         $('clear-session').addEventListener('click', clearSession);
+        $('clear-dictation').addEventListener('click', clearDictation);
         $('clear-recordings').addEventListener('click', clearRecordings);
         $('reset-all').addEventListener('click', resetAll);
 
