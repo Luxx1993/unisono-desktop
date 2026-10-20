@@ -19,39 +19,66 @@ window.Unisono = window.Unisono || {};
         return { steps: [`Auf ${host} ein Konto anlegen.`, keyPage, 'Einen neuen Key erzeugen und sofort kopieren.', 'Hier einfügen und mit „Prüfen“ testen.'], note };
     }
 
-    const bearer = key => ({ Authorization: 'Bearer ' + key });
+    const bearer = key => key ? { Authorization: 'Bearer ' + key } : {};
+    const setting = (id, field) => S.providerSettings.get(id, field);
+    const isEu = id => setting(id, 'region') === 'eu';
+    const regionSetting = (eu, note) => ({ field: 'region', label: 'Region', options: [['', 'Standard'], ['eu', eu]], note });
     const termsAsPrompt = vocabulary => vocabulary?.length ? vocabulary.join(', ') : null;
     const promptSupport = () => ({ maxTerms: 50, maxChars: 40, note: 'Fachbegriffe gehen als Hinweis mit; der Anbieter wertet sie nur teilweise aus.' });
 
     // ---- OpenAI-style multipart upload to {base}audio/transcriptions --------------------------
-    function multipartEngine(id, { label, description, base, model, models, keyUrl, host, keyPage, note, headers = {}, modelsPath = 'models' }) {
+    // OpenAI's diarizing model: answers with speaker turns, takes no prompt, and needs a chunking
+    // strategy for audio over 30 seconds.
+    const isDiarizeModel = model => /diarize/.test(model || '');
+
+    function multipartEngine(id, { label, description, base, models, keyUrl, host, keyPage, note, headers = {}, modelsPath = 'models', ...extra }) {
+        const baseUrl = typeof base === 'function' ? base : () => base;
         register(id, {
             label, description, keyUrl, keyGuide: guide(host, keyPage, note),
             models: models.map(m => ({ id: m, name: m })),
-            test: key => ({ url: base + modelsPath, headers: { ...bearer(key), ...headers } }),
-            vocabularySupport: promptSupport,
-            async transcribe(file, { key, model, language, vocabulary, signal, onStage, onUpload }) {
+            test: key => ({ url: baseUrl() + modelsPath, headers: { ...bearer(key), ...headers } }),
+            vocabularySupport: model => isDiarizeModel(model) ? null : promptSupport(),
+            diarizes: isDiarizeModel,
+            ...extra,
+            async transcribe(file, { key, model, language, diarize, vocabulary, signal, onStage, onUpload }) {
                 onStage('upload', `Sende Audio an ${label} …`);
+                const speakers = isDiarizeModel(model);
                 const form = new FormData();
                 form.append('file', file);
                 form.append('model', model);
-                form.append('response_format', 'json');
-                if (lang(language)) form.append('language', language);
-                const prompt = termsAsPrompt(vocabulary);
+                form.append('response_format', speakers && diarize ? 'diarized_json' : 'json');
+                if (speakers) form.append('chunking_strategy', 'auto');
+                if (lang(language)) form.append('language', language.split('-')[0]);
+                const prompt = speakers ? null : termsAsPrompt(vocabulary);
                 if (prompt) form.append('prompt', prompt);
-                const raw = await S.http.send(base + 'audio/transcriptions', {
+                const raw = await S.http.send(baseUrl() + 'audio/transcriptions', {
                     headers: { ...bearer(key), ...headers }, body: form, signal, onUpload,
                     onUploaded: () => onStage('process', `${label} verarbeitet das Audio …`)
                 }, label);
+                if (speakers && diarize && Array.isArray(raw.segments)) return { raw, segments: speakerSegments(raw.segments) };
                 return plain(raw.text, raw);
             }
         });
     }
 
+    // Speaker labels as the provider names them ("A", "speaker_0", …) become A, B, … in order of appearance.
+    function speakerSegments(list) {
+        const letters = new Map();
+        const letter = label => {
+            if (label == null) return null;
+            if (!letters.has(label)) letters.set(label, S.speakerLetter(letters.size));
+            return letters.get(label);
+        };
+        return list.filter(seg => String(seg.text || '').trim()).map(seg => ({
+            speaker: letter(seg.speaker), start: Number(seg.start) || 0, end: Number(seg.end) || 0, text: String(seg.text).trim()
+        }));
+    }
+
     multipartEngine('openai', {
         label: 'OpenAI', description: 'Spracherkennung von OpenAI; derselbe Key dient zum Aufräumen.',
-        base: 'https://api.openai.com/v1/', models: ['gpt-transcribe'], keyUrl: 'https://platform.openai.com/api-keys',
-        host: 'platform.openai.com', keyPage: 'Unter „Billing“ Guthaben aufladen – ein ChatGPT-Abo gilt für die API nicht – und „API keys“ öffnen.'
+        base: 'https://api.openai.com/v1/', models: ['gpt-transcribe', 'gpt-4o-transcribe-diarize'], keyUrl: 'https://platform.openai.com/api-keys',
+        host: 'platform.openai.com', keyPage: 'Unter „Billing“ Guthaben aufladen – ein ChatGPT-Abo gilt für die API nicht – und „API keys“ öffnen.',
+        note: 'Das Modell gpt-4o-transcribe-diarize trennt Sprecher; Fachbegriffe nimmt es nicht an.'
     });
     multipartEngine('groq', {
         label: 'Groq', description: 'Whisper in sehr hoher Geschwindigkeit; derselbe Key dient zum Aufräumen.',
@@ -82,7 +109,8 @@ window.Unisono = window.Unisono || {};
     });
     multipartEngine('openrouter', {
         label: 'OpenRouter', description: 'Mehrere Spracherkennungs-Modelle über einen Key; derselbe Key dient zum Aufräumen.',
-        base: 'https://openrouter.ai/api/v1/', headers: { 'X-Title': 'Unisono' },
+        base: () => isEu('openrouter') ? 'https://eu.openrouter.ai/api/v1/' : 'https://openrouter.ai/api/v1/', headers: { 'X-Title': 'Unisono' },
+        settings: [regionSetting('EU', 'Die EU-Adresse gibt es nur für Firmenkonten (Enterprise); sie gilt auch fürs Aufräumen.')],
         models: ['openai/gpt-transcribe', 'microsoft/mai-transcribe-2', 'google/gemini-3.5-transcribe', 'elevenlabs/scribe-v2', 'x-ai/grok-stt-1.0', 'assemblyai/universal-3-6-pro', 'mistralai/voxtral-mini-transcribe', 'deepgram/nova-3', 'nvidia/parakeet-tdt-0.6b-v3', 'openai/whisper-large-v3-turbo', 'openai/whisper-large-v3'],
         keyUrl: 'https://openrouter.ai/keys', host: 'openrouter.ai', keyPage: '„Keys“ öffnen.'
     });
@@ -113,16 +141,18 @@ window.Unisono = window.Unisono || {};
     });
 
     // ---- Deepgram: raw audio bytes to {base}listen ---------------------------------------------------
+    const deepgramBase = () => isEu('deepgram') ? 'https://api.eu.deepgram.com/v1/' : 'https://api.deepgram.com/v1/';
     register('deepgram', {
         label: 'Deepgram', description: 'Sehr schnelle Spracherkennung (Nova-3).',
         keyUrl: 'https://console.deepgram.com/signup?jump=keys', keyGuide: guide('console.deepgram.com', 'Im Dashboard „API Keys“ öffnen.', 'Neue Konten bekommen ein Startguthaben.'),
         models: [{ id: 'nova-3', name: 'Nova-3' }, { id: 'nova-2', name: 'Nova-2' }],
-        test: key => ({ url: 'https://api.deepgram.com/v1/models', headers: { Authorization: 'Token ' + key } }),
+        settings: [regionSetting('EU', 'Die EU-Adresse nimmt denselben Key.')],
+        test: key => ({ url: deepgramBase() + 'models', headers: { Authorization: 'Token ' + key } }),
         async transcribe(file, { key, model, language, signal, onStage, onUpload }) {
             onStage('upload', 'Sende Audio an Deepgram …');
             const params = new URLSearchParams({ model, smart_format: 'true' });
             if (lang(language)) params.set('language', language); else params.set('detect_language', 'true');
-            const raw = await S.http.send('https://api.deepgram.com/v1/listen?' + params, {
+            const raw = await S.http.send(deepgramBase() + 'listen?' + params, {
                 headers: { Authorization: 'Token ' + key, 'Content-Type': file.type || 'audio/webm' }, body: file, signal, onUpload,
                 onUploaded: () => onStage('process', 'Deepgram verarbeitet das Audio …')
             }, 'Deepgram');
@@ -131,14 +161,16 @@ window.Unisono = window.Unisono || {};
     });
 
     // ---- Soniox: upload → create → poll → fetch, then clean up -----------------------------------
+    const sonioxBase = () => isEu('soniox') ? 'https://api.eu.soniox.com/v1/' : 'https://api.soniox.com/v1/';
     register('soniox', {
         label: 'Soniox', quick: false, description: 'Sehr genaue Spracherkennung; das Ergebnis kommt nach einigen Sekunden.',
         keyUrl: 'https://console.soniox.com/api-keys', keyGuide: guide('console.soniox.com', '„API Keys“ öffnen.'),
         models: [{ id: 'stt-async-v5', name: 'Soniox Async v5' }],
-        test: key => ({ url: 'https://api.soniox.com/v1/models', headers: bearer(key) }),
+        settings: [regionSetting('EU', 'Für die EU-Region braucht es einen Key aus einem EU-Projekt der Soniox-Konsole.')],
+        test: key => ({ url: sonioxBase() + 'models', headers: bearer(key) }),
         vocabularySupport: () => ({ maxTerms: 100, maxChars: 50 }),
         async transcribe(file, { key, model, language, vocabulary, signal, onStage, onUpload }) {
-            const BASE = 'https://api.soniox.com/v1/';
+            const BASE = sonioxBase();
             onStage('upload', 'Lade Audio zu Soniox hoch …');
             const form = new FormData();
             form.append('file', file);
@@ -180,11 +212,14 @@ window.Unisono = window.Unisono || {};
     register('gemini', {
         label: 'Google Gemini', description: 'Gemini schreibt die Aufnahme mit; derselbe Key dient zum Aufräumen.',
         keyUrl: 'https://aistudio.google.com/app/apikey', keyGuide: guide('aistudio.google.com', '„Get API key“ öffnen.'),
-        models: ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite'].map(m => ({ id: m, name: m })),
+        models: [{ id: 'gemini-3.5-transcribe', name: 'gemini-3.5-transcribe (Spracherkennung, „smart“)' },
+            ...['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite'].map(m => ({ id: m, name: m }))],
         test: key => ({ url: 'https://generativelanguage.googleapis.com/v1beta/models', headers: { 'x-goog-api-key': key } }),
         vocabularySupport: promptSupport,
         limits: () => ({ maxBytes: 15 * 1024 * 1024 }),
-        async transcribe(file, { key, model, language, vocabulary, signal, onStage, onUpload }) {
+        async transcribe(file, opts) {
+            if (opts.model === 'gemini-3.5-transcribe') return geminiTranscribe(file, opts);
+            const { key, model, language, vocabulary, signal, onStage, onUpload } = opts;
             onStage('upload', 'Sende Audio an Gemini …');
             let instruction = 'Transcribe the speech in the audio exactly as spoken, with correct punctuation and capitalization. '
                 + 'Output only the transcription text. Do not add any preamble, commentary, translation, quotation marks, or formatting. '
@@ -204,6 +239,28 @@ window.Unisono = window.Unisono || {};
         }
     });
 
+    // Gemini's own speech model through the Interactions API: "smart" mode drops filler words and
+    // false starts, the way a careful typist would.
+    async function geminiTranscribe(file, { key, language, vocabulary, signal, onStage, onUpload }) {
+        onStage('upload', 'Sende Audio an Gemini …');
+        const transcription = { mode: { type: 'smart' } };
+        if (lang(language)) transcription.language_codes = [language];
+        if (vocabulary?.length) transcription.custom_vocabulary = vocabulary;
+        const body = {
+            model: 'gemini-3.5-transcribe',
+            input: [{ type: 'audio', data: await toBase64(file), mime_type: file.type.split(';')[0] || 'audio/webm' }],
+            generation_config: { transcription_config: transcription }
+        };
+        onUpload(1);
+        onStage('process', 'Gemini verarbeitet das Audio …');
+        const raw = await S.http.fetchJson('https://generativelanguage.googleapis.com/v1beta/interactions', {
+            method: 'POST', headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal
+        }, 'Gemini');
+        const step = [...(raw.steps || raw.outputs || [])].reverse().find(s => s.type !== 'user_input');
+        const text = (step?.content || []).map(c => c.text || '').join('') || raw.output_text || '';
+        return plain(text, raw);
+    }
+
     // ---- AssemblyAI Sync API: one request, the answer is the transcript --------------------------------
     register('assemblyai_sync', {
         label: 'AssemblyAI Sync', keyId: 'assembly',
@@ -215,7 +272,7 @@ window.Unisono = window.Unisono || {};
             const form = new FormData();
             form.append('audio', file);
             if (lang(language)) form.append('config', new Blob([JSON.stringify({ language_codes: [language.split('-')[0]] })], { type: 'application/json' }));
-            const raw = await S.http.send('https://sync.assemblyai.com/v1/transcribe', {
+            const raw = await S.http.send((setting('assembly', 'region') === 'eu' ? 'https://sync.eu.assemblyai.com' : 'https://sync.assemblyai.com') + '/v1/transcribe', {
                 headers: { Authorization: key, 'X-AAI-Model': model }, body: form, signal, onUpload,
                 onUploaded: () => onStage('process', 'AssemblyAI verarbeitet das Audio …')
             }, 'AssemblyAI Sync');
@@ -223,12 +280,69 @@ window.Unisono = window.Unisono || {};
         }
     });
 
+    // ---- Microsoft Azure Speech: MAI-Transcribe through the fast transcription API --------------------
+    // The address is the user's own Speech resource ("Keys and Endpoint" in the Azure portal).
+    const AZURE_API = 'api-version=2025-10-15';
+    const azureBase = () => S.http.withSlash(setting('azure', 'endpoint'));
+    register('azure', {
+        label: 'Microsoft Azure', quick: false, description: 'MAI-Transcribe über eine eigene Speech-Ressource, auch in Nordeuropa.',
+        keyUrl: 'https://portal.azure.com/',
+        keyGuide: {
+            steps: ['Ein Azure-Konto anlegen (azure.microsoft.com/free).', 'Im Portal eine „Speech“-Ressource in einer Region mit MAI-Transcribe anlegen: East US, West US, West US 2, North Europe, Southeast Asia oder Central India.',
+                'Unter „Keys and Endpoint“ den Key und den Endpunkt kopieren.', 'Beides hier einfügen und mit „Prüfen“ testen.'],
+            note: 'North Europe (Irland) hält die Daten in der EU.'
+        },
+        settings: [{ field: 'endpoint', label: 'Endpunkt', placeholder: 'https://my-speech.cognitiveservices.azure.com/', required: true }],
+        models: [{ id: 'MAI-Transcribe-2', name: 'MAI-Transcribe 2' }, { id: 'MAI-Transcribe-1.5', name: 'MAI-Transcribe 1.5' }],
+        test: key => ({ url: `${azureBase()}speechtotext/models/base?${AZURE_API}`, headers: { 'Ocp-Apim-Subscription-Key': key } }),
+        vocabularySupport: () => ({ maxTerms: 500, maxChars: 50 }),
+        async transcribe(file, { key, model, language, vocabulary, signal, onStage, onUpload }) {
+            onStage('upload', 'Sende Audio an Azure …');
+            const definition = {};
+            if (lang(language)) definition.locales = [language.split('-')[0]];
+            // enhancedMode selects MAI at all; without it Azure quietly uses its ordinary model. "clean"
+            // drops filler words (only MAI-Transcribe 2 has it).
+            definition.enhancedMode = { enabled: true, model };
+            if (!/-1(\.|$)/.test(model)) definition.enhancedMode.modelOptions = { transcribeStyle: 'clean' };
+            if (vocabulary?.length) definition.phraseList = { phrases: vocabulary };
+            const form = new FormData();
+            form.append('audio', file);
+            form.append('definition', JSON.stringify(definition));
+            const raw = await S.http.send(`${azureBase()}speechtotext/transcriptions:transcribe?${AZURE_API}`, {
+                headers: { 'Ocp-Apim-Subscription-Key': key }, body: form, signal, onUpload,
+                onUploaded: () => onStage('process', 'Azure verarbeitet das Audio …')
+            }, 'Azure');
+            const parts = raw.combinedPhrases?.length ? raw.combinedPhrases : (raw.phrases || []);
+            return plain(parts.map(p => p.text).join(' '), raw);
+        }
+    });
+
+    // ---- Own server: anything that speaks the OpenAI API (faster-whisper-server, LocalAI, vLLM, …) ------
+    multipartEngine('custom', {
+        label: 'Eigener Server', description: 'Ein eigener Server mit OpenAI-kompatibler Schnittstelle; dient auch zum Aufräumen.',
+        base: () => S.http.withSlash(setting('custom', 'baseUrl')), models: [],
+        keyUrl: 'https://github.com/speaches-ai/speaches', keyOptional: true, quick: true,
+        keyGuide: {
+            steps: ['Einen Server mit OpenAI-kompatibler Schnittstelle starten (z. B. Speaches für Whisper, Ollama oder LM Studio fürs Aufräumen).',
+                'Die Adresse eintragen, die auf /v1/ endet, z. B. http://localhost:8000/v1/.', 'Einen Key nur eintragen, wenn der Server einen verlangt.', 'Mit „Prüfen“ testen.'],
+            note: 'Der Server muss Anfragen von dieser Seite zulassen (CORS). Läuft er auf diesem Rechner, fragt Chrome beim ersten Zugriff, ob die Seite das lokale Netzwerk nutzen darf.'
+        },
+        settings: [
+            { field: 'baseUrl', label: 'Adresse', placeholder: 'http://localhost:8000/v1/', required: true },
+            { field: 'sttModel', label: 'Modell für die Spracherkennung', placeholder: 'Systran/faster-whisper-large-v3' }
+        ]
+    });
+    Object.defineProperty(S.apis.custom, 'models', {
+        get: () => [{ id: setting('custom', 'sttModel') || 'whisper-1', name: setting('custom', 'sttModel') || 'whisper-1' }]
+    });
+
     // What each provider accepts per request (the Android app's figures, from the providers' documentation).
     const MB = 1024 * 1024;
     const LIMITS = {
         openai: { maxBytes: 25 * MB }, groq: { maxBytes: 25 * MB }, scaleway: { maxBytes: 25 * MB }, openrouter: { maxBytes: 25 * MB },
         siliconflow: { maxBytes: 50 * MB }, xai: { maxBytes: 500 * 1000 * 1000 }, deepgram: { maxBytes: 2048 * MB }, ovhcloud: { maxBytes: 2048 * MB },
-        assemblyai_sync: { maxBytes: 256 * MB, maxSeconds: 20 * 60 }, soniox: { maxSeconds: 300 * 60 }
+        assemblyai_sync: { maxBytes: 256 * MB, maxSeconds: 20 * 60 }, soniox: { maxSeconds: 300 * 60 },
+        azure: { maxBytes: 300 * MB, maxSeconds: 2 * 3600 }
     };
     for (const [id, limit] of Object.entries(LIMITS)) S.apis[id].limits = () => limit;
 

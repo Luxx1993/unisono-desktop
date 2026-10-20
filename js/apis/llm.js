@@ -74,22 +74,26 @@ window.Unisono = window.Unisono || {};
     };
 
     // ---- OpenAI-compatible providers (chat/completions with a Bearer key) -------------------------
-    function compat(id, { label, description, base, keyUrl, host, keyPage, note, models = [], defaultModel, extraBody, headers = {} }) {
+    // base: the address, or a function for one that depends on a setting (region, own server).
+    const bearer = key => key ? { Authorization: 'Bearer ' + key } : {};
+    function compat(id, { label, description, base, keyUrl, host, keyPage, note, models = [], defaultModel, extraBody, headers = {}, ...extra }) {
+        const baseUrl = typeof base === 'function' ? base : () => base;
         llms[id] = {
             label, description, keyUrl,
             keyGuide: guide(host, keyPage, note),
-            test: key => ({ url: base + 'models', headers: { Authorization: 'Bearer ' + key, ...headers } }),
+            test: key => ({ url: baseUrl() + 'models', headers: { ...bearer(key), ...headers } }),
             models,
             defaultModel: defaultModel ?? models[0] ?? '',
             live: true,
-            base,
+            baseUrl,
             headers,
+            ...extra,
             chat: async ({ key, model, system, user }) => {
                 const body = { model, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] };
                 Object.assign(body, extraBody?.(model));
-                const data = await S.http.fetchJson(base + 'chat/completions', {
+                const data = await S.http.fetchJson(baseUrl() + 'chat/completions', {
                     method: 'POST',
-                    headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json', ...headers },
+                    headers: { ...bearer(key), 'Content-Type': 'application/json', ...headers },
                     body: JSON.stringify(body)
                 }, label);
                 return data.choices?.[0]?.message?.content || '';
@@ -127,7 +131,9 @@ window.Unisono = window.Unisono || {};
     });
     compat('openrouter', {
         label: 'OpenRouter', description: 'Ein Key für sehr viele Modelle verschiedener Anbieter.',
-        base: 'https://openrouter.ai/api/v1/', keyUrl: 'https://openrouter.ai/keys', host: 'openrouter.ai',
+        // The EU address is set in the key row (shared with OpenRouter's speech engine).
+        base: () => S.providerSettings.get('openrouter', 'region') === 'eu' ? 'https://eu.openrouter.ai/api/v1/' : 'https://openrouter.ai/api/v1/',
+        keyUrl: 'https://openrouter.ai/keys', host: 'openrouter.ai',
         keyPage: '„Keys“ öffnen.',
         models: ['openai/gpt-6-luna'],
         headers: { 'X-Title': 'Unisono' }
@@ -184,6 +190,24 @@ window.Unisono = window.Unisono || {};
         models: ['Mistral-Small-3.2-24B-Instruct-2506', 'Meta-Llama-3_3-70B-Instruct', 'gpt-oss-120b', 'gpt-oss-20b', 'Qwen3.8-27B']
     });
 
+    // Servers on the user's own machine or network: no key needed, the address is set in the key row.
+    const ownServer = id => () => S.http.withSlash(S.providerSettings.get(id, 'baseUrl'));
+    compat('ollama', {
+        label: 'Ollama', description: 'Offene Modelle auf dem eigenen Rechner, ohne Key und ohne Cloud.',
+        base: ownServer('ollama'), keyUrl: 'https://ollama.com/download', keyOptional: true,
+        settings: [{ field: 'baseUrl', label: 'Adresse', placeholder: 'http://localhost:11434/v1/', required: true }]
+    });
+    llms.ollama.keyGuide = {
+        steps: ['Ollama installieren (ollama.com) und ein Modell laden, z. B. „ollama pull gemma3“.',
+            'Ollama Anfragen von dieser Seite erlauben: die Umgebungsvariable OLLAMA_ORIGINS auf die Adresse dieser Seite (oder *) setzen und Ollama neu starten.',
+            'Hier die Adresse eintragen, meist http://localhost:11434/v1/.', 'Mit „Prüfen“ testen. Chrome fragt beim ersten Zugriff, ob die Seite das lokale Netzwerk nutzen darf.'],
+        note: 'Die Texte verlassen den Rechner nicht.'
+    };
+    compat('custom', {
+        label: 'Eigener Server', description: 'Ein eigener Server mit OpenAI-kompatibler Schnittstelle.',
+        base: ownServer('custom'), keyUrl: 'https://github.com/speaches-ai/speaches', keyOptional: true
+    });
+
     // The provider's own model list (OpenAI-style GET /models), merged with the curated ids, without the
     // models that obviously are no chat models. Debounced: while a key is typed, only the last one is
     // sent. Resolves to null when a newer call replaced this one, and to the curated ids when offline.
@@ -194,14 +218,16 @@ window.Unisono = window.Unisono || {};
     async function loadModels(id, key) {
         const llm = llms[id];
         if (!llm) return [];
-        if (!llm.live || !key) return llm.models;
-        const cacheKey = id + '|' + key;
+        if (!llm.live || !(key || llm.keyOptional)) return llm.models;
+        const base = llm.baseUrl();
+        if (!base) return llm.models;
+        const cacheKey = id + '|' + base + '|' + key;
         const token = latest[id] = (latest[id] || 0) + 1;
         if (!catalogs.has(cacheKey)) {
             await new Promise(resolve => setTimeout(resolve, 600));
             if (token !== latest[id]) return null;
             if (!catalogs.has(cacheKey)) {
-                catalogs.set(cacheKey, fetch(llm.base + 'models', { headers: { Authorization: 'Bearer ' + key, ...llm.headers } })
+                catalogs.set(cacheKey, fetch(base + 'models', { headers: { ...bearer(key), ...llm.headers } })
                     .then(res => res.ok ? res.json() : null)
                     .then(data => (data?.data || []).map(m => String(m.id).replace(/^models\//, '')).filter(m => m && !NOT_CHAT.test(m)))
                     .catch(() => []));
@@ -252,7 +278,7 @@ window.Unisono = window.Unisono || {};
                 select.dispatchEvent(new Event('change'));
             });
         }
-        const live = llm.live && !!key;
+        const live = llm.live && (!!key || !!llm.keyOptional);
         set(llm.models, true, live);
         if (live) loadModels(provider, key).then(ids => { if (ids) set(ids, !ids.fromCatalog, false); });
     }

@@ -51,6 +51,14 @@ window.Unisono = window.Unisono || {};
             : 'Kein Transkript gespeichert.';
         $('clear-session').disabled = !segments.length;
 
+        const archived = S.archive?.count() || 0;
+        const queued = S.archive?.pendingCount() || 0;
+        $('data-archive-info').textContent = S.archive && !S.archive.isAvailable()
+            ? 'Der Browser erlaubt hier keinen Speicher (z. B. privates Fenster). Das Archiv ist aus.'
+            : (archived ? `${archived} Transkript${archived === 1 ? '' : 'e'} im Archiv.` : 'Das Archiv ist leer.')
+              + (queued ? ` ${queued} Aufnahme${queued === 1 ? '' : 'n'} warte${queued === 1 ? 't' : 'n'} auf die Transkription.` : '');
+        $('clear-archive').disabled = !archived;
+
         const dictations = S.dictation.historyCount();
         $('data-dictation-info').textContent = dictations
             ? `${dictations} Diktat${dictations === 1 ? '' : 'e'} in diesem Browser gespeichert.`
@@ -104,13 +112,14 @@ window.Unisono = window.Unisono || {};
     async function clearRecordings() {
         if (!confirm('Die Sicherung der unterbrochenen Aufnahme endgültig löschen?')) return;
         await S.recorder.discardBackup();
+        await new Promise(resolve => { try { const r = indexedDB.deleteDatabase('unisono-archive'); r.onsuccess = r.onerror = r.onblocked = resolve; } catch (_) { resolve(); } });
         S.ui.setStatus('Aufnahme-Sicherung gelöscht.', 'success');
         refreshData();
     }
 
     async function resetAll() {
         if (S.recorder.isActive() || S.dictation.isActive()) return S.ui.setStatus('Bitte zuerst die laufende Aufnahme beenden.', 'error');
-        if (!confirm('Wirklich alles löschen – Keys, Transkript, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf, Diktat-Statistik und Einstellungen?')) return;
+        if (!confirm('Wirklich alles löschen – Keys, Transkript, Archiv mit Warteschlange, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf, Diktat-Statistik und Einstellungen?')) return;
         S.state.clear();
         $('vocab-text').value = '';
         await S.recorder.discardBackup();
@@ -126,6 +135,7 @@ window.Unisono = window.Unisono || {};
         $('clear-dictation').addEventListener('click', clearDictation);
         $('clear-stats').addEventListener('click', clearStats);
         $('clear-recordings').addEventListener('click', clearRecordings);
+        $('clear-archive').addEventListener('click', () => S.archive.clearAll());
         $('reset-all').addEventListener('click', resetAll);
 
         renderAppearance();

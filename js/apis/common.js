@@ -20,6 +20,11 @@
  *
  * limits() → { maxBytes, maxSeconds } – checked before a file is sent
  * (see app.js), so a too-large or too-long file fails fast instead of after the upload.
+ *
+ * diarizes(model) → whether this model separates speakers (default: !noDiarization).
+ * settings: [{ field, label, options?: [[value, text]], placeholder?, required?, note? }] – extra
+ * fields in the provider's key row (region, server address); read with Unisono.providerSettings.get.
+ * keyOptional: the provider works without a key (a server on the user's own machine).
  */
 window.Unisono = window.Unisono || {};
 (function (S) {
@@ -94,6 +99,35 @@ window.Unisono = window.Unisono || {};
         return text ? [{ speaker: null, start: 0, end: 0, text }] : [];
     }
 
+    // Per-provider settings from the key page (region, server address), stored per browser.
+    const SETTINGS_KEY = 'unisono_provider_settings';
+    let settings = {};
+    try { settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; } catch (_) {}
+    const providerSettings = {
+        get: (id, field) => String(settings[id]?.[field] || '').trim(),
+        set(id, field, value) {
+            settings[id] = { ...settings[id], [field]: String(value || '').trim() };
+            if (!settings[id][field]) delete settings[id][field];
+            try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); return true; } catch (_) { return false; }
+        },
+        clear() {
+            settings = {};
+            try { localStorage.removeItem(SETTINGS_KEY); } catch (_) {}
+        }
+    };
+
+    // A server address as typed: with a trailing slash, so paths can be appended.
+    const withSlash = url => url ? url.replace(/\/*$/, '/') : '';
+
+    // Whether the engine separates speakers with this model.
+    const canDiarize = (id, model) => {
+        const api = S.apis[id];
+        if (!api) return false;
+        return api.diarizes ? api.diarizes(model) : !api.noDiarization;
+    };
+
     S.apis = S.apis || {};
-    S.http = { fetchJson, send, poll, fallbackSegment };
+    S.http = { fetchJson, send, poll, fallbackSegment, withSlash };
+    S.providerSettings = providerSettings;
+    S.canDiarize = canDiarize;
 })(window.Unisono);

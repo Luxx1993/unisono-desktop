@@ -1,9 +1,12 @@
 /* AssemblyAI v2: upload → /v2/transcript → poll. */
 window.Unisono = window.Unisono || {};
 (function (S) {
-    const BASE = 'https://api.assemblyai.com/v2';
+    // The EU region (Dublin) keeps audio and transcript in the EU; it is chosen in the key row.
+    const base = () => S.providerSettings.get('assembly', 'region') === 'eu'
+        ? 'https://api.eu.assemblyai.com/v2' : 'https://api.assemblyai.com/v2';
 
     async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, signal, onStage, onUpload }) {
+        const BASE = base();
         onStage('upload', 'Lade Datei zu AssemblyAI hoch …');
         const upload = await S.http.send(`${BASE}/upload`, {
             headers: { 'authorization': key, 'Content-Type': 'application/octet-stream' },
@@ -57,9 +60,13 @@ window.Unisono = window.Unisono || {};
                 'Im Dashboard „API Keys“ öffnen – ein Key ist meist schon angelegt.',
                 'Den Key kopieren und hier einfügen.'
             ],
-            note: 'Neue Konten bekommen ein Startguthaben zum Testen. Für die EU-Datenverarbeitung bietet AssemblyAI eine eigene EU-Region an.'
+            note: 'Neue Konten bekommen ein Startguthaben zum Testen. Die EU-Region nutzt denselben Key.'
         },
-        test: key => ({ url: 'https://api.assemblyai.com/v2/transcript?limit=1', headers: { 'authorization': key } }),
+        settings: [{
+            field: 'region', label: 'Region', options: [['', 'Standard (USA)'], ['eu', 'EU (Dublin)']],
+            note: 'Gilt auch für AssemblyAI Sync.'
+        }],
+        test: key => ({ url: base() + '/transcript?limit=1', headers: { 'authorization': key } }),
         models: [
             { id: 'universal-3-5-pro', name: 'Universal-3.5 Pro (höchste Genauigkeit)' },
             { id: 'universal-2', name: 'Universal-2 (99 Sprachen, günstiger)' }

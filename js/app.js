@@ -19,7 +19,7 @@ window.Unisono = window.Unisono || {};
     };
     // Every speech engine can transcribe files; those without speaker separation (noDiarization) say so.
     const engineIds = () => Object.keys(S.apis);
-    const hasEngineKey = id => !!keys[keyIdOf(id)];
+    const hasEngineKey = id => isConfigured(id);
     const engineIdsWithKey = () => engineIds().filter(hasEngineKey);
     // An engine may share the key of another entry (AssemblyAI Sync uses the AssemblyAI key).
     const keyIdOf = id => S.apis[id]?.keyId || id;
@@ -135,10 +135,26 @@ window.Unisono = window.Unisono || {};
         }
     }
 
+    // A provider is ready when its key is there (or it needs none) and its required settings
+    // (Azure's endpoint, the address of an own server) are filled in.
+    function missingSetting(id) {
+        id = keyIdOf(id);
+        return (keyMeta(id)?.settings || []).find(f => f.required && !S.providerSettings.get(id, f.field)) || null;
+    }
+
+    function isConfigured(id) {
+        id = keyIdOf(id);
+        const meta = keyMeta(id);
+        return !!meta && !missingSetting(id) && (!!keys[id] || !!meta.keyOptional);
+    }
+
     function getKey(id) {
         id = keyIdOf(id);
-        if (!keys[id]) throw new Error(`Bitte zuerst den API-Key für ${keyMeta(id).label} unter „API-Keys“ eintragen.`);
-        return keys[id];
+        const meta = keyMeta(id);
+        const missing = missingSetting(id);
+        if (missing) throw new Error(`Bitte zuerst für ${meta.label} unter „API-Keys“ ${missing.label === 'Adresse' ? 'die Adresse' : `den ${missing.label}`} eintragen.`);
+        if (!keys[id] && !meta.keyOptional) throw new Error(`Bitte zuerst den API-Key für ${meta.label} unter „API-Keys“ eintragen.`);
+        return keys[id] || '';
     }
 
     function keysChanged() {
@@ -173,6 +189,8 @@ window.Unisono = window.Unisono || {};
     // Providers that keep the data in the EU by default, by their own documentation (Mistral, Scaleway, OVHcloud).
     // Gladia is French, but its documentation promises EU processing only for live transcription.
     const EU_IDS = new Set(['mistral', 'scaleway', 'ovhcloud']);
+    // Providers with an EU region to choose (in the key row; Azure through the region of the resource).
+    const hasEuRegion = id => id === 'azure' || (keyMeta(id)?.settings || []).some(f => f.field === 'region');
     let keyFilter = 'all';
 
     function providerTags(id) {
@@ -180,7 +198,7 @@ window.Unisono = window.Unisono || {};
         if (S.apis[id]) tags.push('stt');
         if (S.llms[id]) tags.push('llm');
         if (S.apis[id] && REALTIME_IDS.has(id)) tags.push('realtime');
-        if (EU_IDS.has(id)) tags.push('eu');
+        if (EU_IDS.has(id) || hasEuRegion(id)) tags.push('eu');
         return tags;
     }
 
@@ -195,7 +213,7 @@ window.Unisono = window.Unisono || {};
         const note = $('key-filter-note');
         note.textContent = keyFilter === 'realtime'
             ? 'Diese Anbieter können live mitschreiben. Unisono nimmt bisher ganze Aufnahmen auf und schickt sie danach.'
-            : keyFilter === 'eu' ? 'Diese Anbieter verarbeiten die Daten laut ihrer Doku standardmäßig in der EU. Eine EU-Region zum Auswählen gibt es außerdem bei AssemblyAI, Soniox, Deepgram und OpenRouter; Unisono nutzt dort die Standard-Adresse.' : '';
+            : keyFilter === 'eu' ? 'Mistral, Scaleway und OVHcloud verarbeiten die Daten laut ihrer Doku in der EU. Bei den Anbietern mit „EU-Region“ lässt sich die EU-Adresse in der Zeile einstellen (bei Azure über die Region der Ressource).' : '';
         note.classList.toggle('hidden', !note.textContent);
         $('key-filter-count').textContent = `${shown} Anbieter`;
     }
@@ -211,7 +229,7 @@ window.Unisono = window.Unisono || {};
             const meta = keyMeta(id);
             const isEngine = !!S.apis[id];
             const inputId = 'key-' + id;
-            const input = h('input', { id: inputId, type: 'password', class: 'input is-mono', autocomplete: 'off', spellcheck: false, placeholder: 'Key einfügen', value: keys[id] });
+            const input = h('input', { id: inputId, type: 'password', class: 'input is-mono', autocomplete: 'off', spellcheck: false, placeholder: meta.keyOptional ? 'Key (nur falls nötig)' : 'Key einfügen', value: keys[id] });
             const status = h('span', { class: 'key-status t-small' });
             const feedback = h('p', { class: 'key-feedback t-small hidden', 'aria-live': 'polite' });
             const setStatusText = (state, text) => {
@@ -224,6 +242,9 @@ window.Unisono = window.Unisono || {};
             const removeBtn = h('button', { type: 'button', class: 'btn-text is-danger', onclick: () => remove() }, 'Entfernen');
             const refreshStatus = () => {
                 removeBtn.disabled = !keys[id];
+                const missing = missingSetting(id);
+                if (missing && (keys[id] || meta.keyOptional)) return setStatusText('idle', `${missing.label} fehlt`);
+                if (meta.keyOptional) return setStatusText(missing ? 'idle' : 'success', missing ? 'Nicht eingerichtet' : 'Eingerichtet');
                 return keys[id] ? setStatusText('success', 'Gespeichert') : setStatusText('idle', 'Kein Key');
             };
             refreshStatus();
@@ -246,9 +267,36 @@ window.Unisono = window.Unisono || {};
                 mask.setAttribute('aria-label', hidden ? 'Key anzeigen' : 'Key verbergen');
             } }, icon('eye'));
 
+            // Region, endpoint, server address: saved as they change, like the key.
+            const settingFields = (meta.settings || []).map(f => {
+                const fieldId = `setting-${id}-${f.field}`;
+                const value = S.providerSettings.get(id, f.field);
+                const control = f.options
+                    ? h('select', { id: fieldId, class: 'input' }, ...f.options.map(([v, text]) => h('option', { value: v, text, selected: v === value })))
+                    : h('input', { id: fieldId, type: 'url', class: 'input is-mono', autocomplete: 'off', spellcheck: false, placeholder: f.placeholder || '', value });
+                control.addEventListener(f.options ? 'change' : 'input', () => {
+                    if (!S.providerSettings.set(id, f.field, control.value)) showFeedback('danger', 'Der Browser blockiert das Speichern.');
+                    refreshStatus();
+                    keysChanged();
+                    warn();
+                });
+                const warning = h('p', { class: 't-small muted hidden' });
+                const warn = () => {
+                    const insecure = !f.options && /^http:\/\//i.test(control.value.trim()) && !/^http:\/\/(localhost|127\.0\.0\.1)([:/]|$)/i.test(control.value.trim());
+                    warning.textContent = insecure ? 'Achtung: http:// schickt Key und Audio unverschlüsselt. Außerdem blockiert der Browser http-Adressen auf einer https-Seite meist.' : '';
+                    warning.classList.toggle('hidden', !insecure);
+                };
+                warn();
+                return h('div', { class: 'field key-setting' },
+                    h('label', { for: fieldId, text: f.label }), control,
+                    f.note ? h('p', { class: 't-small muted', text: f.note }) : null, warning);
+            });
+
             const test = async () => {
                 save({ quiet: true });
-                if (!keys[id]) return showFeedback('danger', 'Bitte zuerst einen Key eintragen.');
+                const missing = missingSetting(id);
+                if (missing) return showFeedback('danger', `Bitte zuerst „${missing.label}“ eintragen.`);
+                if (!keys[id] && !meta.keyOptional) return showFeedback('danger', 'Bitte zuerst einen Key eintragen.');
                 setStatusText('info', 'Prüfe …');
                 const result = await testKey(meta, keys[id]);
                 setStatusText(result.ok ? 'success' : 'danger', result.ok ? 'Verbunden' : 'Fehler');
@@ -267,7 +315,8 @@ window.Unisono = window.Unisono || {};
                     h('div', { class: 'min-w-0' },
                         h('h3', { class: 'key-name' }, meta.label, S.brandLogo(id)),
                         h('p', { class: 't-small muted', text: meta.description }),
-                        h('div', { class: 'tag-row' }, ...providerTags(id).map(tag => h('span', { class: 'tag', text: TAG_LABELS[tag] }))))),
+                        h('div', { class: 'tag-row' }, ...providerTags(id).map(tag => h('span', { class: 'tag',
+                            text: tag === 'eu' && !EU_IDS.has(id) ? 'EU-Region' : TAG_LABELS[tag] }))))),
                 h('div', { class: 'key-input' },
                     h('label', { class: 'visually-hidden', for: inputId, text: `API-Key für ${meta.label}` }),
                     h('div', { class: 'input-wrap' }, input, mask)),
@@ -275,7 +324,9 @@ window.Unisono = window.Unisono || {};
                 h('div', { class: 'key-actions' },
                     h('button', { type: 'button', class: 'btn-secondary is-small', onclick: test }, 'Prüfen'),
                     removeBtn),
-                h('div', { class: 'key-more' }, feedback, keyGuide(meta)));
+                h('div', { class: 'key-more' },
+                    settingFields.length ? h('div', { class: 'key-settings' }, ...settingFields) : null,
+                    feedback, keyGuide(meta)));
         };
         $('key-cards').replaceChildren(...[...Object.keys(S.apis).filter(id => !S.apis[id].keyId), ...Object.keys(LLM_KEYS)].map(row));
         renderKeyFilters();
@@ -297,13 +348,14 @@ window.Unisono = window.Unisono || {};
 
     // A cheap GET that proves the key works – and that the provider accepts browser requests.
     async function testKey(meta, key) {
-        const { url, headers } = meta.test(key);
         try {
+            const { url, headers } = meta.test(key);
             const res = await fetch(url, { headers });
             if (res.ok) return { ok: true, message: 'Key gültig – Anfragen direkt aus dem Browser funktionieren.' };
             if (res.status === 401 || res.status === 403) return { ok: false, message: `Key ungültig oder ohne Berechtigung (HTTP ${res.status}).` };
             return { ok: false, message: `Der Anbieter antwortet mit HTTP ${res.status}. Bitte später erneut prüfen.` };
         } catch (_) {
+            if (meta.keyOptional) return { ok: false, message: 'Der Server antwortet nicht. Läuft er, stimmt die Adresse, und lässt er Anfragen von dieser Seite zu (CORS)?' };
             return {
                 ok: false,
                 message: 'Anfrage wurde blockiert. Entweder fehlt die Internetverbindung, oder der Anbieter lässt keine Anfragen direkt aus dem Browser zu (CORS) – dann funktioniert er in Unisono nicht.'
@@ -312,8 +364,9 @@ window.Unisono = window.Unisono || {};
     }
 
     function clearKeys() {
-        if (!confirm('Alle gespeicherten API-Keys aus diesem Browser löschen?')) return;
+        if (!confirm('Alle gespeicherten API-Keys und Anbieter-Einstellungen (Region, Adressen) aus diesem Browser löschen?')) return;
         for (const id of allKeyIds()) storeKey(id, '');
+        S.providerSettings.clear();
         renderKeyCards();
         keysChanged();
         setStatus('Alle API-Keys gelöscht.', 'success');
@@ -333,7 +386,7 @@ window.Unisono = window.Unisono || {};
         const vocab = api.vocabularySupport?.($('model-select').value || api.models[0].id);
         const notes = [api.description];
         if (!vocab) notes.push('Fachbegriffe nur teilweise.');
-        if (api.noDiarization) notes.push(`${shortLabel(api)} trennt keine Sprecher.`);
+        if (!S.canDiarize(selectedProvider, $('model-select').value)) notes.push(`${shortLabel(api)} trennt mit diesem Modell keine Sprecher.`);
         $('provider-info').textContent = notes.join(' ');
         const missing = !hasEngineKey(selectedProvider);
         $('provider-key-note').textContent = missing ? 'API-Key eintragen' : '';
@@ -382,8 +435,9 @@ window.Unisono = window.Unisono || {};
 
     function updateHint() {
         const api = S.apis[selectedProvider];
-        $('diarize').disabled = !!api.noDiarization;
-        $('speaker-options').classList.toggle('hidden', !$('diarize').checked || !!api.noDiarization);
+        const diarizes = S.canDiarize(selectedProvider, $('model-select').value);
+        $('diarize').disabled = !diarizes;
+        $('speaker-options').classList.toggle('hidden', !$('diarize').checked || !diarizes);
         $('language-select').disabled = !!api.autoLanguageOnly;
 
         const hints = [];
@@ -565,13 +619,26 @@ window.Unisono = window.Unisono || {};
     // --- Transcription ---
     let running = null;
 
+    // No connection: the file waits in the archive's queue and is transcribed once the browser is online.
+    async function queueForLater(file, provider, model) {
+        const diarize = $('diarize').checked && S.canDiarize(provider, model);
+        try {
+            await S.archive.enqueue(file, { provider, model, language: $('language-select').value, diarize, speakers: diarize ? getSpeakerCount() : null });
+            S.recorder.markUsed(file);
+            setStatus(`Keine Verbindung: „${file.name}“ wartet im Archiv und wird automatisch transkribiert, sobald wieder Netz da ist.`, 'success');
+        } catch (err) {
+            showError('Speichern für später fehlgeschlagen', err);
+        }
+    }
+
     async function startTranscription() {
         if (!currentFile || running) return;
-        if (S.state.get().segments.length && !confirm('Das aktuelle Transkript inklusive deiner Änderungen wird ersetzt. Fortfahren?')) return;
-
         const provider = selectedProvider;
         const file = currentFile;
         const model = $('model-select').value;
+        if (!navigator.onLine && S.archive.isAvailable()) return queueForLater(file, provider, model);
+        if (S.state.get().segments.length && !confirm('Das aktuelle Transkript wird ersetzt. Es bleibt im Archiv. Fortfahren?')) return;
+
         running = new AbortController();
         hideStatus();
         S.progress.begin({ file, provider, model, duration: currentDuration, cancel: () => running?.abort() });
@@ -581,7 +648,7 @@ window.Unisono = window.Unisono || {};
             const limitMsg = limitMessage(provider);
             if (limitMsg) throw new Error(limitMsg);
 
-            const diarize = $('diarize').checked && !S.apis[provider].noDiarization;
+            const diarize = $('diarize').checked && S.canDiarize(provider, model);
             const { terms: vocabulary } = S.vocabulary.prepare(S.vocabulary.getTerms(), vocabularySupport());
             const startedAt = Date.now();
             const { raw, segments } = await S.apis[provider].transcribe(file, {
@@ -597,6 +664,7 @@ window.Unisono = window.Unisono || {};
             });
             S.progress.stage('done');
             S.state.setTranscript({ raw, segments, provider, fileName: file.name, markers: file.unisonoMarkers });
+            S.archive.startNew();
             S.recorder.markUsed(file);
             S.progress.end();
             switchView('transcript');
@@ -604,6 +672,8 @@ window.Unisono = window.Unisono || {};
         } catch (err) {
             S.progress.end();
             if (err?.name === 'AbortError') setStatus('Transkription abgebrochen. Beim Anbieter bereits hochgeladene Daten löscht er nach seinen eigenen Regeln.', 'error');
+            // An own server that does not answer is no missing connection; waiting for "online" would not help.
+            else if (S.archiveCore.isNetworkError(err) && S.archive.isAvailable() && !S.apis[provider].keyOptional) await queueForLater(file, provider, model);
             else showError('Fehler', err);
         } finally {
             running = null;
@@ -681,11 +751,12 @@ window.Unisono = window.Unisono || {};
 
     async function openProject(file) {
         if (!file) return;
-        if (S.state.get().segments.length && !confirm('Das aktuelle Transkript inklusive deiner Änderungen wird ersetzt. Fortfahren?')) return;
+        if (S.state.get().segments.length && !confirm('Das aktuelle Transkript wird ersetzt. Es bleibt im Archiv. Fortfahren?')) return;
         try {
             const data = JSON.parse(await file.text());
             S.state.loadProject(data);
             S.summary.setText(data.summary);
+            S.archive.startNew();
             const audioHint = data.fileName && !currentFile ? ` Für den Player die Audiodatei „${data.fileName}“ laden.` : '';
             switchView('transcript');
             setStatus(`Projekt geöffnet: ${S.state.get().segments.length} Abschnitte.${audioHint}`, 'success');
@@ -696,8 +767,8 @@ window.Unisono = window.Unisono || {};
 
     // --- Init ---
     function init() {
-        S.ui = { setStatus, hideStatus, showError, copy, getKey, hasKey: id => !!keys[keyIdOf(id)] };
-        S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, switchView, openSettings: tab => S.settings.open(tab) };
+        S.ui = { setStatus, hideStatus, showError, copy, getKey, hasKey: isConfigured };
+        S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, loadFile: handleFile, switchView, openSettings: tab => S.settings.open(tab) };
 
         refreshLlmKeys();
         loadKeys();
@@ -706,10 +777,10 @@ window.Unisono = window.Unisono || {};
         S.vocabulary.init();
         S.vocabulary.onChange(updateHint);
         S.settings.init({
-            keyCount: () => ({ saved: allKeyIds().filter(id => keys[id]).length, total: allKeyIds().length })
+            keyCount: () => ({ saved: allKeyIds().filter(isConfigured).length, total: allKeyIds().length })
         });
         loadConfig();
-        CONFIG_FIELDS.forEach(id => $(id).addEventListener('change', () => { updateHint(); saveConfig(); }));
+        CONFIG_FIELDS.forEach(id => $(id).addEventListener('change', () => { renderProviderCards(); updateHint(); saveConfig(); }));
         $('engine-select').addEventListener('change', e => selectProvider(e.target.value));
         setupDropZone();
         S.recorder.init({ onRecorded: handleFile });
@@ -749,8 +820,9 @@ window.Unisono = window.Unisono || {};
         showLlmLogo();
         S.state.subscribe(type => { if (type !== 'text') updateTranscriptView(); });
 
-        const firstVisit = !allKeyIds().some(id => keys[id]);
+        const firstVisit = !allKeyIds().some(isConfigured);
         const restored = S.state.restore();
+        S.archive.init();
         updateTranscriptView();
         if (firstVisit) {
             switchView('keys');
