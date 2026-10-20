@@ -565,13 +565,26 @@ window.Unisono = window.Unisono || {};
     // --- Transcription ---
     let running = null;
 
+    // No connection: the file waits in the archive's queue and is transcribed once the browser is online.
+    async function queueForLater(file, provider, model) {
+        const diarize = $('diarize').checked && !S.apis[provider].noDiarization;
+        try {
+            await S.archive.enqueue(file, { provider, model, language: $('language-select').value, diarize, speakers: diarize ? getSpeakerCount() : null });
+            S.recorder.markUsed(file);
+            setStatus(`Keine Verbindung: „${file.name}“ wartet im Archiv und wird automatisch transkribiert, sobald wieder Netz da ist.`, 'success');
+        } catch (err) {
+            showError('Speichern für später fehlgeschlagen', err);
+        }
+    }
+
     async function startTranscription() {
         if (!currentFile || running) return;
-        if (S.state.get().segments.length && !confirm('Das aktuelle Transkript inklusive deiner Änderungen wird ersetzt. Fortfahren?')) return;
-
         const provider = selectedProvider;
         const file = currentFile;
         const model = $('model-select').value;
+        if (!navigator.onLine && S.archive.isAvailable()) return queueForLater(file, provider, model);
+        if (S.state.get().segments.length && !confirm('Das aktuelle Transkript wird ersetzt. Es bleibt im Archiv. Fortfahren?')) return;
+
         running = new AbortController();
         hideStatus();
         S.progress.begin({ file, provider, model, duration: currentDuration, cancel: () => running?.abort() });
@@ -597,6 +610,7 @@ window.Unisono = window.Unisono || {};
             });
             S.progress.stage('done');
             S.state.setTranscript({ raw, segments, provider, fileName: file.name, markers: file.unisonoMarkers });
+            S.archive.startNew();
             S.recorder.markUsed(file);
             S.progress.end();
             switchView('transcript');
@@ -604,6 +618,7 @@ window.Unisono = window.Unisono || {};
         } catch (err) {
             S.progress.end();
             if (err?.name === 'AbortError') setStatus('Transkription abgebrochen. Beim Anbieter bereits hochgeladene Daten löscht er nach seinen eigenen Regeln.', 'error');
+            else if (S.archiveCore.isNetworkError(err) && S.archive.isAvailable()) await queueForLater(file, provider, model);
             else showError('Fehler', err);
         } finally {
             running = null;
@@ -681,11 +696,12 @@ window.Unisono = window.Unisono || {};
 
     async function openProject(file) {
         if (!file) return;
-        if (S.state.get().segments.length && !confirm('Das aktuelle Transkript inklusive deiner Änderungen wird ersetzt. Fortfahren?')) return;
+        if (S.state.get().segments.length && !confirm('Das aktuelle Transkript wird ersetzt. Es bleibt im Archiv. Fortfahren?')) return;
         try {
             const data = JSON.parse(await file.text());
             S.state.loadProject(data);
             S.summary.setText(data.summary);
+            S.archive.startNew();
             const audioHint = data.fileName && !currentFile ? ` Für den Player die Audiodatei „${data.fileName}“ laden.` : '';
             switchView('transcript');
             setStatus(`Projekt geöffnet: ${S.state.get().segments.length} Abschnitte.${audioHint}`, 'success');
@@ -697,7 +713,7 @@ window.Unisono = window.Unisono || {};
     // --- Init ---
     function init() {
         S.ui = { setStatus, hideStatus, showError, copy, getKey, hasKey: id => !!keys[keyIdOf(id)] };
-        S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, switchView, openSettings: tab => S.settings.open(tab) };
+        S.app = { hasFile: () => !!currentFile, getFile: () => currentFile, loadFile: handleFile, switchView, openSettings: tab => S.settings.open(tab) };
 
         refreshLlmKeys();
         loadKeys();
@@ -751,6 +767,7 @@ window.Unisono = window.Unisono || {};
 
         const firstVisit = !allKeyIds().some(id => keys[id]);
         const restored = S.state.restore();
+        S.archive.init();
         updateTranscriptView();
         if (firstVisit) {
             switchView('keys');
