@@ -234,7 +234,7 @@ Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (a
 | Gladia (v2) | `solaria-3` (DE/EN/FR/ES/IT, feste Sprache nötig), `solaria-1` (100+ Sprachen) | Upload → `/v2/pre-recorded` → Polling |
 | ElevenLabs (Scribe) | `scribe_v2`, `scribe_v1` | Synchroner Upload an `/v1/speech-to-text` |
 | AssemblyAI (v2) | `universal-3-5-pro`, `universal-2` | Upload → `/v2/transcript` → Polling |
-| Mistral (Voxtral) | `voxtral-mini-latest` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
+| Mistral (Voxtral) | `voxtral-mini-latest`, `voxtral-small-transcribe-3-0`, `voxtral-mini-transcribe-3-0` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
 
 Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar, außerdem bei OpenAI mit dem Modell `gpt-4o-transcribe-diarize`. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
 

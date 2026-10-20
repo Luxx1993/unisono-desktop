@@ -1,7 +1,7 @@
 /*
  * Mistral Voxtral: one synchronous multipart request to /v1/audio/transcriptions.
  *
- * Voxtral Mini Transcribe 2 returns speaker-labelled segments when asked for diarization
+ * Voxtral Mini Transcribe 2 and Voxtral 3 return speaker-labelled segments when asked for diarization
  * and segment timestamps. Mistral does not allow a fixed language together with
  * timestamps, so the language is detected automatically here.
  */
@@ -43,7 +43,10 @@ window.Unisono = window.Unisono || {};
         description: 'Europäischer Anbieter, schnell und günstig. Sprache wird automatisch erkannt. Derselbe Key dient zum Aufräumen.',
         icon: 'graphic_eq',
         models: [
-            { id: 'voxtral-mini-latest', name: 'Voxtral Mini Transcribe (aktuell)' }
+            { id: 'voxtral-mini-latest', name: 'Voxtral Mini Transcribe (aktuell)' },
+            // Voxtral 3 (Oktober 2026): Small ist am genauesten, Mini günstiger. Die IDs stehen so auf den Modellseiten von Mistral.
+            { id: 'voxtral-small-transcribe-3-0', name: 'Voxtral Small Transcribe 3 (genauestes Modell)' },
+            { id: 'voxtral-mini-transcribe-3-0', name: 'Voxtral Mini Transcribe 3' }
         ],
         keyUrl: 'https://console.mistral.ai/api-keys',
         keyGuide: {
