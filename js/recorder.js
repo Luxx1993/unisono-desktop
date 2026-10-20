@@ -311,6 +311,10 @@ window.Unisono = window.Unisono || {};
             S.ui.setStatus('Unter „Diktat“ läuft gerade eine Aufnahme. Bitte zuerst beenden.', 'error');
             return;
         }
+        if (S.meeting?.isActive()) {
+            S.ui.setStatus('Gerade läuft eine Meeting-Aufnahme. Bitte zuerst beenden.', 'error');
+            return;
+        }
         if (pendingRecovery && !confirm('Es gibt noch eine unterbrochene Aufnahme. Beim Start einer neuen Aufnahme wird sie verworfen. Fortfahren?')) return;
         if (unsaved && !confirm('Die letzte Aufnahme wurde weder transkribiert noch gesichert. Trotzdem neu aufnehmen?')) return;
         if (!supported()) {

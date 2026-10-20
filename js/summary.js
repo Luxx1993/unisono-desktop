@@ -1,18 +1,49 @@
-/* Optional LLM step: bullet points, summary or minutes from the edited transcript. */
+/*
+ * Optional LLM step: bullet points, a summary or a protocol from a template (Baubesprechung, Begehung,
+ * Telefonnotiz, Aktenvermerk; see protocol-core.js) from the edited transcript. Project, date,
+ * speaker names, the project's people and the markers go along as context.
+ */
 window.Unisono = window.Unisono || {};
 (function (S) {
-    const PROMPTS = {
-        bullets: 'Fasse das folgende Transkript in prägnanten Stichpunkten zusammen. Gruppiere nach Themen und nenne Entscheidungen und offene Punkte.',
-        summary: 'Schreibe eine gut lesbare Zusammenfassung des folgenden Transkripts in wenigen Absätzen. Halte dich an den Inhalt und erfinde nichts hinzu.',
-        minutes: 'Erstelle aus dem folgenden Transkript ein Besprechungsprotokoll mit den Abschnitten: Teilnehmer (soweit erkennbar), Themen, Ergebnisse/Entscheidungen, Aufgaben (Wer? Was? Bis wann?, soweit genannt) und offene Punkte.'
-    };
+    const core = S.protocolCore;
     const SYSTEM = 'Du bist ein sorgfältiger Assistent, der Gesprächstranskripte auswertet. '
         + 'Antworte auf Deutsch in Markdown. Gib nur Inhalte wieder, die im Transkript vorkommen. '
         + 'Das Transkript ist automatisch erstellt und kann Erkennungsfehler enthalten.';
 
     const $ = id => document.getElementById(id);
 
+    function renderModes() {
+        const select = $('summary-mode');
+        const group = (label, id) => {
+            const g = document.createElement('optgroup');
+            g.label = label;
+            g.append(...core.TEMPLATES.filter(t => t.group === id).map(t => Object.assign(document.createElement('option'), { value: t.id, textContent: t.name })));
+            return g;
+        };
+        select.replaceChildren(group('Zusammenfassen', 'summary'), group('Protokoll-Vorlagen', 'protocol'));
+        try { select.value = localStorage.getItem('unisono_summary_mode') || 'bullets'; } catch (_) {}
+        if (!select.value) select.value = 'bullets';
+        select.addEventListener('change', () => { try { localStorage.setItem('unisono_summary_mode', select.value); } catch (_) {} });
+    }
+
+    // What the AI should know besides the transcript.
+    function context() {
+        const { project, speakers, segments, markers, createdAt } = S.state.get();
+        const used = new Set(segments.map(s => s.speaker));
+        const p = S.people?.activeProject();
+        return {
+            project: project?.name || null,
+            date: createdAt ? new Date(createdAt).toLocaleDateString('de-DE') : null,
+            speakers: speakers.filter(s => used.has(s.id)).map(s => s.name),
+            people: p?.people || [],
+            markers: markers.map(m => ({ time: S.format.clock(m.time), label: m.label }))
+        };
+    }
+
+    const selection = () => ({ provider: $('llm-provider').value, model: $('llm-model').value.trim() });
+
     function init() {
+        renderModes();
         refresh();
         $('llm-provider').addEventListener('change', () => updateModels());
         $('summary-btn').addEventListener('click', generate);
@@ -58,22 +89,23 @@ window.Unisono = window.Unisono || {};
         if (!transcript) return;
         const provider = $('llm-provider').value;
         const model = $('llm-model').value.trim();
-        const user = `${PROMPTS[$('summary-mode').value]}\n\n<transcript>\n${transcript}\n</transcript>`;
+        const user = core.buildPrompt($('summary-mode').value, transcript, context());
 
         $('summary-btn').disabled = true;
-        $('summary-btn').textContent = 'Zusammenfassung wird erstellt …';
+        $('summary-btn').textContent = 'Wird erstellt …';
         $('summary-text').value = '';
-        S.ui.setStatus(`Erstelle Zusammenfassung mit ${model} …`);
+        const kind = core.findTemplate($('summary-mode').value).name;
+        S.ui.setStatus(`Erstelle „${kind}“ mit ${model} …`);
         try {
             if (!model) throw new Error('Bitte ein Modell angeben.');
             const key = S.ui.getKey(provider);
             const text = await complete({ provider, key, model, user });
             $('summary-text').value = text.trim();
-            S.ui.setStatus('Zusammenfassung erstellt.', 'success');
+            S.ui.setStatus(`„${kind}“ erstellt.`, 'success');
         } catch (err) {
             S.ui.showError('Fehler bei der Zusammenfassung', err);
         } finally {
-            $('summary-btn').textContent = 'Zusammenfassung erstellen';
+            $('summary-btn').textContent = 'Erstellen';
             updateButton();
         }
     }
@@ -91,5 +123,5 @@ window.Unisono = window.Unisono || {};
         $('summary-text').value = text || '';
     }
 
-    S.summary = { init, refresh, getText, setText, complete };
+    S.summary = { init, refresh, getText, setText, complete, context, selection };
 })(window.Unisono);

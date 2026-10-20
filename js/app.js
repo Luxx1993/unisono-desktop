@@ -212,7 +212,7 @@ window.Unisono = window.Unisono || {};
         document.querySelectorAll('#key-filters button').forEach(chip => chip.setAttribute('aria-checked', String(chip.dataset.filter === keyFilter)));
         const note = $('key-filter-note');
         note.textContent = keyFilter === 'realtime'
-            ? 'Diese Anbieter können live mitschreiben. Unisono nimmt bisher ganze Aufnahmen auf und schickt sie danach.'
+            ? 'Diese Anbieter können live mitschreiben. In Unisono geht das im Diktat bisher mit ElevenLabs und Deepgram („Live mitschreiben“ in den Einstellungen der Seite Diktat).'
             : keyFilter === 'eu' ? 'Mistral, Scaleway und OVHcloud verarbeiten die Daten laut ihrer Doku in der EU. Bei den Anbietern mit „EU-Region“ lässt sich die EU-Adresse in der Zeile einstellen (bei Azure über die Region der Ressource).' : '';
         note.classList.toggle('hidden', !note.textContent);
         $('key-filter-count').textContent = `${shown} Anbieter`;
@@ -649,7 +649,7 @@ window.Unisono = window.Unisono || {};
             if (limitMsg) throw new Error(limitMsg);
 
             const diarize = $('diarize').checked && S.canDiarize(provider, model);
-            const { terms: vocabulary } = S.vocabulary.prepare(S.vocabulary.getTerms(), vocabularySupport());
+            const { terms: vocabulary } = S.vocabulary.prepare(S.vocabulary.transcriptionTerms(), vocabularySupport());
             const startedAt = Date.now();
             const { raw, segments } = await S.apis[provider].transcribe(file, {
                 key: getKey(provider),
@@ -663,7 +663,11 @@ window.Unisono = window.Unisono || {};
                 onUpload: fraction => S.progress.upload(fraction)
             });
             S.progress.stage('done');
-            S.state.setTranscript({ raw, segments, provider, fileName: file.name, markers: file.unisonoMarkers });
+            const project = S.people.current();
+            S.state.setTranscript({ raw, segments, provider, fileName: file.name, markers: file.unisonoMarkers, project: project && { id: project.id, name: project.name } });
+            // A meeting recording knows when the own microphone was louder than the meeting: that speaker is "Ich".
+            const self = file.unisonoMeeting && S.protocolCore.selfSpeaker(S.state.get().segments, file.unisonoMeeting);
+            if (self) S.state.renameSpeaker(self, 'Ich');
             S.archive.startNew();
             S.recorder.markUsed(file);
             S.progress.end();
@@ -765,6 +769,40 @@ window.Unisono = window.Unisono || {};
         }
     }
 
+    // --- Meeting recording: an optional module, loaded on first use ---
+    const MEETING_KEY = 'unisono_module_meeting';
+    function setupMeetingModule() {
+        let on = false;
+        try { on = localStorage.getItem(MEETING_KEY) === '1'; } catch (_) {}
+        const show = () => $('meeting-card').classList.toggle('hidden', !on);
+        $('module-meeting').checked = on;
+        $('module-meeting').addEventListener('change', e => {
+            on = e.target.checked;
+            try { if (on) localStorage.setItem(MEETING_KEY, '1'); else localStorage.removeItem(MEETING_KEY); } catch (_) {}
+            show();
+            if (on) setStatus('Meeting-Aufnahme eingeschaltet. Du findest sie auf der Seite „Aufnahme“.', 'success');
+        });
+        $('meeting-open').addEventListener('click', loadMeeting);
+        show();
+    }
+
+    let meetingLoad = null;
+    async function loadMeeting() {
+        meetingLoad ||= new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'js/meeting.js';
+            script.onload = resolve;
+            script.onerror = () => { meetingLoad = null; reject(new Error('Das Modul ließ sich nicht laden.')); };
+            document.head.append(script);
+        });
+        try {
+            await meetingLoad;
+            S.meeting.open($('meeting-body'));
+        } catch (err) {
+            showError('Meeting-Aufnahme', err);
+        }
+    }
+
     // --- Init ---
     function init() {
         S.ui = { setStatus, hideStatus, showError, copy, getKey, hasKey: isConfigured };
@@ -812,13 +850,16 @@ window.Unisono = window.Unisono || {};
         });
         S.markers.init();
         S.search.init();
+        S.people.init();
         S.summary.init();
+        S.tasks.init();
+        setupMeetingModule();
         S.dictation.init();
         S.dictationMini.init();
         const showLlmLogo = () => $('llm-logo').replaceChildren(...[S.brandLogo($('llm-provider').value)].filter(Boolean));
         $('llm-provider').addEventListener('change', showLlmLogo);
         showLlmLogo();
-        S.state.subscribe(type => { if (type !== 'text') updateTranscriptView(); });
+        S.state.subscribe(type => { if (type !== 'text' && type !== 'tasks') updateTranscriptView(); });
 
         const firstVisit = !allKeyIds().some(isConfigured);
         const restored = S.state.restore();

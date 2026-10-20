@@ -143,6 +143,7 @@ window.Unisono = window.Unisono || {};
             row.dataset.speakerRow = spk.id;
             const input = el('input', 'speaker-name', { value: spk.name, spellcheck: false });
             input.setAttribute('aria-label', `Name für Sprecher ${spk.id}`);
+            input.setAttribute('list', 'people-list');   // the project's people (people.js)
             input.dataset.speaker = spk.id;
             input.addEventListener('input', () => S.state.renameSpeaker(spk.id, input.value));
             input.addEventListener('blur', () => {

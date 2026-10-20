@@ -76,7 +76,7 @@ window.Unisono = window.Unisono || {};
     }
 
     function onStateChange(type, id) {
-        if (type === 'text' || type === 'speaker-renamed') return;
+        if (['text', 'speaker-renamed', 'tasks', 'project'].includes(type)) return;
         if (type === 'markers' && id) {
             // Only a label changed: update the row text, keep the focus in the list.
             const m = S.state.get().markers.find(x => x.id === id);

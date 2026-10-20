@@ -14,6 +14,7 @@
 
     <!-- Classic scripts (no ES modules) so the app also runs when opened directly via file:// -->
     <script src="js/state.js" defer></script>
+    <script src="js/protocol-core.js" defer></script>
     <script src="js/apis/common.js" defer></script>
     <script src="js/apis/gladia.js" defer></script>
     <script src="js/apis/elevenlabs.js" defer></script>
@@ -21,6 +22,7 @@
     <script src="js/apis/mistral.js" defer></script>
     <script src="js/apis/dictation-engines.js" defer></script>
     <script src="js/apis/llm.js" defer></script>
+    <script src="js/apis/realtime.js" defer></script>
     <script src="js/export.js" defer></script>
     <script src="js/vocabulary.js" defer></script>
     <script src="js/recording-backup.js" defer></script>
@@ -39,6 +41,8 @@
     <script src="js/progress.js" defer></script>
     <script src="js/player.js" defer></script>
     <script src="js/search.js" defer></script>
+    <script src="js/people.js" defer></script>
+    <script src="js/tasks.js" defer></script>
     <script src="js/settings.js" defer></script>
     <script src="js/app.js" defer></script>
 </head>
@@ -71,6 +75,9 @@
             <symbol id="i-text" viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11zM13.5 3.5v4h4M9.5 12h5M9.5 16h5"/></symbol>
             <symbol id="i-file" viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11zM13.5 3.5v4h4"/></symbol>
             <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+            <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.25"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0M15.5 5.6a3.25 3.25 0 0 1 0 5.8M17 14.4a5.5 5.5 0 0 1 3.5 5.1"/></symbol>
+            <symbol id="i-meeting" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="11.5" rx="2"/><path d="M8.5 20h7M12 16v4M9.5 10.25h1M12 8.5v3.5M14.5 9.5v1.5"/></symbol>
+            <symbol id="i-tasks" viewBox="0 0 24 24"><path d="m4.5 7 1.75 1.75L9.5 5.5M4.5 13.5l1.75 1.75L9.5 12M12.5 7.5h7M12.5 14h7M12.5 19h7"/></symbol>
             <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4.5h5.5V10M19.5 4.5 11 13M17.5 14v4.5a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-11a1 1 0 0 1 1-1H10"/></symbol>
             <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.75"/></symbol>
             <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="m4 4 16 16M10 5.7A9 9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.7 3.4M6.7 6.9C4 8.6 2.5 12 2.5 12S6 18.5 12 18.5a9 9 0 0 0 4.6-1.3M10 10.1a2.75 2.75 0 0 0 3.9 3.9"/></symbol>
@@ -106,6 +113,7 @@
                 <button type="button" class="nav-item" data-view="start"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Transkribieren</button>
                 <button type="button" class="nav-item" data-view="transcript"><svg class="icon" aria-hidden="true"><use href="#i-text"/></svg>Transkript</button>
                 <button type="button" class="nav-item" data-view="archive"><svg class="icon" aria-hidden="true"><use href="#i-archive"/></svg>Archiv</button>
+                <button type="button" class="nav-item" data-view="projects"><svg class="icon" aria-hidden="true"><use href="#i-people"/></svg>Projekte</button>
                 <button type="button" class="nav-item" data-view="vocab"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>Fachbegriffe</button>
                 <button type="button" class="nav-item" data-view="keys"><svg class="icon" aria-hidden="true"><use href="#i-key"/></svg>API-Keys</button>
                 <button type="button" class="nav-item" data-view="settings"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg>Einstellungen</button>
@@ -215,6 +223,10 @@
                                 <label for="num-speakers">Anzahl Sprecher (optional)</label>
                                 <input type="number" id="num-speakers" min="1" max="32" placeholder="automatisch" class="input">
                             </div>
+                            <div class="field">
+                                <label for="project-select-start">Projekt</label>
+                                <select id="project-select-start" class="input"></select>
+                            </div>
                         </div>
                         <p id="provider-info" class="t-small muted"></p>
 
@@ -267,6 +279,7 @@
                             <button type="button" id="dict-main" class="rec-mark-btn"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span id="dict-main-text">Diktat starten</span></button>
                             <button type="button" id="dict-cancel" class="btn-text is-invisible">Verwerfen</button>
                         </div>
+                        <p id="dict-live-text" class="dict-live-text hidden" aria-live="polite"></p>
                         <p id="dict-keys-hint" class="t-small muted dict-keys-hint"></p>
                         <p id="dict-key-missing" class="t-small hidden"></p>
                         <div class="dict-mini-row">
@@ -355,6 +368,13 @@
                     </div>
                     <label class="check"><input type="checkbox" id="dict-autocopy" checked> Ergebnis sofort in die Zwischenablage kopieren</label>
                     <label class="check"><input type="checkbox" id="dict-longdictation" checked> Langdiktat: lange Aufnahmen an Pausen teilen und schon beim Sprechen transkribieren (nur bei „Antippen“)</label>
+                    <div id="dict-live-options" class="dict-live-options hidden">
+                        <label class="check"><input type="checkbox" id="dict-live"> Live mitschreiben: der Text erscheint schon beim Sprechen (Echtzeit)</label>
+                        <div id="dict-live-model-field" class="field hidden">
+                            <label for="dict-live-model">Live-Modell</label>
+                            <select id="dict-live-model" class="input"></select>
+                        </div>
+                    </div>
                     <div class="options-grid">
                         <div class="field">
                             <label for="dict-mini-skin">Schwebendes Fenster: Aussehen</label>
@@ -437,6 +457,17 @@
                     </div>
                 </section>
 
+                <!-- Meeting recording: an optional module (Einstellungen → Zusätzliche Module), js/meeting.js loads on first use -->
+                <section id="meeting-card" class="card hidden" aria-labelledby="meeting-title">
+                    <div class="card-head">
+                        <h2 id="meeting-title" class="t-label"><svg class="icon" aria-hidden="true"><use href="#i-meeting"/></svg> Meeting aufnehmen</h2>
+                    </div>
+                    <div id="meeting-body">
+                        <p class="t-small muted">Ton eines Web-Meetings (Teams, Zoom, Meet im Browser-Tab; unter Windows auch die Desktop-App über „Bildschirm“ mit Systemton) plus dein Mikrofon, ohne Bot im Meeting.</p>
+                        <button type="button" id="meeting-open" class="btn-secondary">Meeting-Aufnahme vorbereiten</button>
+                    </div>
+                </section>
+
                 <section class="card record-card" aria-label="Aufnahme">
                     <div id="rec-recovery" class="notice hidden" role="alert">
                         <svg class="icon" aria-hidden="true"><use href="#i-restore"/></svg>
@@ -500,6 +531,10 @@
                             <p id="transcript-eyebrow" class="t-label eyebrow">Transkript</p>
                             <h1 id="transcript-title" class="page-title truncate"></h1>
                             <p id="transcript-meta" class="t-mono muted meta-row"></p>
+                            <div class="transcript-project">
+                                <label for="transcript-project" class="t-small muted">Projekt</label>
+                                <select id="transcript-project" class="input is-compact"></select>
+                            </div>
                         </div>
                         <div class="head-actions">
                             <button type="button" id="copy-transcript" class="btn-secondary" data-needs-transcript><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg><span class="btn-label">Kopieren</span></button>
@@ -598,7 +633,7 @@
 
                             <section class="card summary-card" aria-labelledby="summary-title">
                                 <div class="card-head">
-                                    <h2 id="summary-title" class="t-label">Zusammenfassung</h2>
+                                    <h2 id="summary-title" class="t-label">Zusammenfassung und Protokoll</h2>
                                     <div class="head-icons">
                                         <button type="button" id="summary-copy" class="icon-btn" aria-label="Zusammenfassung kopieren" title="Kopieren"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button>
                                         <button type="button" id="summary-download" class="icon-btn" aria-label="Zusammenfassung als Markdown speichern" title="Als Markdown speichern"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg></button>
@@ -611,26 +646,58 @@
                                     </div>
                                     <div class="field">
                                         <label for="summary-mode">Art</label>
-                                        <select id="summary-mode" class="input">
-                                            <option value="bullets">Stichpunkte</option>
-                                            <option value="summary">Zusammenfassung</option>
-                                            <option value="minutes">Protokoll mit Aufgaben</option>
-                                        </select>
+                                        <select id="summary-mode" class="input"></select>
                                     </div>
                                 </div>
                                 <div class="field">
                                     <label for="llm-model">Modell</label>
                                     <select id="llm-model" class="input"></select>
                                 </div>
-                                <button type="button" id="summary-btn" disabled class="btn-secondary is-wide">Zusammenfassung erstellen</button>
+                                <button type="button" id="summary-btn" disabled class="btn-secondary is-wide">Erstellen</button>
                                 <div class="field">
                                     <label for="summary-text" class="visually-hidden">Zusammenfassung</label>
-                                    <textarea id="summary-text" placeholder="Die Zusammenfassung erscheint hier." class="input is-area"></textarea>
+                                    <textarea id="summary-text" placeholder="Die Zusammenfassung oder das Protokoll erscheint hier." class="input is-area"></textarea>
+                                </div>
+                            </section>
+
+                            <section class="card task-card" aria-labelledby="tasks-title">
+                                <div class="card-head">
+                                    <h2 id="tasks-title" class="t-label">Aufgaben</h2>
+                                    <span id="task-count" class="t-mono muted"></span>
+                                    <div class="head-icons">
+                                        <button type="button" id="task-copy" class="icon-btn" aria-label="Aufgaben als Markdown-Tabelle kopieren" title="Als Tabelle kopieren"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button>
+                                        <button type="button" id="task-csv" class="icon-btn" aria-label="Aufgaben als CSV speichern (Excel)" title="Als CSV speichern (Excel)"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg></button>
+                                    </div>
+                                </div>
+                                <p id="task-empty" class="t-small muted">Wer macht was bis wann? „Aufgaben erkennen“ liest sie mit der KI aus dem Transkript (Anbieter und Modell wie oben).</p>
+                                <ul id="task-list" class="task-list"></ul>
+                                <div class="button-row">
+                                    <button type="button" id="task-find" class="btn-secondary" disabled>Aufgaben erkennen</button>
+                                    <button type="button" id="task-add" class="btn-text" disabled><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Aufgabe</button>
                                 </div>
                             </section>
                         </aside>
                     </div>
                 </div>
+            </section>
+
+            <!-- ================= VIEW: Projekte ================= -->
+            <section id="view-projects" class="view is-narrow hidden" aria-labelledby="projects-title">
+                <header class="page-head">
+                    <div>
+                        <p class="t-label eyebrow">Wiederkehrende Personen</p>
+                        <h1 id="projects-title" class="page-title">Projekte</h1>
+                        <p class="page-intro muted">Pro Projekt die Personen, die immer wieder vorkommen, mit Rolle oder Firma. Die Namen des aktuellen Projekts gehen als Fachbegriffe an die Spracherkennung, stehen beim Benennen der Sprecher und bei Aufgaben zur Auswahl und fließen in Protokolle ein.</p>
+                    </div>
+                </header>
+                <section class="card narrow-card">
+                    <div class="person-add">
+                        <input id="project-new-name" class="input" placeholder="Neues Projekt, z. B. Neubau Kita Lindenstraße" aria-label="Name des neuen Projekts" autocomplete="off">
+                        <button type="button" id="project-add" class="btn-primary">Projekt anlegen</button>
+                    </div>
+                    <p id="project-empty" class="t-small muted">Noch keine Projekte.</p>
+                </section>
+                <div id="project-list" class="project-list"></div>
             </section>
 
             <!-- ================= VIEW: Fachbegriffe ================= -->
@@ -758,6 +825,12 @@
                     <p class="t-small muted">Wird sofort übernommen und in diesem Browser gespeichert.</p>
                 </section>
 
+                <section class="card narrow-card" aria-labelledby="modules-title">
+                    <h2 id="modules-title" class="t-label">Zusätzliche Module</h2>
+                    <label class="check"><input type="checkbox" id="module-meeting"> Meeting-Aufnahme: Ton eines Web-Meetings (Browser-Tab oder Bildschirm) plus eigenes Mikrofon aufnehmen</label>
+                    <p class="t-small muted">Erscheint auf der Seite „Aufnahme“. Der Code dafür wird erst geladen, wenn du das Modul benutzt.</p>
+                </section>
+
                 <section class="card narrow-card" aria-labelledby="data-title">
                     <h2 id="data-title" class="t-label">Daten und Datenschutz</h2>
                     <p class="t-small muted">Unisono hat keinen eigenen Server. Audio und Keys gehen nur an den Anbieter, den du auswählst. Alles andere bleibt in diesem Browser. Hier kannst du es löschen.</p>
@@ -788,6 +861,16 @@
                         </div>
                         <div class="data-row">
                             <div class="min-w-0">
+                                <p class="data-title">Projekte und Personen</p>
+                                <p id="data-projects-info" class="t-small muted"></p>
+                            </div>
+                            <div class="foot-actions">
+                                <button type="button" class="btn-text" data-view="projects">Anzeigen</button>
+                                <button type="button" id="clear-projects" class="btn-text is-danger">Löschen</button>
+                            </div>
+                        </div>
+                        <div class="data-row">
+                            <div class="min-w-0">
                                 <p class="data-title">Sicherung unterbrochener Aufnahmen</p>
                                 <p id="data-recording-info" class="t-small muted"></p>
                             </div>
@@ -810,7 +893,7 @@
                         <div class="data-row">
                             <div class="min-w-0">
                                 <p class="data-title">Alles zurücksetzen</p>
-                                <p class="t-small muted">Löscht Keys, Transkript, Archiv, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf, Diktat-Statistik und alle Einstellungen. Die Seite lädt danach neu.</p>
+                                <p class="t-small muted">Löscht Keys, Transkript, Archiv, Projekte, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf, Diktat-Statistik und alle Einstellungen. Die Seite lädt danach neu.</p>
                             </div>
                             <button type="button" id="reset-all" class="btn-text is-danger">Zurücksetzen</button>
                         </div>
@@ -821,6 +904,8 @@
     </div>
 
     <!-- Recording on site: full-screen view with a large marker button (opens by itself on phones) -->
+    <datalist id="people-list"></datalist>
+
     <div id="rec-focus" class="rec-focus hidden" role="dialog" aria-modal="true" aria-labelledby="rec-focus-state">
         <div class="rec-focus-top">
             <p class="rec-focus-status"><span class="status-dot rec-dot" aria-hidden="true"></span><span id="rec-focus-state" class="t-label">Aufnahme läuft</span></p>

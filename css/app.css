@@ -944,6 +944,47 @@ button.seg-time:hover { color: var(--text-primary); text-decoration: underline; 
 .dictation-card .rec-mark-btn:disabled { opacity: .55; }
 .dictation-card .rec-display { padding: 0; }
 .dict-keys-hint { text-align: center; }
+
+/* ---------------- Projects, tasks, meeting ---------------- */
+.project-list { display: flex; flex-direction: column; gap: var(--space-4); }
+.project-card { display: flex; flex-direction: column; gap: var(--space-3); }
+.project-card.is-current { box-shadow: var(--elev-1), inset 0 0 0 1px var(--border-strong); }
+.project-head { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.project-head .project-name { flex: 1 1 14rem; font: var(--type-button); }
+.person-list { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.person-row, .person-add { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
+.person-add .btn-primary, .person-add .btn-secondary { white-space: nowrap; }
+.narrow-card .person-add { grid-template-columns: minmax(0, 1fr) auto; }
+@media (max-width: 560px) { .person-row, .person-add { grid-template-columns: minmax(0, 1fr) auto; } .person-row > :nth-child(2), .person-add > :nth-child(2) { grid-column: 1; } }
+
+.transcript-project { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); }
+.transcript-project .input { width: auto; min-width: 12rem; min-height: var(--space-8); }
+
+.task-card { gap: var(--space-3); }
+.task-list { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.task-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-2); align-items: start; }
+.task-row > input[type="checkbox"] { margin-top: var(--space-3); }
+.task-fields { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.task-text { resize: none; overflow: hidden; min-height: var(--input-height); padding-top: var(--space-2); padding-bottom: var(--space-2); }
+.task-meta { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.task-meta .input { flex: 1 1 8.5rem; width: auto; min-width: 0; min-height: var(--space-8); font: var(--type-small); }
+.task-row.is-done .task-text { text-decoration: line-through; color: var(--text-tertiary); }
+
+#meeting-card .card-head h2 { display: inline-flex; align-items: center; gap: var(--space-2); }
+#meeting-body { display: flex; flex-direction: column; gap: var(--space-3); }
+.meeting-consent { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+.meeting-levels { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-2) var(--space-3); align-items: center; }
+.meeting-recording .rec-display-time { margin: 0; }
+.meeting-last { border-top: 1px solid var(--border-subtle); padding-top: var(--space-3); }
+.dict-live-text {
+    max-height: 9.5em; overflow-y: auto;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md); background: var(--surface-sunken);
+    font: var(--type-body); color: var(--text-primary); white-space: pre-wrap;
+}
+.dict-live-text.is-placeholder { color: var(--text-tertiary); font-style: italic; }
+.dict-live-options { display: flex; flex-direction: column; gap: var(--space-3); }
+.dict-live-options .field { max-width: 24rem; }
 #dict-key-missing { text-align: center; color: var(--text-primary); }
 #dict-style-hint {
     max-width: var(--measure);
@@ -1039,6 +1080,7 @@ button.seg-time:hover { color: var(--text-primary); text-decoration: underline; 
 .mini-state { margin: 0; font-variant-numeric: tabular-nums; }
 .mini-style { margin: 0; }
 .mini-note { margin: 0; }
+.mini-live { margin: 0; width: 100%; box-sizing: border-box; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--surface-sunken); text-align: left; color: var(--text-primary); }
 .mini-note[data-type="error"] { color: var(--status-danger); }
 .mini-note[data-type="success"] { color: var(--text-primary); }
 .mini-note:not([data-type="error"]):not([data-type="success"]) { color: var(--text-secondary); }
