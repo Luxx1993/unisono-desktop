@@ -301,7 +301,18 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 
 ## Ausblick
 
-- **Etappe 4a – Vor Ort (mobil):** umgesetzt, siehe „Vor-Ort-Termine mit dem Handy“.
-- **Etappe 3:** Verlauf/Archiv früherer Transkripte im Browser und Kennzahlen, dazu „jetzt aufnehmen, später transkribieren“: Aufnahmen ohne Netz bleiben gesichert und werden transkribiert, sobald man wieder online ist.
+**Umgesetzt:**
+- **Etappe 4a – Vor Ort (mobil),** siehe „Vor-Ort-Termine mit dem Handy“.
+- **Diktat im Browser** mit schwebendem Fenster, Umformulieren, Langdiktat, Ersetzungsregeln, Verlauf und Statistik, siehe „Diktat“.
+- **Viele Anbieter** für Spracherkennung und Aufräumen, mit Filtern (Transkription, Umformulierung, Echtzeit, EU) auf der Seite „API-Keys“; Auswahllisten zeigen nur Anbieter mit Key.
+
+**Als Nächstes:**
+- **Etappe 3:** Verlauf und Archiv früherer Dateitranskripte im Browser und Kennzahlen dazu, außerdem „jetzt aufnehmen, später transkribieren“: Aufnahmen ohne Netz bleiben gesichert und werden transkribiert, sobald man wieder online ist. (Verlauf und Statistik gibt es bisher nur für Diktate.)
 - **Etappe 4b – Meeting-Aufnahme ohne Bot (zuschaltbares Modul):** Ton eines Web-Meetings (Browser-Tab mit Ton, unter Windows auch Systemton der Desktop-App) plus eigenes Mikrofon aufnehmen und danach wie gewohnt transkribieren; das eigene Mikrofon wird als „Ich“ erkannt. Vor dem Start muss bestätigt werden, dass alle Teilnehmer informiert sind und zustimmen (§ 201 StGB). Das Modul wird erst beim Einschalten in den Einstellungen bzw. beim ersten Klick nachgeladen – wer es nicht nutzt, lädt keinen zusätzlichen Code.
+- **Echtzeit-Transkription:** Mehrere Anbieter können live mitschreiben (z. B. ElevenLabs, Deepgram, Soniox, AssemblyAI, OpenAI, Gemini, xAI, Mistral, Gladia). Unisono nimmt bisher ganze Aufnahmen auf und schickt sie danach.
+- **Anbieter-Feinschliff:**
+  - EU-Region wählbar machen, wo der Anbieter sie anbietet (AssemblyAI, Soniox, Deepgram, OpenRouter).
+  - Azure Speech, Ollama und eigene Server (brauchen eine eigene Adresse; Ollama muss Anfragen aus dem Browser erlauben).
+  - Sprechertrennung bei OpenAI (`gpt-4o-transcribe-diarize`) und der Modus „smart“ von Gemini, der Füllwörter entfernt.
+  - Ob Cerebras und Scaleway Anfragen direkt aus dem Browser zulassen, ist mit echtem Key noch zu prüfen („Prüfen“ unter „API-Keys“).
 - **Danach:** Protokoll-Vorlagen (Baubesprechung, Begehung, Telefonnotiz, Aktenvermerk), Aufgabenliste mit Verantwortlichen und Fristen, wiederkehrende Personen pro Projekt.
