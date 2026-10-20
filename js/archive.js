@@ -209,7 +209,7 @@ window.Unisono = window.Unisono || {};
                 try {
                     const file = new File([item.blob], item.name, { type: item.type || item.blob.type });
                     const support = api.vocabularySupport?.(item.model);
-                    const vocabulary = support ? S.vocabulary.prepare(S.vocabulary.getTerms(), support).terms : [];
+                    const vocabulary = support ? S.vocabulary.prepare(S.vocabulary.transcriptionTerms(), support).terms : [];
                     const diarize = !!item.diarize && S.canDiarize(item.provider, item.model);
                     const { raw, segments } = await api.transcribe(file, {
                         key: S.ui.getKey(item.provider), model: item.model, language: item.language,
@@ -263,12 +263,14 @@ window.Unisono = window.Unisono || {};
 
     function rowFor(e) {
         const meta = [
+            e.project || null,
             dateFmt.format(new Date(e.createdAt)),
             e.seconds ? S.format.clock(e.seconds) : null,
             e.speakers ? `${e.speakers} Sprecher` : null,
             `${e.words.toLocaleString('de-DE')} Wörter`,
             e.provider ? providerName(e.provider) : null,
-            e.hasAudio ? 'mit Audio' : null
+            e.hasAudio ? 'mit Audio' : null,
+            e.openTasks ? `${e.openTasks} offene Aufgabe${e.openTasks === 1 ? '' : 'n'}` : null
         ].filter(Boolean).join(' · ');
         return el('li', { class: 'archive-row' + (e.id === currentId ? ' is-current' : '') },
             el('button', { type: 'button', class: 'archive-open', onclick: () => openEntry(e.id) },
@@ -332,6 +334,8 @@ window.Unisono = window.Unisono || {};
         } catch (_) { available = false; }
         // A transcript restored after a reload that the archive does not know yet (older version).
         if (S.state.get().segments.length && (!currentId || !entries.some(e => e.id === currentId))) startNew();
+        // The last edit before closing the tab may not have reached the archive: the restored state is newer.
+        else if (currentId && S.state.get().segments.length) saveSoon(0);
         render();
         S.settings?.refresh();
         processQueue();

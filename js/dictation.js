@@ -191,7 +191,7 @@ window.Unisono = window.Unisono || {};
 
     async function startRecording() {
         if (phase !== 'idle') return;
-        if (S.recorder.isActive()) {
+        if (S.recorder.isActive() || S.meeting?.isActive()) {
             return say('Unter „Aufnahme“ läuft gerade eine Aufnahme. Bitte zuerst beenden.', 'error');
         }
         if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
@@ -330,7 +330,7 @@ window.Unisono = window.Unisono || {};
 
     // The text appears while speaking; the recorded audio stays as a fallback if the live connection fails.
     function startLive(r) {
-        const vocabulary = S.vocabulary.prepare(S.vocabulary.getTerms(), { maxTerms: 50, maxChars: 50 }).terms;
+        const vocabulary = S.vocabulary.prepare(S.vocabulary.transcriptionTerms(), { maxTerms: 50, maxChars: 50 }).terms;
         showLiveText('', 'Live-Verbindung wird aufgebaut …');
         r.live = S.realtime.start({
             provider: config.engine, model: config.liveModel, key: S.ui.getKey(config.engine), language: config.language,
@@ -438,7 +438,7 @@ window.Unisono = window.Unisono || {};
         const key = S.ui.getKey(config.engine);
         const file = new File([blob], `diktat.${extensionFor(mime)}`, { type: mime });
         const support = api.vocabularySupport?.(config.model);
-        const vocabulary = support ? S.vocabulary.prepare(S.vocabulary.getTerms(), support).terms : [];
+        const vocabulary = support ? S.vocabulary.prepare(S.vocabulary.transcriptionTerms(), support).terms : [];
         const options = {
             key, model: config.model, language: config.language, diarize: false, speakers: null,
             vocabulary, signal, onStage: () => {}, onUpload: () => {}

@@ -55,7 +55,8 @@ window.Unisono = window.Unisono || {};
             dateIso: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
             dateText: date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
             duration: duration > 0 ? clock(duration) : null,
-            speakers: usedSpeakers
+            speakers: usedSpeakers,
+            project: S.state.get().project?.name || null
         };
     }
 
@@ -63,6 +64,8 @@ window.Unisono = window.Unisono || {};
     function markers() {
         return S.state.get().markers;
     }
+
+    const tasks = () => S.state.get().tasks || [];
 
     function toText() {
         const withTimes = S.state.hasTimes();
@@ -88,6 +91,7 @@ window.Unisono = window.Unisono || {};
         const summary = includeSummary ? S.summary.getText().trim() : '';
 
         const front = ['---', `titel: ${yamlString(m.title)}`, `datum: ${m.dateIso}`];
+        if (m.project) front.push(`projekt: ${yamlString(m.project)}`);
         if (m.fileName) front.push(`quelle: ${yamlString(m.fileName)}`);
         if (m.provider) front.push(`anbieter: ${yamlString(m.provider)}`);
         if (m.duration) front.push(`dauer: "${m.duration}"`);
@@ -96,6 +100,7 @@ window.Unisono = window.Unisono || {};
 
         const body = [`# ${m.title}`, ''];
         if (summary) body.push('## Zusammenfassung', '', summary, '');
+        if (tasks().length) body.push('## Aufgaben', '', S.protocolCore.tasksToMarkdown(tasks()), '');
         if (markers().length) {
             body.push('## Merker', '', ...markers().map(m => `- \`${clock(m.time)}\` ${m.label}`), '');
         }
@@ -131,14 +136,15 @@ window.Unisono = window.Unisono || {};
 
     // Project file: everything needed to continue editing later (not the audio itself).
     function toJson() {
-        const { fileName, provider, createdAt, speakers, segments, raw } = S.state.get();
+        const { fileName, provider, createdAt, speakers, segments, raw, project } = S.state.get();
         return JSON.stringify({
             format: 'unisono',
             version: 1,
-            fileName, provider, createdAt,
+            fileName, provider, createdAt, project,
             speakers,
             segments: segments.map(({ speaker, start, end, text }) => ({ speaker, start, end, text })),
             markers: S.state.get().markers.map(({ time, label, kind }) => ({ time, label, kind })),
+            tasks: tasks().map(({ text, owner, due, done }) => ({ text, owner, due, done })),
             summary: S.summary.getText(),
             raw
         }, null, 2);
@@ -186,6 +192,8 @@ window.Unisono = window.Unisono || {};
   dt { display:none; } dd { margin:0; }
   .player { position:sticky; top:0; z-index:1; background:var(--surface-canvas); padding:1rem 0; margin-top:1.5rem; border-bottom:1px solid var(--border-subtle); }
   audio { width:100%; }
+  table.tasks { border-collapse:collapse; width:100%; max-width:var(--measure); font:var(--type-body); }
+  table.tasks th, table.tasks td { text-align:left; padding:.4rem .6rem; border-bottom:1px solid var(--border-subtle, rgba(0,0,0,.1)); vertical-align:top; }
   .summary { background:var(--surface-raised); box-shadow:var(--elev-1); border-radius:var(--radius-lg); padding:1.5rem; white-space:pre-wrap; font:var(--type-body); max-width:var(--measure); }
   .transcript { background:var(--surface-raised); box-shadow:var(--elev-1); border-radius:var(--radius-lg); padding:1rem 1.5rem; }
   .seg { display:grid; grid-template-columns:4.5rem minmax(0,1fr); column-gap:1rem; padding:1rem .5rem; border-radius:10px; break-inside:avoid; }
@@ -249,6 +257,7 @@ window.Unisono = window.Unisono || {};
         const audioSrc = audioFile ? await readAsDataUrl(audioFile) : null;
 
         const facts = [
+            m.project && ['Projekt', m.project],
             ['Datum', m.dateText],
             m.duration && ['Dauer', m.duration],
             m.fileName && ['Quelle', m.fileName],
@@ -295,6 +304,8 @@ window.Unisono = window.Unisono || {};
   <dl>${facts.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join('')}</dl>
   ${audioSrc ? `<div class="player"><audio id="audio" controls preload="metadata" src="${AUDIO_PLACEHOLDER}"></audio></div>` : ''}
   ${summary ? `<h2>Zusammenfassung</h2>\n  <div class="summary">${escapeHtml(summary)}</div>` : ''}
+  ${tasks().length ? `<h2>Aufgaben</h2>\n  <table class="tasks"><thead><tr><th></th><th>Aufgabe</th><th>Verantwortlich</th><th>Frist</th></tr></thead><tbody>${tasks().map(t =>
+        `<tr><td>${t.done ? '✓' : ''}</td><td>${escapeHtml(t.text)}</td><td>${escapeHtml(t.owner)}</td><td>${escapeHtml(S.protocolCore.dueText(t.due))}</td></tr>`).join('')}</tbody></table>` : ''}
   ${markersHtml}
   <h2>Transkript</h2>
   <div class="transcript">

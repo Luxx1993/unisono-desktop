@@ -422,7 +422,7 @@ window.Unisono = window.Unisono || {};
         wrap.addEventListener('keydown', onKey);
 
         if (window.ResizeObserver) new ResizeObserver(scheduleDraw).observe(wrap);
-        S.state.subscribe(type => { if (type !== 'text') { updateControls(); scheduleDraw(); } });
+        S.state.subscribe(type => { if (!['text', 'tasks', 'project'].includes(type)) { updateControls(); scheduleDraw(); } });
         S.appearance.onChange(scheduleDraw);
         updateControls();
     }

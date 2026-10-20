@@ -18,6 +18,8 @@
             title: titleOf(fileName),
             fileName,
             provider: data?.provider || null,
+            project: data?.project?.name || null,
+            openTasks: (Array.isArray(data?.tasks) ? data.tasks : []).filter(t => !t.done).length,
             createdAt: data?.createdAt || savedAt,
             updatedAt: savedAt,
             seconds: segments.reduce((max, s) => Math.max(max, Number(s.end) || 0), 0),
@@ -38,7 +40,8 @@
     function matches(entry, query) {
         const words = String(query || '').toLocaleLowerCase('de').split(/\s+/).filter(Boolean);
         if (!words.length) return true;
-        const text = [entry.title, entry.fileName, entry.provider,
+        const text = [entry.title, entry.fileName, entry.provider, entry.project,
+            ...(entry.data?.tasks || []).map(t => `${t.text} ${t.owner}`),
             ...(entry.data?.segments || []).map(s => s.text),
             ...(entry.data?.speakers || []).map(s => s.name)].join(' ').toLocaleLowerCase('de');
         return words.every(w => text.includes(w));

@@ -39,13 +39,14 @@ Links steht die Seitenleiste. Auf dem Handy gibt es unten eine Tab-Leiste mit Da
 | Seite | Inhalt |
 |---|---|
 | **Diktat** | Sprechen, aufräumen lassen, kopieren; Umformulieren; schwebendes Fenster; Stile, Verlauf, Statistik, Einstellungen. Siehe „Diktat“. |
-| **Aufnahme** | Live aufnehmen (vor Ort, Diktat) mit Merkern; danach „Transkribieren“ oder „Aufnahme sichern“. Auf Handy und Tablet die Startseite. |
+| **Aufnahme** | Live aufnehmen (vor Ort, Diktat) mit Merkern; danach „Transkribieren“ oder „Aufnahme sichern“. Auf Handy und Tablet die Startseite. Mit eingeschaltetem Modul auch die Meeting-Aufnahme. |
 | **Transkribieren** | Vorhandene Audio- oder Videodatei ablegen, Engine wählen, Optionen, Start. Während des Laufs der Fortschritt. |
-| **Transkript** | Player, Transkript-Editor, Suche, Sprecher und Redezeit, Zusammenfassung, Export. |
+| **Transkript** | Player, Transkript-Editor, Suche, Sprecher und Redezeit, Projekt, Zusammenfassung und Protokoll-Vorlagen, Aufgaben, Export. |
 | **Archiv** | Alle Transkripte mit Suche und Kennzahlen; Dateien, die ohne Netz warten. Siehe „Archiv“. |
+| **Projekte** | Projekte mit den Personen, die immer wieder vorkommen. Siehe „Projekte, Protokolle und Aufgaben“. |
 | **Fachbegriffe** | Begriffsliste mit Import und Export, dazu Ersetzungsregeln für das Diktat. |
 | **API-Keys** | Keys aller Anbieter, jeweils mit **Prüfen**, **Entfernen** und der Anleitung „So bekommst du einen Key“. Filter wie in der Android-App: Transkription, Umformulierung, Echtzeit, EU. |
-| **Einstellungen** | Darstellung (Hell, Dunkel, Wie System) sowie Daten und Datenschutz: Keys, Transkript, Archiv, Aufnahme-Sicherung, Diktat-Verlauf und Diktat-Statistik einzeln löschen oder alles zurücksetzen. |
+| **Einstellungen** | Darstellung (Hell, Dunkel, Wie System), zusätzliche Module (Meeting-Aufnahme) sowie Daten und Datenschutz: Keys, Transkript, Archiv, Projekte, Aufnahme-Sicherung, Diktat-Verlauf und Diktat-Statistik einzeln löschen oder alles zurücksetzen. |
 
 Unten in der Seitenleiste stehen die Engines mit hinterlegtem Key. Auf den Seiten „Transkribieren“, „Diktat“ und bei der Zusammenfassung zeigen die Auswahllisten nur Anbieter mit Key; ein neu gespeicherter Key erscheint sofort.
 
@@ -257,14 +258,26 @@ Ein Server auf dem eigenen Rechner muss Anfragen von der Adresse der Seite zulas
 
 Jede Engine hat eine feste Farbe (Punkt in Chips, Fortschrittslinie, Seitenleiste): Gladia Salbei, AssemblyAI Fjord, ElevenLabs Bernstein, Mistral Rosenholz. Logos erscheinen nur klein und neutral neben dem Namen unter „API-Keys“. Die Marken gehören ihren Inhabern und kennzeichnen hier nur den jeweiligen Dienst; Quellen stehen in `js/brand-logos.js`.
 
-### Zusammenfassung
+### Zusammenfassung und Protokoll
 
-| Anbieter | Modelle (frei änderbar) | Hinweis |
-|---|---|---|
-| Anthropic | `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-5-5`, `claude-haiku-4-5` | Direktzugriff aus dem Browser über den Header `anthropic-dangerous-direct-browser-access` |
-| OpenAI | `gpt-5`, `gpt-5-mini` | Chat Completions API |
+Jede KI mit Key unter „API-Keys“ (Anthropic, OpenAI, Gemini, Mistral, Ollama, …) kann zusammenfassen; das Modell ist frei wählbar. Bei Anthropic geht die Anfrage direkt aus dem Browser über den Header `anthropic-dangerous-direct-browser-access`. Verarbeitet wird immer der aktuelle (ggf. von dir korrigierte) Text. Dieselben Keys nutzt das Aufräumen im Diktat.
 
-Zusammengefasst wird immer der aktuelle (ggf. von dir korrigierte) Text im Ergebnisfeld. Dieselben Keys nutzt das Aufräumen im Diktat.
+## Projekte, Protokolle und Aufgaben
+
+- **Projekte und Personen:** Auf der Seite **Projekte** legst du Projekte an und trägst die Personen ein, die immer wieder vorkommen, mit Rolle oder Firma („Frau Kaya, Bauherrin“). Ein Projekt ist das **aktuelle**; neue Transkripte gehören dazu (wählbar auch auf „Transkribieren“ und im Kopf des Transkripts). Die Namen des aktuellen Projekts gehen als Fachbegriffe an die Spracherkennung, auch im Diktat. Beim Benennen der Sprecher und bei Verantwortlichen schlägt Unisono sie vor, dazu „Ich“.
+- **Protokoll-Vorlagen:** Unter „Zusammenfassung und Protokoll“ gibt es neben Stichpunkten, Zusammenfassung und Protokoll mit Aufgaben die Vorlagen **Baubesprechung** (nummerierte Punkte, Termine, Aufgabentabelle, Behinderungen und Nachträge), **Begehung** (Feststellungen nach Ort, Mängelliste, nach Merkern geordnet), **Telefonnotiz** und **Aktenvermerk**. Projekt, Datum, die Namen der Sprecher, die Personen des Projekts mit Rolle und die Merker gehen als Kontext mit, damit die KI sie nicht raten muss.
+- **Aufgaben:** Die Karte **Aufgaben** sammelt, wer was bis wann tut. **Aufgaben erkennen** liest sie mit der KI aus dem Transkript (Anbieter und Modell wie bei der Zusammenfassung; schon vorhandene kommen nicht doppelt). Jede Aufgabe lässt sich ändern, abhaken, löschen oder von Hand anlegen; eine Frist ist ein Datum oder ein Text wie „nächste Woche“. Kopieren als Tabelle (Markdown) oder Speichern als CSV für Excel.
+- Projekt und Aufgaben gehören zum Transkript: Sie stehen im Archiv (mit der Zahl offener Aufgaben, durchsuchbar), in der Projektdatei und im Markdown- und HTML-Export.
+
+## Meeting-Aufnahme (Modul)
+
+Unter **Einstellungen → Zusätzliche Module** lässt sich die **Meeting-Aufnahme** einschalten. Dann gibt es auf der Seite „Aufnahme“ die Karte **Meeting aufnehmen**. Der Code dafür wird erst beim ersten Klick geladen.
+
+- Aufgenommen wird der Ton eines Web-Meetings ohne Bot im Meeting: ein **Browser-Tab** (Teams, Zoom, Meet im Browser, beim Teilen „Tab-Audio teilen“ eingeschaltet lassen) oder unter Windows der **Bildschirm mit Systemton** für die Desktop-App. Dazu kommt dein **Mikrofon**; beides landet gemischt in einer Datei. Am Mac kann der Browser keinen Systemton aufnehmen; dort geht nur ein Tab.
+- **Vor dem Start** bestätigst du, dass alle Teilnehmer wissen, dass aufgenommen wird, und einverstanden sind. Das nichtöffentlich gesprochene Wort heimlich aufzunehmen ist strafbar (§ 201 StGB).
+- Während der Aufnahme zeigt die Karte die Zeit und die Pegel von Meeting und Mikrofon. „Freigabe beenden“ in der Leiste des Browsers beendet die Aufnahme ebenfalls.
+- Danach geht die Datei wie gewohnt auf „Transkribieren“, mit eingeschalteter Sprechertrennung. Unisono hat sich alle 0,2 Sekunden gemerkt, ob dein Mikrofon lauter war als das Meeting. Der Sprecher, der überwiegend in diesen Momenten spricht, heißt nach dem Transkribieren **„Ich“**. Dafür braucht es eine Engine mit Sprechertrennung (Gladia, ElevenLabs, AssemblyAI, Mistral, OpenAI mit `gpt-4o-transcribe-diarize`). Mit Kopfhörern klappt die Trennung am zuverlässigsten.
+- Die Meeting-Aufnahme wird nicht laufend gesichert wie die Aufnahme vor Ort; nach dem Stopp lässt sie sich mit **Aufnahme speichern** herunterladen.
 
 ## Handy und Tablet
 
@@ -280,7 +293,7 @@ Auf schmalen Bildschirmen ersetzt eine Tab-Leiste unten die Seitenleiste, Karten
 ## Datenschutz
 
 - Es gibt keinen Server von Unisono. Audio und Keys gehen nur an den Anbieter, den du auswählst.
-- API-Keys, Anbieter-Einstellungen (Region, Adressen), das zuletzt bearbeitete Transkript, Fachbegriffe, Ersetzungen, eigene Diktat-Stile, der Diktat-Verlauf, die Diktat-Statistik und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme sowie Archiv und Warteschlange (Transkripte, bei Warteschlangen-Aufnahmen auch das Audio) liegen in IndexedDB.
+- API-Keys, Anbieter-Einstellungen (Region, Adressen), Projekte mit Personen, das zuletzt bearbeitete Transkript, Fachbegriffe, Ersetzungen, eigene Diktat-Stile, der Diktat-Verlauf, die Diktat-Statistik und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme sowie Archiv und Warteschlange (Transkripte, bei Warteschlangen-Aufnahmen auch das Audio) liegen in IndexedDB.
 - Alles lässt sich unter **Einstellungen → Daten und Datenschutz** einzeln löschen oder komplett zurücksetzen.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.
 
@@ -305,7 +318,11 @@ js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem b
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
 js/recorder.js          Mikrofonaufnahme, Pegel, Pause, Merker, Großansicht, Weiteraufnahme nach Unterbrechung
 js/recording-backup.js  Laufende Sicherung der Aufnahme in IndexedDB, Wiederherstellung
-js/summary.js           Zusammenfassung (Anthropic / OpenAI), `complete()` auch für das Diktat
+js/summary.js           Zusammenfassung und Protokoll-Vorlagen, `complete()` auch für das Diktat
+js/protocol-core.js     Vorlagen, Aufgaben (lesen, Markdown, CSV), „Ich“ bei Meetings – ohne Seite, mit Node-Tests
+js/tasks.js             Karte „Aufgaben“ im Transkript
+js/people.js            Projekte und Personen, Seite „Projekte“
+js/meeting.js           Meeting-Aufnahme (Modul, wird erst bei Bedarf geladen)
 js/dictation-core.js    Diktat ohne Seite: Stile, KI-Anweisungen, Ersetzungsregeln, Verlauf, Teilung an Pausen, Statistik (mit Node testbar)
 js/dictation.js         Seite „Diktat“: Aufnahme, Langdiktat, Ablauf, Umformulieren, Stile, Verlauf, Statistik, Ersetzungen
 js/orbs.js              Kugeln Wolke (WebGL-Shader) und Welle (Canvas) wie im Android-Button
@@ -348,10 +365,11 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 - **Viele Anbieter** für Spracherkennung und Aufräumen, mit Filtern (Transkription, Umformulierung, Echtzeit, EU) auf der Seite „API-Keys“; Auswahllisten zeigen nur Anbieter mit Key.
 - **Echtzeit im Diktat:** Live mitschreiben mit ElevenLabs und Deepgram, auch im schwebenden Fenster, siehe „Live mitschreiben (Echtzeit)“.
 - **Etappe 3:** Archiv mit Suche und Kennzahlen, „jetzt aufnehmen, später transkribieren“, siehe „Archiv“.
+- **Etappe 4b:** Meeting-Aufnahme ohne Bot als zuschaltbares Modul, eigenes Mikrofon als „Ich“, siehe „Meeting-Aufnahme (Modul)“.
+- **Etappe 5:** Protokoll-Vorlagen, Aufgabenliste mit Verantwortlichen und Fristen, Projekte mit wiederkehrenden Personen, siehe „Projekte, Protokolle und Aufgaben“.
 - **Anbieter-Feinschliff:** EU-Region für AssemblyAI, Soniox, Deepgram und OpenRouter, Microsoft Azure (MAI-Transcribe), Ollama und eigene Server, Sprechertrennung bei OpenAI, Gemini im Modus „smart“, siehe „Region, Endpunkt und eigene Server“.
 
 **Als Nächstes:**
-- **Etappe 4b – Meeting-Aufnahme ohne Bot (zuschaltbares Modul):** Ton eines Web-Meetings (Browser-Tab mit Ton, unter Windows auch Systemton der Desktop-App) plus eigenes Mikrofon aufnehmen und danach wie gewohnt transkribieren; das eigene Mikrofon wird als „Ich“ erkannt. Vor dem Start muss bestätigt werden, dass alle Teilnehmer informiert sind und zustimmen (§ 201 StGB). Das Modul wird erst beim Einschalten in den Einstellungen bzw. beim ersten Klick nachgeladen – wer es nicht nutzt, lädt keinen zusätzlichen Code.
 - **Echtzeit, weitere Schritte:** live mitschreiben auch auf der Seite „Aufnahme“ (mit Sprechern bei Deepgram) und mit weiteren Anbietern, die es können (Soniox, AssemblyAI, OpenAI, Gemini, xAI, Mistral, Gladia).
 - **Mit echten Keys zu prüfen:** ob Cerebras und Scaleway Anfragen direkt aus dem Browser zulassen („Prüfen“ unter „API-Keys“).
-- **Danach:** Protokoll-Vorlagen (Baubesprechung, Begehung, Telefonnotiz, Aktenvermerk), Aufgabenliste mit Verantwortlichen und Fristen, wiederkehrende Personen pro Projekt.
+- **Ideen danach:** Meeting-Aufnahme laufend sichern wie die Aufnahme vor Ort; Aufgaben über alle Transkripte eines Projekts hinweg; eigene Protokoll-Vorlagen.

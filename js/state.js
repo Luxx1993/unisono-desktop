@@ -5,6 +5,8 @@
  * Speaker:  { id: 'A', name: 'Sprecher A' }
  * Marker:   { id: 'mk-1', time: 723.5, label: 'Merker 1', kind: 'mark' | 'gap' }
  *           set while recording on site (or later in the player); 'gap' notes an interruption
+ * Task:     { id: 'task-1', text: 'Angebot schicken', owner: 'Frau Kaya', due: '2026-11-03' | 'nächste Woche' | '', done: false }
+ * project:  { id, name } of the project the transcript belongs to (see people.js), or null
  *
  * Segments reference speakers by id, so renaming a speaker updates every segment at once.
  * Exporters and the editor always read from here – manual edits flow into every output.
@@ -17,6 +19,8 @@
  *   'speaker-renamed'  (detail: speaker id) name changed
  *   'text'             (detail: segment id) text of one segment changed
  *   'markers'          markers added, renamed or removed
+ *   'tasks'            tasks added, changed or removed
+ *   'project'          the project changed
  */
 window.Unisono = window.Unisono || {};
 (function (S) {
@@ -32,9 +36,12 @@ window.Unisono = window.Unisono || {};
         raw: null,
         segments: [],
         speakers: [],
-        markers: []
+        markers: [],
+        tasks: [],
+        project: null
     };
     let markerSeq = 0;
+    let taskSeq = 0;
 
     // Speaker index 0, 1, … → 'A', 'B', …, 'Z', 'AA', …
     function speakerLetter(index) {
@@ -130,7 +137,15 @@ window.Unisono = window.Unisono || {};
             .sort((a, b) => a.time - b.time);
     }
 
-    function setTranscript({ raw, segments, provider, fileName, markers }) {
+    function normalizeTasks(list) {
+        return (Array.isArray(list) ? list : [])
+            .filter(t => t && String(t.text ?? '').trim())
+            .map(t => ({ id: 'task-' + (++taskSeq), text: String(t.text).trim(), owner: String(t.owner ?? ''), due: String(t.due ?? ''), done: !!t.done }));
+    }
+
+    const normalizeProject = p => p && p.name ? { id: String(p.id || ''), name: String(p.name) } : null;
+
+    function setTranscript({ raw, segments, provider, fileName, markers, project = null }) {
         const ids = [];
         for (const s of segments) {
             if (s.speaker != null && !ids.includes(s.speaker)) ids.push(s.speaker);
@@ -148,6 +163,8 @@ window.Unisono = window.Unisono || {};
         state.fileName = fileName ?? null;
         state.createdAt = segments.length ? new Date().toISOString() : null;
         state.markers = segments.length ? normalizeMarkers(markers) : [];
+        state.tasks = [];
+        state.project = segments.length ? normalizeProject(project) : null;
         emit('reset');
     }
 
@@ -172,6 +189,8 @@ window.Unisono = window.Unisono || {};
         state.createdAt = data.createdAt || null;
         state.raw = data.raw ?? null;
         state.markers = normalizeMarkers(data.markers);
+        state.tasks = normalizeTasks(data.tasks);
+        state.project = normalizeProject(data.project);
         emit('reset');
     }
 
@@ -251,6 +270,41 @@ window.Unisono = window.Unisono || {};
         emit('markers');
     }
 
+    // --- Tasks and project ---
+    function addTask(task = {}) {
+        const [added] = normalizeTasks([{ text: 'Neue Aufgabe', ...task }]);
+        state.tasks.push(added);
+        emit('tasks');
+        return added.id;
+    }
+
+    function addTasks(list) {
+        const added = normalizeTasks(list);
+        if (!added.length) return 0;
+        state.tasks.push(...added);
+        emit('tasks');
+        return added.length;
+    }
+
+    function updateTask(id, patch) {
+        const task = state.tasks.find(t => t.id === id);
+        if (!task) return;
+        Object.assign(task, patch);
+        emit('tasks', id);
+    }
+
+    function removeTask(id) {
+        const i = state.tasks.findIndex(t => t.id === id);
+        if (i < 0) return;
+        state.tasks.splice(i, 1);
+        emit('tasks');
+    }
+
+    function setProject(project) {
+        state.project = normalizeProject(project);
+        emit('project');
+    }
+
     // --- Persistence: edits survive a page reload (without the audio file itself) ---
     function schedulePersist() {
         clearTimeout(persistTimer);
@@ -259,9 +313,9 @@ window.Unisono = window.Unisono || {};
 
     function persist() {
         try {
-            const { fileName, provider, createdAt, segments, speakers, markers } = state;
+            const { fileName, provider, createdAt, segments, speakers, markers, tasks, project } = state;
             if (!segments.length) localStorage.removeItem(STORAGE_KEY);
-            else localStorage.setItem(STORAGE_KEY, JSON.stringify({ fileName, provider, createdAt, segments, speakers, markers }));
+            else localStorage.setItem(STORAGE_KEY, JSON.stringify({ fileName, provider, createdAt, segments, speakers, markers, tasks, project }));
         } catch (_) { /* storage unavailable or full – editing still works */ }
     }
 
@@ -284,6 +338,8 @@ window.Unisono = window.Unisono || {};
         state.speakers = Array.isArray(saved.speakers) ? saved.speakers : [];
         state.segments = saved.segments.map(s => ({ ...s, id: newSegmentId() }));
         state.markers = normalizeMarkers(saved.markers);
+        state.tasks = normalizeTasks(saved.tasks);
+        state.project = normalizeProject(saved.project);
         for (const fn of listeners) fn('reset');
         return true;
     }
@@ -292,6 +348,7 @@ window.Unisono = window.Unisono || {};
     S.state = {
         subscribe, get, getSpeaker, speakerName, speakerIndex, hasTimes, hasSpeakers, segmentAt,
         setTranscript, loadProject, clear, updateText, renameSpeaker, addSpeaker, setSegmentSpeaker,
-        mergeWithNext, deleteSegment, restore, addMarker, renameMarker, removeMarker
+        mergeWithNext, deleteSegment, restore, addMarker, renameMarker, removeMarker,
+        addTask, addTasks, updateTask, removeTask, setProject
     };
 })(window.Unisono);

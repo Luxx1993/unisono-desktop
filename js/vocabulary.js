@@ -37,6 +37,18 @@ window.Unisono = window.Unisono || {};
         return isEnabled() ? parse($('vocab-text').value) : [];
     }
 
+    // What goes to the speech engine: the terms plus the names of the current project's people
+    // (people.js), which also count when the list is switched off.
+    function transcriptionTerms() {
+        const seen = new Set();
+        return [...getTerms(), ...(S.people?.vocabularyNames() || [])].filter(t => {
+            const k = t.toLocaleLowerCase('de');
+            if (seen.has(k)) return false;
+            seen.add(k);
+            return true;
+        });
+    }
+
     // Applies a provider's limits. Terms that don't fit are reported, not silently dropped.
     // reasons: which limits actually removed terms ('chars' | 'words' | 'count').
     function prepare(terms, support) {
@@ -147,5 +159,5 @@ window.Unisono = window.Unisono || {};
         return parse($('vocab-text').value).length;
     }
 
-    S.vocabulary = { init, getTerms, prepare, describe, onChange, parse, count, isEnabled };
+    S.vocabulary = { init, getTerms, transcriptionTerms, prepare, describe, onChange, parse, count, isEnabled };
 })(window.Unisono);

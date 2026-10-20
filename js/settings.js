@@ -65,6 +65,12 @@ window.Unisono = window.Unisono || {};
             : 'Kein Verlauf gespeichert.';
         $('clear-dictation').disabled = !dictations;
 
+        const { projects, people } = S.people.count();
+        $('data-projects-info').textContent = projects
+            ? `${projects} Projekt${projects === 1 ? '' : 'e'} mit ${people} Person${people === 1 ? '' : 'en'}.`
+            : 'Keine Projekte angelegt.';
+        $('clear-projects').disabled = !projects;
+
         const counted = S.dictation.statsCount();
         $('data-stats-info').textContent = counted
             ? `${counted} Eintr${counted === 1 ? 'ag' : 'äge'} in der Statistik.`
@@ -119,7 +125,7 @@ window.Unisono = window.Unisono || {};
 
     async function resetAll() {
         if (S.recorder.isActive() || S.dictation.isActive()) return S.ui.setStatus('Bitte zuerst die laufende Aufnahme beenden.', 'error');
-        if (!confirm('Wirklich alles löschen – Keys, Transkript, Archiv mit Warteschlange, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf, Diktat-Statistik und Einstellungen?')) return;
+        if (!confirm('Wirklich alles löschen – Keys, Transkript, Archiv mit Warteschlange, Projekte, Aufnahme-Sicherung, Fachbegriffe, Ersetzungen, Diktat-Verlauf, Diktat-Statistik und Einstellungen?')) return;
         S.state.clear();
         $('vocab-text').value = '';
         await S.recorder.discardBackup();
@@ -136,6 +142,12 @@ window.Unisono = window.Unisono || {};
         $('clear-stats').addEventListener('click', clearStats);
         $('clear-recordings').addEventListener('click', clearRecordings);
         $('clear-archive').addEventListener('click', () => S.archive.clearAll());
+        $('clear-projects').addEventListener('click', () => {
+            if (!confirm('Alle Projekte und Personen aus diesem Browser löschen? Transkripte bleiben erhalten.')) return;
+            S.people.clearAll();
+            refreshData();
+            S.ui.setStatus('Projekte und Personen gelöscht.', 'success');
+        });
         $('reset-all').addEventListener('click', resetAll);
 
         renderAppearance();
