@@ -70,5 +70,12 @@ test('ElevenLabs URL carries the single-use token, PCM 16 kHz and the language',
     assert.equal(new URL(rt.elevenLabsUrl({ model: 'm', language: 'auto', token: 't' })).searchParams.get('language_code'), null);
 });
 
+test('Mistral: URL with model, session.update with PCM format, audio as input_audio.append', () => {
+    assert.equal(rt.mistralUrl('voxtral-mini-transcribe-realtime-2602'), 'wss://api.mistral.ai/v1/audio/transcriptions/realtime?model=voxtral-mini-transcribe-realtime-2602');
+    assert.deepEqual(rt.mistralSessionUpdate(), { type: 'session.update', session: { audio_format: { encoding: 'pcm_s16le', sample_rate: 16000 } } });
+    assert.equal(rt.mistralSessionUpdate(480).session.target_streaming_delay_ms, 480);
+    assert.deepEqual(rt.mistralAudio(new Int16Array([1, 256])), { type: 'input_audio.append', audio: Buffer.from([1, 0, 0, 1]).toString('base64') });
+});
+
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log('all passed');

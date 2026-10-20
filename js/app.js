@@ -212,7 +212,7 @@ window.Unisono = window.Unisono || {};
         document.querySelectorAll('#key-filters button').forEach(chip => chip.setAttribute('aria-checked', String(chip.dataset.filter === keyFilter)));
         const note = $('key-filter-note');
         note.textContent = keyFilter === 'realtime'
-            ? 'Diese Anbieter können live mitschreiben. In Unisono geht das im Diktat bisher mit ElevenLabs und Deepgram („Live mitschreiben“ in den Einstellungen der Seite Diktat).'
+            ? 'Diese Anbieter können live mitschreiben. In Unisono geht das im Diktat bisher mit ElevenLabs, Deepgram und Mistral („Live mitschreiben“ in den Einstellungen der Seite Diktat).'
             : keyFilter === 'eu' ? 'Mistral, Scaleway und OVHcloud verarbeiten die Daten laut ihrer Doku in der EU. Bei den Anbietern mit „EU-Region“ lässt sich die EU-Adresse in der Zeile einstellen (bei Azure über die Region der Ressource).' : '';
         note.classList.toggle('hidden', !note.textContent);
         $('key-filter-count').textContent = `${shown} Anbieter`;
