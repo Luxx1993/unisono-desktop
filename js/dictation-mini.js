@@ -121,14 +121,15 @@ window.Unisono = window.Unisono || {};
         const state = el('p', { class: 't-label mini-state' });
         const styleLine = el('p', { class: 't-small muted mini-style' });
         const note = el('p', { class: 't-small mini-note hidden', role: 'status' });
+        const live = el('p', { class: 't-small mini-live hidden', 'aria-live': 'polite' });
         const resultText = el('p', { class: 't-small mini-result-text' });
         const copyBtn = el('button', { type: 'button', class: 'icon-btn is-small', 'aria-label': 'Kopieren', title: 'Kopieren', onclick: () => copyResult() }, S.icon('copy'));
         const result = el('div', { class: 'mini-result hidden' }, resultText, copyBtn);
         const menu = el('div', { class: 'mini-menu hidden', role: 'menu' });
-        const root = el('div', { class: 'mini-bubble' }, stage, state, styleLine, note, result, menu);
+        const root = el('div', { class: 'mini-bubble' }, stage, state, styleLine, live, note, result, menu);
         doc.body.append(root);
 
-        const u = { doc, win, root, stage, orbHost, cancel, state, styleLine, note, result, resultText, copyBtn, menu, held: false };
+        const u = { doc, win, root, stage, orbHost, cancel, state, styleLine, live, note, result, resultText, copyBtn, menu, held: false };
         wireOrb(u);
 
         const isTarget = t => t === doc.body || t === orbHost;
@@ -211,6 +212,7 @@ window.Unisono = window.Unisono || {};
             ? 'Umformulieren: Anweisung sprechen'
             : `Stil: ${st.styleName} · lang drücken für das Menü`;
         showResult(st.result);
+        if (st.phase === 'idle') ui.live.classList.add('hidden');
         if (st.phase === 'idle') scheduleDim(); else wake();
     }
 
@@ -228,6 +230,12 @@ window.Unisono = window.Unisono || {};
             return;
         }
         if (type === 'result') return showResult(data);
+        // Live transcription: the end of the text so far, while speaking.
+        if (type === 'live') {
+            ui.live.textContent = data.text.length > 180 ? '… ' + data.text.slice(-180).replace(/^\S*\s/, '') : data.text;
+            ui.live.classList.toggle('hidden', !data.text);
+            return;
+        }
         if (type === 'notice') return showNote(data.text, data.type);
         if (type === 'done') {
             wake();

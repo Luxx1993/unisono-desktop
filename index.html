@@ -21,6 +21,7 @@
     <script src="js/apis/mistral.js" defer></script>
     <script src="js/apis/dictation-engines.js" defer></script>
     <script src="js/apis/llm.js" defer></script>
+    <script src="js/apis/realtime.js" defer></script>
     <script src="js/export.js" defer></script>
     <script src="js/vocabulary.js" defer></script>
     <script src="js/recording-backup.js" defer></script>
@@ -267,6 +268,7 @@
                             <button type="button" id="dict-main" class="rec-mark-btn"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span id="dict-main-text">Diktat starten</span></button>
                             <button type="button" id="dict-cancel" class="btn-text is-invisible">Verwerfen</button>
                         </div>
+                        <p id="dict-live-text" class="dict-live-text hidden" aria-live="polite"></p>
                         <p id="dict-keys-hint" class="t-small muted dict-keys-hint"></p>
                         <p id="dict-key-missing" class="t-small hidden"></p>
                         <div class="dict-mini-row">
@@ -355,6 +357,13 @@
                     </div>
                     <label class="check"><input type="checkbox" id="dict-autocopy" checked> Ergebnis sofort in die Zwischenablage kopieren</label>
                     <label class="check"><input type="checkbox" id="dict-longdictation" checked> Langdiktat: lange Aufnahmen an Pausen teilen und schon beim Sprechen transkribieren (nur bei „Antippen“)</label>
+                    <div id="dict-live-options" class="dict-live-options hidden">
+                        <label class="check"><input type="checkbox" id="dict-live"> Live mitschreiben: der Text erscheint schon beim Sprechen (Echtzeit)</label>
+                        <div id="dict-live-model-field" class="field hidden">
+                            <label for="dict-live-model">Live-Modell</label>
+                            <select id="dict-live-model" class="input"></select>
+                        </div>
+                    </div>
                     <div class="options-grid">
                         <div class="field">
                             <label for="dict-mini-skin">Schwebendes Fenster: Aussehen</label>

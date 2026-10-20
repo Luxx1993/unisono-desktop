@@ -944,6 +944,15 @@ button.seg-time:hover { color: var(--text-primary); text-decoration: underline; 
 .dictation-card .rec-mark-btn:disabled { opacity: .55; }
 .dictation-card .rec-display { padding: 0; }
 .dict-keys-hint { text-align: center; }
+.dict-live-text {
+    max-height: 9.5em; overflow-y: auto;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md); background: var(--surface-sunken);
+    font: var(--type-body); color: var(--text-primary); white-space: pre-wrap;
+}
+.dict-live-text.is-placeholder { color: var(--text-tertiary); font-style: italic; }
+.dict-live-options { display: flex; flex-direction: column; gap: var(--space-3); }
+.dict-live-options .field { max-width: 24rem; }
 #dict-key-missing { text-align: center; color: var(--text-primary); }
 #dict-style-hint {
     max-width: var(--measure);
@@ -1039,6 +1048,7 @@ button.seg-time:hover { color: var(--text-primary); text-decoration: underline; 
 .mini-state { margin: 0; font-variant-numeric: tabular-nums; }
 .mini-style { margin: 0; }
 .mini-note { margin: 0; }
+.mini-live { margin: 0; width: 100%; box-sizing: border-box; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--surface-sunken); text-align: left; color: var(--text-primary); }
 .mini-note[data-type="error"] { color: var(--status-danger); }
 .mini-note[data-type="success"] { color: var(--text-primary); }
 .mini-note:not([data-type="error"]):not([data-type="success"]) { color: var(--text-secondary); }

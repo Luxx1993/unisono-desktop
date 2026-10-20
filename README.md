@@ -116,8 +116,18 @@ Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt i
 - **Einstellungen der Seite:** Engine (Standard: ElevenLabs, wenn ein Key da ist, sonst die erste Engine mit Key), Modell, Sprache, KI-Anbieter und -Modell (Standard Claude Haiku 5.5, schnell und günstig), automatisch kopieren, Langdiktat. ElevenLabs und Mistral antworten in einem Schritt, Gladia und AssemblyAI brauchen einige Sekunden länger.
 
 - **Mehr Anbieter für das Diktat:** Für die Spracherkennung zusätzlich OpenAI, Groq, Together AI, Scaleway, OVHcloud, SiliconFlow, OpenRouter, xAI (Grok), Deepgram, Soniox, Google Gemini und AssemblyAI Sync (die Ein-Anfrage-Variante von AssemblyAI, gleicher Key wie AssemblyAI). Zum Aufräumen die KI von Anthropic, OpenAI, Groq, Google Gemini, Mistral, OpenRouter, Together AI, DeepInfra, xAI, DeepSeek, Cerebras, SiliconFlow, Scaleway oder OVHcloud. Wer einen Anbieter schon für die Spracherkennung eingetragen hat, nutzt denselben Key zum Aufräumen. Modelle und Adressen sind dieselben wie in der Android-App; bei Anbietern ohne feste Modellliste lädt Unisono die Liste des Anbieters, sobald ein Key da ist. Diese Engines gibt es auch für Dateien; dort ist „Sprecher erkennen“ für sie abgeschaltet, und die Grenzen des Anbieters (Größe, Länge) werden vor dem Upload geprüft.
-- **Nicht dabei:** Azure Speech (eigene Adresse je Konto), Ollama und eigene Server (laufen im lokalen Netz, ein Browser darf sie nicht ohne Weiteres ansprechen) und die Offline-Modelle auf dem Gerät. Ob Cerebras und Scaleway Anfragen aus dem Browser zulassen, ließ sich ohne Key nicht prüfen; **Prüfen** unter „API-Keys“ zeigt es.
+- **Auch dabei:** Microsoft Azure, Ollama und eigene Server, siehe „Region, Endpunkt und eigene Server“. **Nicht dabei** sind die Offline-Modelle auf dem Gerät. Ob Cerebras und Scaleway Anfragen aus dem Browser zulassen, ließ sich ohne Key nicht prüfen; **Prüfen** unter „API-Keys“ zeigt es.
 - **Falls die KI ausfällt** (Key fehlt, Netzwerk): Das Rohtext-Ergebnis steht trotzdem bereit, mit dem Grund in der Meldung.
+
+### Live mitschreiben (Echtzeit)
+
+Mit **ElevenLabs** oder **Deepgram** als Engine gibt es unter „Einstellungen“ der Seite den Schalter **Live mitschreiben**. Dann geht das Mikrofon schon beim Sprechen an den Anbieter, und der Text erscheint unter dem Aufnahmeknopf und im schwebenden Fenster, während du redest. Beim Stopp ist der Rohtext sofort fertig; Aufräumen, Ersetzungen, Verlauf und Kopieren laufen wie gewohnt.
+
+- **Modelle:** ElevenLabs *Scribe v2 Realtime*; Deepgram *Nova-3* (mit „Automatisch erkennen“ folgt es mehreren Sprachen), *Nova-2* und *Flux* (erkennt Sprechpausen). Bei Deepgram gilt die EU-Region aus „API-Keys“ auch live. Fachbegriffe gehen bei Nova-3 als Schlüsselbegriffe mit.
+- **Ausfall:** Unisono nimmt nebenher wie immer auf. Bricht die Live-Verbindung ab oder kommt kein Text, wird die Aufnahme nach dem Stopp mit dem Modell aus „Modell“ transkribiert. Die Meldung nennt den Grund.
+- **Anmeldung:** Ein Browser kann bei Live-Verbindungen keinen Key im Header mitschicken. Deepgram nimmt ihn deshalb, wie für Browser dokumentiert, im Protokoll-Feld der Verbindung entgegen. Für ElevenLabs holt Unisono mit dem Key zuerst ein Einmal-Token und öffnet die Verbindung nur damit.
+- Das Audio geht als 16-kHz-PCM in Häppchen von etwa 0,1 Sekunden. Langdiktat ist bei „Live“ nicht nötig und ruht.
+- Beim Umformulieren und auf der Seite „Aufnahme“ wird nicht live mitgeschrieben.
 
 ### Schwebendes Fenster
 
@@ -307,7 +317,8 @@ js/appearance.js        Hell, Dunkel oder wie System, wird vor dem ersten Zeichn
 js/settings.js          Seite „Einstellungen“: Darstellung, Daten löschen
 js/app.js               Seiten, Keys, Engine-Auswahl, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP-Helfer: Upload mit Fortschritt, Polling, Abbrechen
-js/apis/*.js            Je ein Modul pro Engine (Gladia, ElevenLabs, AssemblyAI, Mistral)
+js/apis/*.js            Je ein Modul pro Engine (Gladia, ElevenLabs, AssemblyAI, Mistral, weitere in dictation-engines.js, KI in llm.js)
+js/apis/realtime.js     Live-Transkription: Mikrofon als 16-kHz-PCM über WebSocket (ElevenLabs, Deepgram)
 docs/screenshots/       Bilder für diese README
 ```
 
@@ -335,11 +346,12 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 - **Etappe 4a – Vor Ort (mobil),** siehe „Vor-Ort-Termine mit dem Handy“.
 - **Diktat im Browser** mit schwebendem Fenster, Umformulieren, Langdiktat, Ersetzungsregeln, Verlauf und Statistik, siehe „Diktat“.
 - **Viele Anbieter** für Spracherkennung und Aufräumen, mit Filtern (Transkription, Umformulierung, Echtzeit, EU) auf der Seite „API-Keys“; Auswahllisten zeigen nur Anbieter mit Key.
+- **Echtzeit im Diktat:** Live mitschreiben mit ElevenLabs und Deepgram, auch im schwebenden Fenster, siehe „Live mitschreiben (Echtzeit)“.
 - **Etappe 3:** Archiv mit Suche und Kennzahlen, „jetzt aufnehmen, später transkribieren“, siehe „Archiv“.
 - **Anbieter-Feinschliff:** EU-Region für AssemblyAI, Soniox, Deepgram und OpenRouter, Microsoft Azure (MAI-Transcribe), Ollama und eigene Server, Sprechertrennung bei OpenAI, Gemini im Modus „smart“, siehe „Region, Endpunkt und eigene Server“.
 
 **Als Nächstes:**
 - **Etappe 4b – Meeting-Aufnahme ohne Bot (zuschaltbares Modul):** Ton eines Web-Meetings (Browser-Tab mit Ton, unter Windows auch Systemton der Desktop-App) plus eigenes Mikrofon aufnehmen und danach wie gewohnt transkribieren; das eigene Mikrofon wird als „Ich“ erkannt. Vor dem Start muss bestätigt werden, dass alle Teilnehmer informiert sind und zustimmen (§ 201 StGB). Das Modul wird erst beim Einschalten in den Einstellungen bzw. beim ersten Klick nachgeladen – wer es nicht nutzt, lädt keinen zusätzlichen Code.
-- **Echtzeit-Transkription:** Mehrere Anbieter können live mitschreiben (z. B. ElevenLabs, Deepgram, Soniox, AssemblyAI, OpenAI, Gemini, xAI, Mistral, Gladia). Unisono nimmt bisher ganze Aufnahmen auf und schickt sie danach.
+- **Echtzeit, weitere Schritte:** live mitschreiben auch auf der Seite „Aufnahme“ (mit Sprechern bei Deepgram) und mit weiteren Anbietern, die es können (Soniox, AssemblyAI, OpenAI, Gemini, xAI, Mistral, Gladia).
 - **Mit echten Keys zu prüfen:** ob Cerebras und Scaleway Anfragen direkt aus dem Browser zulassen („Prüfen“ unter „API-Keys“).
 - **Danach:** Protokoll-Vorlagen (Baubesprechung, Begehung, Telefonnotiz, Aktenvermerk), Aufgabenliste mit Verantwortlichen und Fristen, wiederkehrende Personen pro Projekt.

@@ -44,7 +44,8 @@ window.Unisono = window.Unisono || {};
     const config = {
         engine: null, model: null, language: 'de', mode: 'tap', task: 'dictate', longDictation: true,
         miniSkin: 'cloud', miniPalette: S.orbs.DEFAULT_PALETTE, miniDim: true,
-        style: 'cleanup', llmProvider: 'anthropic', llmModel: 'claude-haiku-5-5', autoCopy: true
+        style: 'cleanup', llmProvider: 'anthropic', llmModel: 'claude-haiku-5-5', autoCopy: true,
+        live: false, liveModel: null
     };
     let customStyles = [];
     let history = [];
@@ -129,6 +130,16 @@ window.Unisono = window.Unisono || {};
         if (!config.engine) config.engine = pickEngine();
         const api = S.apis[config.engine];
         if (!api.models.some(m => m.id === config.model)) config.model = api.models[0].id;
+        config.live = config.live === true;
+        fixLiveModel();
+    }
+
+    // Live transcription: only engines that can stream (S.realtime), with their own streaming models.
+    const liveAvailable = () => S.realtime.supports(config.engine);
+    const liveOn = () => config.live && liveAvailable() && !rewording();
+    function fixLiveModel() {
+        const models = S.realtime.models(config.engine);
+        if (models.length && !models.some(m => m.id === config.liveModel)) config.liveModel = models[0].id;
     }
 
     const saveConfig = () => write(CONFIG_KEY, config);
@@ -207,6 +218,7 @@ window.Unisono = window.Unisono || {};
         try {
             abortController = new AbortController();
             rec = openRecording(stream);
+            if (liveOn()) startLive(rec);
         } catch (err) {
             stream.getTracks().forEach(t => t.stop());
             abortController = null;
@@ -248,7 +260,9 @@ window.Unisono = window.Unisono || {};
             stream, mime: pickMimeType(), startedAt: performance.now(), timer: null, ctx: null, analyser: null, data: null,
             segment: null, parts: [], done: 0,
             // Long dictation runs only while tapping: when holding, the part is as long as the key is down anyway.
-            longOk: config.longDictation && config.mode === 'tap' && !rewording()
+            // Live transcription already writes along, so the recording stays whole (needed only as a fallback).
+            longOk: config.longDictation && config.mode === 'tap' && !rewording() && !liveOn(),
+            live: null
         };
         startSegment(r);
         r.mime = r.segment.recorder.mimeType || r.mime;
@@ -314,6 +328,38 @@ window.Unisono = window.Unisono || {};
         r.parts.push(promise);
     }
 
+    // The text appears while speaking; the recorded audio stays as a fallback if the live connection fails.
+    function startLive(r) {
+        const vocabulary = S.vocabulary.prepare(S.vocabulary.getTerms(), { maxTerms: 50, maxChars: 50 }).terms;
+        showLiveText('', 'Live-Verbindung wird aufgebaut …');
+        r.live = S.realtime.start({
+            provider: config.engine, model: config.liveModel, key: S.ui.getKey(config.engine), language: config.language,
+            vocabulary, stream: r.stream,
+            onText: text => { if (rec === r || phase === 'working') { showLiveText(text); emit('live', { text }); } },
+            onError: err => { r.liveError = err; if (rec === r) showLiveText('', 'Live-Verbindung unterbrochen. Die Aufnahme läuft weiter und wird danach transkribiert.'); }
+        }).catch(err => { r.liveError = err; showLiveText('', 'Live-Transkription nicht möglich. Die Aufnahme läuft weiter und wird danach transkribiert.'); return null; });
+    }
+
+    function showLiveText(text, placeholder = '') {
+        const box = $('dict-live-text');
+        box.textContent = text || placeholder;
+        box.classList.toggle('is-placeholder', !text);
+        box.classList.toggle('hidden', !text && !placeholder);
+    }
+
+    // The live text, or null when it failed or heard nothing (then the recorded audio is transcribed instead).
+    async function finishLive(r) {
+        const session = await r.live;
+        if (!session) return null;
+        try {
+            const text = (await session.stop()).trim();
+            return text || null;
+        } catch (err) {
+            r.liveError = err;
+            return null;
+        }
+    }
+
     function closeRecording(r) {
         clearInterval(r.timer);
         r.stream.getTracks().forEach(t => t.stop());
@@ -333,6 +379,8 @@ window.Unisono = window.Unisono || {};
         r.segment = null;
         if (seconds < MIN_SECONDS || (!r.parts.length && audio.blob.size < 1000)) {
             r.parts.length = 0;
+            r.live?.then(session => session?.cancel());
+            showLiveText('');
             abortController?.abort();
             abortController = null;
             setPhase('idle');
@@ -342,6 +390,17 @@ window.Unisono = window.Unisono || {};
         }
         setPhase('working');
         try {
+            if (r.live) {
+                say(`Warte auf den Rest der Live-Mitschrift von ${shortLabel(S.apis[config.engine])} …`);
+                const text = await finishLive(r);
+                if (text) {
+                    showLiveText('');
+                    await deliver(text, seconds, config.style, abortController.signal);
+                    return;
+                }
+                if (r.liveError) say(`Live-Mitschrift fehlgeschlagen (${r.liveError.message}). Die Aufnahme wird jetzt transkribiert.`, 'note');
+            }
+            showLiveText('');
             // The last part counts even when no speech was heard in it, if it is all there is: a quiet microphone.
             queuePart(r, { ...audio, hadSpeech: audio.hadSpeech || r.parts.length === 0 });
             await finishTake(r, seconds);
@@ -361,6 +420,8 @@ window.Unisono = window.Unisono || {};
             rec = null;
             abortController?.abort();
             abortController = null;
+            r.live?.then(session => session?.cancel());
+            showLiveText('');
             await endSegment(r.segment, r.mime);
             closeRecording(r);
             setPhase('idle');
@@ -644,6 +705,7 @@ window.Unisono = window.Unisono || {};
     function stateText() {
         if (phase === 'recording') {
             const n = rec?.parts.length || 0;
+            if (rec?.live) return 'Aufnahme läuft · live';
             return n ? `Aufnahme läuft · ${rec.done} von ${n} Teil${n === 1 ? '' : 'en'} transkribiert` : 'Aufnahme läuft';
         }
         return { starting: 'Mikrofon wird geöffnet …', working: 'Wird verarbeitet …' }[phase] || 'Bereit';
@@ -877,6 +939,12 @@ window.Unisono = window.Unisono || {};
         }
         $('dict-autocopy').checked = config.autoCopy;
         $('dict-longdictation').checked = config.longDictation;
+        $('dict-live-options').classList.toggle('hidden', !liveAvailable());
+        $('dict-live').checked = config.live;
+        $('dict-live-model-field').classList.toggle('hidden', !config.live || !liveAvailable());
+        fixLiveModel();
+        $('dict-live-model').replaceChildren(...S.realtime.models(config.engine).map(m => el('option', { value: m.id, text: m.name })));
+        if (liveAvailable()) $('dict-live-model').value = config.liveModel;
         $('dict-mini-skin').value = config.miniSkin;
         $('dict-mini-dim').checked = config.miniDim;
         $('dict-mini-palette-field').classList.toggle('hidden', config.miniSkin !== 'cloud');
@@ -894,6 +962,7 @@ window.Unisono = window.Unisono || {};
         const notes = [];
         if (!api.quick) notes.push(`${shortLabel(api)} liefert das Ergebnis erst nach einigen Sekunden Wartezeit; für Diktate sind die schnellen Engines (z. B. ElevenLabs, Groq, Deepgram) angenehmer.`);
         if (api.autoLanguageOnly) notes.push(`${shortLabel(api)} erkennt die Sprache automatisch.`);
+        if (liveOn()) notes.push('Live: Der Text erscheint beim Sprechen; das Modell oben gilt nur, falls die Live-Verbindung ausfällt und die Aufnahme danach transkribiert wird.');
         const vocab = api.vocabularySupport?.(config.model) ? S.vocabulary.describe(api.vocabularySupport(config.model)) : '';
         if (vocab) notes.push(vocab);
         $('dict-engine-note').textContent = notes.join(' ');
@@ -904,6 +973,7 @@ window.Unisono = window.Unisono || {};
         $('dict-engine').addEventListener('change', e => {
             config.engine = e.target.value;
             config.model = S.apis[config.engine].models[0].id;
+            fixLiveModel();
             saveConfig(); renderSettings(); refreshHints();
         });
         $('dict-model').addEventListener('change', e => { config.model = e.target.value; saveConfig(); renderSettings(); });
@@ -920,6 +990,8 @@ window.Unisono = window.Unisono || {};
         });
         $('dict-autocopy').addEventListener('change', e => { config.autoCopy = e.target.checked; saveConfig(); });
         $('dict-longdictation').addEventListener('change', e => { config.longDictation = e.target.checked; saveConfig(); });
+        $('dict-live').addEventListener('change', e => { config.live = e.target.checked; saveConfig(); renderSettings(); });
+        $('dict-live-model').addEventListener('change', e => { config.liveModel = e.target.value; saveConfig(); });
         $('dict-mini-skin').addEventListener('change', e => { config.miniSkin = e.target.value; saveConfig(); renderSettings(); emit('config', getState()); });
         $('dict-mini-dim').addEventListener('change', e => { config.miniDim = e.target.checked; saveConfig(); emit('config', getState()); });
     }
