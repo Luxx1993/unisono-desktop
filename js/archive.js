@@ -210,7 +210,7 @@ window.Unisono = window.Unisono || {};
                     const file = new File([item.blob], item.name, { type: item.type || item.blob.type });
                     const support = api.vocabularySupport?.(item.model);
                     const vocabulary = support ? S.vocabulary.prepare(S.vocabulary.getTerms(), support).terms : [];
-                    const diarize = !!item.diarize && !api.noDiarization;
+                    const diarize = !!item.diarize && S.canDiarize(item.provider, item.model);
                     const { raw, segments } = await api.transcribe(file, {
                         key: S.ui.getKey(item.provider), model: item.model, language: item.language,
                         diarize, speakers: diarize ? item.speakers : null, vocabulary,

@@ -167,6 +167,7 @@ Vor dem Upload prüft Unisono Dateigröße und Länge gegen die Grenzen des gew�
 | ElevenLabs | 3 GB | 10 h |
 | AssemblyAI | 2,2 GB | 10 h |
 | Mistral | keine Vorabprüfung | keine Vorabprüfung |
+| Microsoft Azure | 300 MB | 2 h |
 
 Besprechungen von 1–2 Stunden (typisch 40–60 MB) passen bei allen Anbietern.
 
@@ -224,7 +225,25 @@ Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (a
 | AssemblyAI (v2) | `universal-3-5-pro`, `universal-2` | Upload → `/v2/transcript` → Polling |
 | Mistral (Voxtral) | `voxtral-mini-latest` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
 
-Sprechererkennung (Diarization) ist bei allen Anbietern aktivierbar.
+Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar, außerdem bei OpenAI mit dem Modell `gpt-4o-transcribe-diarize`. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
+
+### Region, Endpunkt und eigene Server
+
+Manche Anbieter brauchen in ihrer Zeile unter „API-Keys“ mehr als einen Key. Unisono speichert diese Angaben wie die Keys nur in diesem Browser.
+
+| Anbieter | Einstellung | Hinweis |
+|---|---|---|
+| AssemblyAI | Region Standard oder EU (Dublin) | Gilt auch für AssemblyAI Sync. Derselbe Key. |
+| Soniox | Region Standard oder EU | Der Key muss aus einem EU-Projekt der Soniox-Konsole stammen. |
+| Deepgram | Region Standard oder EU | Derselbe Key. |
+| OpenRouter | Region Standard oder EU | Nur für Firmenkonten (Enterprise); gilt für Spracherkennung und Aufräumen. |
+| Microsoft Azure | Endpunkt der eigenen Speech-Ressource | MAI-Transcribe 2 (mit Stil „clean“) und 1.5. MAI läuft nur in East US, West US, West US 2, North Europe, Southeast Asia und Central India; North Europe hält die Daten in der EU. |
+| Ollama | Adresse, z. B. `http://localhost:11434/v1/` | Ohne Key. Ollama muss Anfragen von dieser Seite erlauben (Umgebungsvariable `OLLAMA_ORIGINS`). |
+| Eigener Server | Adresse und Modell für die Spracherkennung | Jeder Server mit OpenAI-kompatibler Schnittstelle (z. B. Speaches, LocalAI, vLLM), für Spracherkennung und Aufräumen; Key nur, falls der Server einen verlangt. |
+
+Gemini hat zusätzlich das Modell `gemini-3.5-transcribe`. Es läuft über die Interactions-API im Modus „smart“ und lässt Füllwörter und Versprecher weg.
+
+Ein Server auf dem eigenen Rechner muss Anfragen von der Adresse der Seite zulassen (CORS). Chrome fragt außerdem beim ersten Zugriff einer Webseite auf das lokale Netzwerk nach der Erlaubnis. Eine `http://`-Adresse außerhalb von `localhost` blockiert der Browser auf einer `https`-Seite meist; sie würde Key und Audio auch unverschlüsselt schicken.
 
 Jede Engine hat eine feste Farbe (Punkt in Chips, Fortschrittslinie, Seitenleiste): Gladia Salbei, AssemblyAI Fjord, ElevenLabs Bernstein, Mistral Rosenholz. Logos erscheinen nur klein und neutral neben dem Namen unter „API-Keys“. Die Marken gehören ihren Inhabern und kennzeichnen hier nur den jeweiligen Dienst; Quellen stehen in `js/brand-logos.js`.
 
@@ -251,7 +270,7 @@ Auf schmalen Bildschirmen ersetzt eine Tab-Leiste unten die Seitenleiste, Karten
 ## Datenschutz
 
 - Es gibt keinen Server von Unisono. Audio und Keys gehen nur an den Anbieter, den du auswählst.
-- API-Keys, das zuletzt bearbeitete Transkript, Fachbegriffe, Ersetzungen, eigene Diktat-Stile, der Diktat-Verlauf, die Diktat-Statistik und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme sowie Archiv und Warteschlange (Transkripte, bei Warteschlangen-Aufnahmen auch das Audio) liegen in IndexedDB.
+- API-Keys, Anbieter-Einstellungen (Region, Adressen), das zuletzt bearbeitete Transkript, Fachbegriffe, Ersetzungen, eigene Diktat-Stile, der Diktat-Verlauf, die Diktat-Statistik und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme sowie Archiv und Warteschlange (Transkripte, bei Warteschlangen-Aufnahmen auch das Audio) liegen in IndexedDB.
 - Alles lässt sich unter **Einstellungen → Daten und Datenschutz** einzeln löschen oder komplett zurücksetzen.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.
 
@@ -317,13 +336,10 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 - **Diktat im Browser** mit schwebendem Fenster, Umformulieren, Langdiktat, Ersetzungsregeln, Verlauf und Statistik, siehe „Diktat“.
 - **Viele Anbieter** für Spracherkennung und Aufräumen, mit Filtern (Transkription, Umformulierung, Echtzeit, EU) auf der Seite „API-Keys“; Auswahllisten zeigen nur Anbieter mit Key.
 - **Etappe 3:** Archiv mit Suche und Kennzahlen, „jetzt aufnehmen, später transkribieren“, siehe „Archiv“.
+- **Anbieter-Feinschliff:** EU-Region für AssemblyAI, Soniox, Deepgram und OpenRouter, Microsoft Azure (MAI-Transcribe), Ollama und eigene Server, Sprechertrennung bei OpenAI, Gemini im Modus „smart“, siehe „Region, Endpunkt und eigene Server“.
 
 **Als Nächstes:**
 - **Etappe 4b – Meeting-Aufnahme ohne Bot (zuschaltbares Modul):** Ton eines Web-Meetings (Browser-Tab mit Ton, unter Windows auch Systemton der Desktop-App) plus eigenes Mikrofon aufnehmen und danach wie gewohnt transkribieren; das eigene Mikrofon wird als „Ich“ erkannt. Vor dem Start muss bestätigt werden, dass alle Teilnehmer informiert sind und zustimmen (§ 201 StGB). Das Modul wird erst beim Einschalten in den Einstellungen bzw. beim ersten Klick nachgeladen – wer es nicht nutzt, lädt keinen zusätzlichen Code.
 - **Echtzeit-Transkription:** Mehrere Anbieter können live mitschreiben (z. B. ElevenLabs, Deepgram, Soniox, AssemblyAI, OpenAI, Gemini, xAI, Mistral, Gladia). Unisono nimmt bisher ganze Aufnahmen auf und schickt sie danach.
-- **Anbieter-Feinschliff:**
-  - EU-Region wählbar machen, wo der Anbieter sie anbietet (AssemblyAI, Soniox, Deepgram, OpenRouter).
-  - Azure Speech, Ollama und eigene Server (brauchen eine eigene Adresse; Ollama muss Anfragen aus dem Browser erlauben).
-  - Sprechertrennung bei OpenAI (`gpt-4o-transcribe-diarize`) und der Modus „smart“ von Gemini, der Füllwörter entfernt.
-  - Ob Cerebras und Scaleway Anfragen direkt aus dem Browser zulassen, ist mit echtem Key noch zu prüfen („Prüfen“ unter „API-Keys“).
+- **Mit echten Keys zu prüfen:** ob Cerebras und Scaleway Anfragen direkt aus dem Browser zulassen („Prüfen“ unter „API-Keys“).
 - **Danach:** Protokoll-Vorlagen (Baubesprechung, Begehung, Telefonnotiz, Aktenvermerk), Aufgabenliste mit Verantwortlichen und Fristen, wiederkehrende Personen pro Projekt.
