@@ -42,9 +42,10 @@ Links steht die Seitenleiste. Auf dem Handy gibt es unten eine Tab-Leiste mit Da
 | **Aufnahme** | Live aufnehmen (vor Ort, Diktat) mit Merkern; danach „Transkribieren“ oder „Aufnahme sichern“. Auf Handy und Tablet die Startseite. |
 | **Transkribieren** | Vorhandene Audio- oder Videodatei ablegen, Engine wählen, Optionen, Start. Während des Laufs der Fortschritt. |
 | **Transkript** | Player, Transkript-Editor, Suche, Sprecher und Redezeit, Zusammenfassung, Export. |
+| **Archiv** | Alle Transkripte mit Suche und Kennzahlen; Dateien, die ohne Netz warten. Siehe „Archiv“. |
 | **Fachbegriffe** | Begriffsliste mit Import und Export, dazu Ersetzungsregeln für das Diktat. |
 | **API-Keys** | Keys aller Anbieter, jeweils mit **Prüfen**, **Entfernen** und der Anleitung „So bekommst du einen Key“. Filter wie in der Android-App: Transkription, Umformulierung, Echtzeit, EU. |
-| **Einstellungen** | Darstellung (Hell, Dunkel, Wie System) sowie Daten und Datenschutz: Keys, Transkript, Aufnahme-Sicherung, Diktat-Verlauf und Diktat-Statistik einzeln löschen oder alles zurücksetzen. |
+| **Einstellungen** | Darstellung (Hell, Dunkel, Wie System) sowie Daten und Datenschutz: Keys, Transkript, Archiv, Aufnahme-Sicherung, Diktat-Verlauf und Diktat-Statistik einzeln löschen oder alles zurücksetzen. |
 
 Unten in der Seitenleiste stehen die Engines mit hinterlegtem Key. Auf den Seiten „Transkribieren“, „Diktat“ und bei der Zusammenfassung zeigen die Auswahllisten nur Anbieter mit Key; ein neu gespeicherter Key erscheint sofort.
 
@@ -148,6 +149,14 @@ Bei **Antippen** teilt Unisono eine lange Aufnahme an Sprechpausen in Teile (min
 
 Die Karte **Statistik** zählt wie die Android-App: Diktate, Wörter, Zeichen, gesprochene Zeit, Wörter je Diktat, Tempo (Wörter pro Minute), KI-Durchgänge (Aufräumen und Umformulieren), die Serie aufeinanderfolgender Tage, die Wörter dieses Monats und ein Balkendiagramm der letzten sieben Tage. **Gesparte Zeit** vergleicht mit dem Tippen von 40 Wörtern pro Minute. Alles bleibt im Browser; zurücksetzen geht in der Karte oder unter **Einstellungen → Daten und Datenschutz**.
 
+## Archiv
+
+- **Automatisch:** Jedes Transkript – frisch transkribiert, aus einer Projektdatei geöffnet oder aus dem Archiv – liegt im Archiv dieses Browsers und wird beim Bearbeiten mitgespeichert (Text, Sprechernamen, Merker, Zusammenfassung). Das Audio wird nur bei Aufnahmen aus der Warteschlange mitgespeichert, sonst wie bei Projektdateien nicht.
+- **Seite „Archiv“:** Liste mit Datum, Länge, Sprechern, Wörtern und Engine, Suche in Titel, Text und Sprechernamen, Öffnen und Löschen. Öffnen ersetzt das offene Transkript; das bleibt aber selbst im Archiv.
+- **Kennzahlen:** Anzahl der Transkripte, Audio gesamt, Wörter, dieser Monat und die Verteilung nach Engine.
+- **Jetzt aufnehmen, später transkribieren:** Ist beim Start keine Verbindung da (oder bricht der Upload deshalb ab), wartet die Datei mit allen Einstellungen im Archiv. Sobald der Browser wieder online ist, wird sie automatisch transkribiert und landet samt Audio im Archiv; „Jetzt versuchen“ startet es von Hand.
+- Auf dem Handy erreicht man das Archiv über **Mehr → Archiv → Anzeigen**. Das Archiv liegt in IndexedDB; im privaten Fenster ist es aus.
+
 ## Grenzen der Anbieter
 
 Vor dem Upload prüft Unisono Dateigröße und Länge gegen die Grenzen des gewählten Anbieters und schlägt passende Alternativen vor – so schlägt nichts erst nach einem langen Upload fehl.
@@ -242,7 +251,7 @@ Auf schmalen Bildschirmen ersetzt eine Tab-Leiste unten die Seitenleiste, Karten
 ## Datenschutz
 
 - Es gibt keinen Server von Unisono. Audio und Keys gehen nur an den Anbieter, den du auswählst.
-- API-Keys, das zuletzt bearbeitete Transkript, Fachbegriffe, Ersetzungen, eigene Diktat-Stile, der Diktat-Verlauf, die Diktat-Statistik und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme liegt in IndexedDB.
+- API-Keys, das zuletzt bearbeitete Transkript, Fachbegriffe, Ersetzungen, eigene Diktat-Stile, der Diktat-Verlauf, die Diktat-Statistik und Einstellungen liegen im `localStorage` dieses Browsers; die Sicherung einer laufenden Aufnahme sowie Archiv und Warteschlange (Transkripte, bei Warteschlangen-Aufnahmen auch das Audio) liegen in IndexedDB.
 - Alles lässt sich unter **Einstellungen → Daten und Datenschutz** einzeln löschen oder komplett zurücksetzen.
 - API-Keys im Browser sind nur für den eigenen, privaten Gebrauch gedacht – die Seite nicht mit eingetragenen Keys öffentlich hosten.
 
@@ -272,7 +281,9 @@ js/dictation-core.js    Diktat ohne Seite: Stile, KI-Anweisungen, Ersetzungsrege
 js/dictation.js         Seite „Diktat“: Aufnahme, Langdiktat, Ablauf, Umformulieren, Stile, Verlauf, Statistik, Ersetzungen
 js/orbs.js              Kugeln Wolke (WebGL-Shader) und Welle (Canvas) wie im Android-Button
 js/dictation-mini.js    Schwebendes Fenster (Document Picture-in-Picture) für das Diktat
-tests/                  `node tests/dictation-core.test.js`
+js/archive-core.js      Archiv ohne Seite: Einträge, Suche, Kennzahlen (mit Node testbar)
+js/archive.js           Archiv und Warteschlange „später transkribieren“ (IndexedDB) mit der Seite „Archiv“
+tests/                  `node tests/dictation-core.test.js`, `node tests/archive-core.test.js`
 js/appearance.js        Hell, Dunkel oder wie System, wird vor dem ersten Zeichnen gesetzt
 js/settings.js          Seite „Einstellungen“: Darstellung, Daten löschen
 js/app.js               Seiten, Keys, Engine-Auswahl, Datei-Upload, Ablauf der Transkription
@@ -305,9 +316,9 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 - **Etappe 4a – Vor Ort (mobil),** siehe „Vor-Ort-Termine mit dem Handy“.
 - **Diktat im Browser** mit schwebendem Fenster, Umformulieren, Langdiktat, Ersetzungsregeln, Verlauf und Statistik, siehe „Diktat“.
 - **Viele Anbieter** für Spracherkennung und Aufräumen, mit Filtern (Transkription, Umformulierung, Echtzeit, EU) auf der Seite „API-Keys“; Auswahllisten zeigen nur Anbieter mit Key.
+- **Etappe 3:** Archiv mit Suche und Kennzahlen, „jetzt aufnehmen, später transkribieren“, siehe „Archiv“.
 
 **Als Nächstes:**
-- **Etappe 3:** Verlauf und Archiv früherer Dateitranskripte im Browser und Kennzahlen dazu, außerdem „jetzt aufnehmen, später transkribieren“: Aufnahmen ohne Netz bleiben gesichert und werden transkribiert, sobald man wieder online ist. (Verlauf und Statistik gibt es bisher nur für Diktate.)
 - **Etappe 4b – Meeting-Aufnahme ohne Bot (zuschaltbares Modul):** Ton eines Web-Meetings (Browser-Tab mit Ton, unter Windows auch Systemton der Desktop-App) plus eigenes Mikrofon aufnehmen und danach wie gewohnt transkribieren; das eigene Mikrofon wird als „Ich“ erkannt. Vor dem Start muss bestätigt werden, dass alle Teilnehmer informiert sind und zustimmen (§ 201 StGB). Das Modul wird erst beim Einschalten in den Einstellungen bzw. beim ersten Klick nachgeladen – wer es nicht nutzt, lädt keinen zusätzlichen Code.
 - **Echtzeit-Transkription:** Mehrere Anbieter können live mitschreiben (z. B. ElevenLabs, Deepgram, Soniox, AssemblyAI, OpenAI, Gemini, xAI, Mistral, Gladia). Unisono nimmt bisher ganze Aufnahmen auf und schickt sie danach.
 - **Anbieter-Feinschliff:**
