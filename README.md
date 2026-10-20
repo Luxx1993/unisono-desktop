@@ -122,11 +122,11 @@ Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt i
 
 ### Live mitschreiben (Echtzeit)
 
-Mit **ElevenLabs** oder **Deepgram** als Engine gibt es unter „Einstellungen“ der Seite den Schalter **Live mitschreiben**. Dann geht das Mikrofon schon beim Sprechen an den Anbieter, und der Text erscheint unter dem Aufnahmeknopf und im schwebenden Fenster, während du redest. Beim Stopp ist der Rohtext sofort fertig; Aufräumen, Ersetzungen, Verlauf und Kopieren laufen wie gewohnt.
+Mit **ElevenLabs**, **Deepgram** oder **Mistral** als Engine gibt es unter „Einstellungen“ der Seite den Schalter **Live mitschreiben**. Dann geht das Mikrofon schon beim Sprechen an den Anbieter, und der Text erscheint unter dem Aufnahmeknopf und im schwebenden Fenster, während du redest. Beim Stopp ist der Rohtext sofort fertig; Aufräumen, Ersetzungen, Verlauf und Kopieren laufen wie gewohnt.
 
-- **Modelle:** ElevenLabs *Scribe v2 Realtime*; Deepgram *Nova-3* (mit „Automatisch erkennen“ folgt es mehreren Sprachen), *Nova-2* und *Flux* (erkennt Sprechpausen). Bei Deepgram gilt die EU-Region aus „API-Keys“ auch live. Fachbegriffe gehen bei Nova-3 als Schlüsselbegriffe mit.
+- **Modelle:** Mistral *Voxtral Mini Transcribe Realtime* (`voxtral-mini-transcribe-realtime-2602`, Standard) und das neue `voxtral-mini-transcribe-realtime-3-0` (Modell-ID von Mistrals Voxtral-3-Seite; mit einem Key noch nicht ausprobiert). Mistral erkennt die Sprache selbst und nimmt bei Echtzeit keine Fachbegriffe an. ElevenLabs *Scribe v2 Realtime*; Deepgram *Nova-3* (mit „Automatisch erkennen“ folgt es mehreren Sprachen), *Nova-2* und *Flux* (erkennt Sprechpausen). Bei Deepgram gilt die EU-Region aus „API-Keys“ auch live. Fachbegriffe gehen bei Nova-3 als Schlüsselbegriffe mit.
 - **Ausfall:** Unisono nimmt nebenher wie immer auf. Bricht die Live-Verbindung ab oder kommt kein Text, wird die Aufnahme nach dem Stopp mit dem Modell aus „Modell“ transkribiert. Die Meldung nennt den Grund.
-- **Anmeldung:** Ein Browser kann bei Live-Verbindungen keinen Key im Header mitschicken. Deepgram nimmt ihn deshalb, wie für Browser dokumentiert, im Protokoll-Feld der Verbindung entgegen. Für ElevenLabs holt Unisono mit dem Key zuerst ein Einmal-Token und öffnet die Verbindung nur damit.
+- **Anmeldung:** Ein Browser kann bei Live-Verbindungen keinen Key im Header mitschicken. Deepgram nimmt ihn deshalb, wie für Browser dokumentiert, im Protokoll-Feld der Verbindung entgegen. Für ElevenLabs und Mistral holt Unisono mit dem Key zuerst ein kurzlebiges Token (bei Mistral `POST /v1/client/sessions`, etwa 15 Minuten gültig, an das Modell gebunden) und öffnet die Verbindung nur damit; bei Mistral geht es als Subprotokoll `realtime` mit. Die Nachrichten (`session.update`, `input_audio.append`, `input_audio.flush`, `input_audio.end`, `transcription.text.delta`, `transcription.done`) sind die des offiziellen Python-SDKs von Mistral.
 - Das Audio geht als 16-kHz-PCM in Häppchen von etwa 0,1 Sekunden. Langdiktat ist bei „Live“ nicht nötig und ruht.
 - Beim Umformulieren und auf der Seite „Aufnahme“ wird nicht live mitgeschrieben.
 
@@ -234,7 +234,7 @@ Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (a
 | Gladia (v2) | `solaria-3` (DE/EN/FR/ES/IT, feste Sprache nötig), `solaria-1` (100+ Sprachen) | Upload → `/v2/pre-recorded` → Polling |
 | ElevenLabs (Scribe) | `scribe_v2`, `scribe_v1` | Synchroner Upload an `/v1/speech-to-text` |
 | AssemblyAI (v2) | `universal-3-5-pro`, `universal-2` | Upload → `/v2/transcript` → Polling |
-| Mistral (Voxtral) | `voxtral-mini-latest` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
+| Mistral (Voxtral) | `voxtral-mini-latest`, `voxtral-small-transcribe-3-0`, `voxtral-mini-transcribe-3-0` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
 
 Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar, außerdem bei OpenAI mit dem Modell `gpt-4o-transcribe-diarize`. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
 
@@ -363,13 +363,13 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 - **Etappe 4a – Vor Ort (mobil),** siehe „Vor-Ort-Termine mit dem Handy“.
 - **Diktat im Browser** mit schwebendem Fenster, Umformulieren, Langdiktat, Ersetzungsregeln, Verlauf und Statistik, siehe „Diktat“.
 - **Viele Anbieter** für Spracherkennung und Aufräumen, mit Filtern (Transkription, Umformulierung, Echtzeit, EU) auf der Seite „API-Keys“; Auswahllisten zeigen nur Anbieter mit Key.
-- **Echtzeit im Diktat:** Live mitschreiben mit ElevenLabs und Deepgram, auch im schwebenden Fenster, siehe „Live mitschreiben (Echtzeit)“.
+- **Echtzeit im Diktat:** Live mitschreiben mit ElevenLabs, Deepgram und Mistral, auch im schwebenden Fenster, siehe „Live mitschreiben (Echtzeit)“.
 - **Etappe 3:** Archiv mit Suche und Kennzahlen, „jetzt aufnehmen, später transkribieren“, siehe „Archiv“.
 - **Etappe 4b:** Meeting-Aufnahme ohne Bot als zuschaltbares Modul, eigenes Mikrofon als „Ich“, siehe „Meeting-Aufnahme (Modul)“.
 - **Etappe 5:** Protokoll-Vorlagen, Aufgabenliste mit Verantwortlichen und Fristen, Projekte mit wiederkehrenden Personen, siehe „Projekte, Protokolle und Aufgaben“.
 - **Anbieter-Feinschliff:** EU-Region für AssemblyAI, Soniox, Deepgram und OpenRouter, Microsoft Azure (MAI-Transcribe), Ollama und eigene Server, Sprechertrennung bei OpenAI, Gemini im Modus „smart“, siehe „Region, Endpunkt und eigene Server“.
 
 **Als Nächstes:**
-- **Echtzeit, weitere Schritte:** live mitschreiben auch auf der Seite „Aufnahme“ (mit Sprechern bei Deepgram) und mit weiteren Anbietern, die es können (Soniox, AssemblyAI, OpenAI, Gemini, xAI, Mistral, Gladia).
+- **Echtzeit, weitere Schritte:** live mitschreiben auch auf der Seite „Aufnahme“ (mit Sprechern bei Deepgram) und mit weiteren Anbietern, die es können (Soniox, AssemblyAI, OpenAI, Gemini, xAI, Gladia).
 - **Mit echten Keys zu prüfen:** ob Cerebras und Scaleway Anfragen direkt aus dem Browser zulassen („Prüfen“ unter „API-Keys“).
 - **Ideen danach:** Meeting-Aufnahme laufend sichern wie die Aufnahme vor Ort; Aufgaben über alle Transkripte eines Projekts hinweg; eigene Protokoll-Vorlagen.

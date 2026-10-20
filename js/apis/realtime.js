@@ -1,6 +1,6 @@
 /*
  * Live transcription: the microphone is streamed to the provider while you speak, and the text
- * comes back piece by piece. ElevenLabs (Scribe Realtime) and Deepgram (Nova, Flux) for now.
+ * comes back piece by piece. ElevenLabs (Scribe Realtime), Deepgram (Nova, Flux) and Mistral (Voxtral Realtime).
  *
  * Unisono.realtime.start({ provider, model, key, language, vocabulary, stream, onText, onError })
  *   → { stop() → Promise<final text>, cancel() }
@@ -8,8 +8,8 @@
  *
  * Audio goes out as 16 kHz mono PCM16, the format both providers document for streaming. A browser
  * cannot set headers on a WebSocket, so the key travels the way each provider documents for browsers:
- * Deepgram reads it from the "token" subprotocol, ElevenLabs takes a single-use token that the page
- * fetches with the key first (the key itself never goes into the socket URL).
+ * Deepgram reads it from the "token" subprotocol, ElevenLabs and Mistral take a short-lived token that the
+ * page fetches with the key first (the key itself never goes into the socket URL or the subprotocol).
  *
  * The pure parts (resampling, PCM conversion, joining the text) are exported for Node tests.
  */
@@ -89,7 +89,15 @@
         return `wss://api.elevenlabs.io/v1/speech-to-text/realtime?${p}`;
     }
 
-    const core = { RATE, downsample, toPcm16, base64, transcript, deepgramUrl, elevenLabsUrl };
+    // Mistral: message formats as the official SDK sends them (mistralai/client-python, extra/realtime).
+    const mistralUrl = model => `wss://api.mistral.ai/v1/audio/transcriptions/realtime?model=${encodeURIComponent(model)}`;
+    const mistralSessionUpdate = (delayMs = null) => ({
+        type: 'session.update',
+        session: { audio_format: { encoding: 'pcm_s16le', sample_rate: RATE }, ...(delayMs ? { target_streaming_delay_ms: delayMs } : {}) }
+    });
+    const mistralAudio = pcm => ({ type: 'input_audio.append', audio: base64(pcm) });
+
+    const core = { RATE, downsample, toPcm16, base64, transcript, deepgramUrl, elevenLabsUrl, mistralUrl, mistralSessionUpdate, mistralAudio };
     if (typeof module !== 'undefined' && module.exports) module.exports = core;
     if (!root || !root.document) return;
 
@@ -177,6 +185,7 @@
             text,
             update,
             fail,
+            send: msg => { try { ws?.send(JSON.stringify(msg)); } catch (_) {} },
             markReady() {
                 if (ready || ended) return;
                 ready = true;
@@ -273,6 +282,59 @@
                     sendAudio: (ws, pcm) => ws.send(pcm.buffer),
                     // Deepgram sends the last results and then closes the socket itself.
                     finish: ws => ws.send(JSON.stringify({ type: 'CloseStream' }))
+                });
+            }
+        },
+        mistral: {
+            models: [
+                { id: 'voxtral-mini-transcribe-realtime-2602', name: 'Voxtral Mini Transcribe Realtime' },
+                { id: 'voxtral-mini-transcribe-realtime-3-0', name: 'Voxtral Mini Transcribe Realtime 3 (neu)' }
+            ],
+            open({ key, model, onText, onError }) {
+                let acc = '';
+                return socketSession({
+                    label: 'Mistral', onText, onError, finishTimeoutMs: 5000,
+                    // A browser cannot send an Authorization header on a WebSocket, so a short-lived token (rt_…, bound to the
+                    // model, valid about 15 minutes) is fetched with the key and passed as subprotocol.
+                    async open() {
+                        const res = await fetch('https://api.mistral.ai/v1/client/sessions', {
+                            method: 'POST', headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ purpose: 'realtime', model })
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        const token = data?.client_secret?.value;
+                        if (!res.ok || !token) {
+                            throw new Error(`Mistral: Live-Zugang abgelehnt (HTTP ${res.status}${data?.detail || data?.message ? ' – ' + (typeof (data.detail || data.message) === 'string' ? (data.detail || data.message) : JSON.stringify(data.detail || data.message)) : ''}).`);
+                        }
+                        return connect(mistralUrl(model), ['realtime', token]);
+                    },
+                    onMessage(msg, s) {
+                        switch (msg.type) {
+                            // The format goes first; audio captured meanwhile is replayed after it.
+                            case 'session.created': s.send(mistralSessionUpdate()); s.markReady(); break;
+                            case 'transcription.text.delta':
+                                acc += msg.text || '';
+                                s.text.guess(acc);
+                                s.update();
+                                break;
+                            case 'transcription.done':
+                                s.text.settle(msg.text || acc);
+                                acc = '';
+                                s.update();
+                                s.close();
+                                break;
+                            case 'error': {
+                                const detail = msg.error?.message ?? msg.error;
+                                s.fail(new Error('Mistral: ' + (typeof detail === 'string' ? detail : JSON.stringify(detail || msg))));
+                                break;
+                            }
+                        }
+                    },
+                    sendAudio: (ws, pcm) => ws.send(JSON.stringify(mistralAudio(pcm))),
+                    finish(ws) {
+                        ws.send(JSON.stringify({ type: 'input_audio.flush' }));
+                        ws.send(JSON.stringify({ type: 'input_audio.end' }));
+                    }
                 });
             }
         },
