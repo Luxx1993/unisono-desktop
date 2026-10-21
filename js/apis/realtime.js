@@ -1,6 +1,7 @@
 /*
  * Live transcription: the microphone is streamed to the provider while you speak, and the text
- * comes back piece by piece. ElevenLabs (Scribe Realtime), Deepgram (Nova, Flux) and Mistral (Voxtral Realtime).
+ * comes back piece by piece. ElevenLabs (Scribe Realtime), Deepgram (Nova, Flux), Mistral (Voxtral Realtime) and
+ * Gladia (Solaria).
  *
  * Unisono.realtime.start({ provider, model, key, language, vocabulary, stream, onText, onError })
  *   → { stop() → Promise<final text>, cancel() }
@@ -8,7 +9,8 @@
  *
  * Audio goes out as 16 kHz mono PCM16, the format both providers document for streaming. A browser
  * cannot set headers on a WebSocket, so the key travels the way each provider documents for browsers:
- * Deepgram reads it from the "token" subprotocol, ElevenLabs and Mistral take a short-lived token that the
+ * Deepgram reads it from the "token" subprotocol, Gladia returns a ready WebSocket address with a token, ElevenLabs
+ * and Mistral take a short-lived token that the
  * page fetches with the key first (the key itself never goes into the socket URL or the subprotocol).
  *
  * The pure parts (resampling, PCM conversion, joining the text) are exported for Node tests.
@@ -97,7 +99,26 @@
     });
     const mistralAudio = pcm => ({ type: 'input_audio.append', audio: base64(pcm) });
 
-    const core = { RATE, downsample, toPcm16, base64, transcript, deepgramUrl, elevenLabsUrl, mistralUrl, mistralSessionUpdate, mistralAudio };
+    // Gladia: POST /v2/live in the EU region (Gladia's default; it is set explicitly so it stays that way). The answer
+    // holds the WebSocket address with a session token. Solaria 1 is the only live model.
+    const GLADIA_INIT_URL = 'https://api.gladia.io/v2/live?region=eu-west';
+    function gladiaInit({ language, vocabulary = [] } = {}) {
+        const lang = !language || language === 'auto' ? null : language.split('-')[0];
+        const body = {
+            encoding: 'wav/pcm', bit_depth: 16, sample_rate: RATE, channels: 1, model: 'solaria-1',
+            language_config: { languages: lang ? [lang] : [], code_switching: false },
+            messages_config: { receive_partial_transcripts: true, receive_final_transcripts: true }
+        };
+        // The list is compared with every spoken word, Gladia asks for a short one.
+        const terms = vocabulary.filter(Boolean).slice(0, 100);
+        if (terms.length) {
+            body.realtime_processing = { custom_vocabulary: true, custom_vocabulary_config: { vocabulary: terms, default_intensity: 0.5 } };
+        }
+        return body;
+    }
+
+    const core = { RATE, downsample, toPcm16, base64, transcript, deepgramUrl, elevenLabsUrl, mistralUrl, mistralSessionUpdate, mistralAudio,
+        GLADIA_INIT_URL, gladiaInit };
     if (typeof module !== 'undefined' && module.exports) module.exports = core;
     if (!root || !root.document) return;
 
@@ -282,6 +303,39 @@
                     sendAudio: (ws, pcm) => ws.send(pcm.buffer),
                     // Deepgram sends the last results and then closes the socket itself.
                     finish: ws => ws.send(JSON.stringify({ type: 'CloseStream' }))
+                });
+            }
+        },
+        gladia: {
+            models: [{ id: 'solaria-1', name: 'Solaria 1' }],
+            open({ key, language, vocabulary, onText, onError }) {
+                return socketSession({
+                    label: 'Gladia', onText, onError, readyOnOpen: true, finishTimeoutMs: 6000,
+                    async open() {
+                        const res = await fetch(GLADIA_INIT_URL, {
+                            method: 'POST', headers: { 'x-gladia-key': key, 'Content-Type': 'application/json' },
+                            body: JSON.stringify(gladiaInit({ language, vocabulary }))
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok || !data.url) {
+                            throw new Error(`Gladia: Live-Zugang abgelehnt (HTTP ${res.status}${data?.message ? ' – ' + (Array.isArray(data.message) ? data.message.join(', ') : data.message) : ''}).`);
+                        }
+                        return connect(data.url);
+                    },
+                    onMessage(msg, s) {
+                        if (msg.type === 'transcript') {
+                            const text = msg.data?.utterance?.text || '';
+                            // An event of the same utterance replaces the one before it; a final one settles it.
+                            if (msg.data?.is_final) s.text.settle(text); else if (text) s.text.guess(text);
+                            s.update();
+                        } else if (msg.type === 'error' || msg.error) {
+                            const e = msg.error || msg.data || {};
+                            s.fail(new Error('Gladia: ' + (e.message || e.exception || 'Fehler bei der Live-Transkription.')));
+                        }
+                    },
+                    sendAudio: (ws, pcm) => ws.send(pcm.buffer),
+                    // The server processes what is left, then closes the socket itself.
+                    finish: ws => ws.send(JSON.stringify({ type: 'stop_recording' }))
                 });
             }
         },

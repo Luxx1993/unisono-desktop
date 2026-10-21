@@ -77,5 +77,17 @@ test('Mistral: URL with model, session.update with PCM format, audio as input_au
     assert.deepEqual(rt.mistralAudio(new Int16Array([1, 256])), { type: 'input_audio.append', audio: Buffer.from([1, 0, 0, 1]).toString('base64') });
 });
 
+test('Gladia: init body asks for 16 kHz PCM, partials, one fixed language and the vocabulary; EU region in the address', () => {
+    assert.equal(rt.GLADIA_INIT_URL, 'https://api.gladia.io/v2/live?region=eu-west');
+    const body = rt.gladiaInit({ language: 'de-DE', vocabulary: ['Unisono', '', 'Kaya'] });
+    assert.deepEqual([body.encoding, body.bit_depth, body.sample_rate, body.channels, body.model], ['wav/pcm', 16, 16000, 1, 'solaria-1']);
+    assert.deepEqual(body.language_config, { languages: ['de'], code_switching: false });
+    assert.equal(body.messages_config.receive_partial_transcripts, true);
+    assert.deepEqual(body.realtime_processing.custom_vocabulary_config.vocabulary, ['Unisono', 'Kaya']);
+    const auto = rt.gladiaInit({ language: 'auto' });
+    assert.deepEqual(auto.language_config.languages, []);
+    assert.equal(auto.realtime_processing, undefined);
+});
+
 if (failed) { console.log(`${failed} test(s) failed`); process.exit(1); }
 console.log('all passed');
