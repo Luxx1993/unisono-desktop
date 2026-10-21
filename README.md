@@ -377,7 +377,7 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 
 ## Preise der Spracherkennung
 
-Neben jedem Modell zeigt Unisono den Listenpreis in Euro pro Stunde Audio („Solaria-3 · 0,16 €/h“). Es sind die normalen Pay-as-you-go-Preise der Anbieter, abgerufen am 21.10.2026 und mit 1 € = 1,1215 $ umgerechnet; Aufpreise für Sprechertrennung oder Fachbegriffe sind nicht enthalten. „ca.“ steht bei gerechneten oder nur aus Drittquellen belegten Werten, ohne Angabe ist kein Preis gefunden. Die Daten stehen in `js/prices.js`.
+Neben jedem Modell zeigt Unisono den Listenpreis in Euro pro Stunde Audio („Solaria-3 · 0,160 €/h“). Es sind die normalen Pay-as-you-go-Preise der Anbieter, abgerufen am 21.10.2026 und mit 1 € = 1,1215 $ umgerechnet; Aufpreise für Sprechertrennung oder Fachbegriffe sind nicht enthalten. „ca.“ steht bei gerechneten oder nur aus Drittquellen belegten Werten, ohne Angabe ist kein Preis gefunden. Die Daten stehen in `js/prices.js`.
 
 | Datei-Transkription | €/h |
 |---|---|

@@ -68,10 +68,10 @@
     const key = (engine, model) => engine + '|' + String(model || '').trim().toLowerCase();
     const price = (engine, model, live) => (live ? REALTIME : BATCH)[key(engine, model)] || null;
 
-    // "0,16 €/h", "ca. 0,40 €/h", or '' when no price is known.
+    // "0,160 €/h" (2 to 4 decimals by amount), "ca. 0,400 €/h", or '' when no price is known.
     function format(pr) {
         if (!pr) return '';
-        return (pr.approx ? 'ca. ' : '') + pr.eur.toFixed(2).replace('.', ',') + ' €/h';
+        return (pr.approx ? 'ca. ' : '') + pr.eur.toFixed(pr.eur >= 1 ? 2 : pr.eur >= 0.1 ? 3 : 4).replace('.', ',') + ' €/h';
     }
 
     // The model's name with its price behind it, for the model selects.
