@@ -130,4 +130,7 @@ window.Unisono = window.Unisono || {};
     S.http = { fetchJson, send, poll, fallbackSegment, withSlash };
     S.providerSettings = providerSettings;
     S.canDiarize = canDiarize;
+    // The separate "AssemblyAI Sync" entry became a model of AssemblyAI (October 2026); stored settings and
+    // queued files that still name the old entry are mapped over.
+    S.upgradeEngine = (id, model) => id === 'assemblyai_sync' ? { id: 'assembly', model: 'universal-3-5-pro-sync' } : { id, model };
 })(window.Unisono);

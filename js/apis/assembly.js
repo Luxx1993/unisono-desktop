@@ -5,7 +5,27 @@ window.Unisono = window.Unisono || {};
     const base = () => S.providerSettings.get('assembly', 'region') === 'eu'
         ? 'https://api.eu.assemblyai.com/v2' : 'https://api.assemblyai.com/v2';
 
-    async function transcribe(file, { key, model, language, diarize, speakers, vocabulary, signal, onStage, onUpload }) {
+    const SYNC_SUFFIX = '-sync';
+
+    // The Sync API: one request, the answer is the transcript. Up to 256 MB / 20 minutes, no speaker labels.
+    async function transcribeSync(file, { key, model, language, signal, onStage, onUpload }) {
+        onStage('upload', 'Sende Audio an AssemblyAI …');
+        const form = new FormData();
+        form.append('audio', file);
+        if (language && language !== 'auto') form.append('config', new Blob([JSON.stringify({ language_codes: [language.split('-')[0]] })], { type: 'application/json' }));
+        const host = S.providerSettings.get('assembly', 'region') === 'eu' ? 'https://sync.eu.assemblyai.com' : 'https://sync.assemblyai.com';
+        const raw = await S.http.send(host + '/v1/transcribe', {
+            headers: { Authorization: key, 'X-AAI-Model': model.slice(0, -SYNC_SUFFIX.length) }, body: form, signal, onUpload,
+            onUploaded: () => onStage('process', 'AssemblyAI verarbeitet das Audio …')
+        }, 'AssemblyAI Sync');
+        return { raw, segments: S.http.fallbackSegment((raw.text || '').trim()) };
+    }
+
+    async function transcribe(file, opts) {
+        return opts.model.endsWith(SYNC_SUFFIX) ? transcribeSync(file, opts) : transcribeAsync(file, opts);
+    }
+
+    async function transcribeAsync(file, { key, model, language, diarize, speakers, vocabulary, signal, onStage, onUpload }) {
         const BASE = base();
         onStage('upload', 'Lade Datei zu AssemblyAI hoch …');
         const upload = await S.http.send(`${BASE}/upload`, {
@@ -64,15 +84,19 @@ window.Unisono = window.Unisono || {};
         },
         settings: [{
             field: 'region', label: 'Region', options: [['', 'Standard (USA)'], ['eu', 'EU (Dublin)']],
-            note: 'Gilt auch für AssemblyAI Sync.'
+            note: 'Gilt auch für das Sync-Modell.'
         }],
         test: key => ({ url: base() + '/transcript?limit=1', headers: { 'authorization': key } }),
         models: [
             { id: 'universal-3-5-pro', name: 'Universal-3.5 Pro (höchste Genauigkeit)' },
-            { id: 'universal-2', name: 'Universal-2 (99 Sprachen, günstiger)' }
+            { id: 'universal-2', name: 'Universal-2 (99 Sprachen, günstiger)' },
+            { id: 'universal-3-5-pro' + SYNC_SUFFIX, name: 'Universal-3.5 Pro Sync (eine Anfrage, bis 20 Min., ohne Sprecher)' }
         ],
+        diarizes: model => !model.endsWith(SYNC_SUFFIX),
         vocabularySupport: () => ({ maxTerms: 1000, maxWords: 6 }),
-        limits: () => ({ maxBytes: 2.2 * 1024 * 1024 * 1024, maxSeconds: 10 * 3600 }),
+        limits: model => model?.endsWith(SYNC_SUFFIX)
+            ? { maxBytes: 256 * 1024 * 1024, maxSeconds: 20 * 60 }
+            : { maxBytes: 2.2 * 1024 * 1024 * 1024, maxSeconds: 10 * 3600 },
         transcribe
     };
 })(window.Unisono);

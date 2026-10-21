@@ -197,6 +197,7 @@ window.Unisono = window.Unisono || {};
         try {
             for (const item of [...pending]) {
                 if (!navigator.onLine) break;
+                ({ id: item.provider, model: item.model } = S.upgradeEngine(item.provider, item.model));
                 const api = S.apis[item.provider];
                 if (!api || !S.ui.hasKey(item.provider)) {
                     item.error = api ? `Für ${api.label} fehlt der API-Key.` : 'Die Engine gibt es nicht mehr.';
