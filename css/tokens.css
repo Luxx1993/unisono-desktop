@@ -41,21 +41,21 @@
   --focus-ring: #1F1C1A;
 
   /* ---- Anbieter-Akzente: Basis (Punkte, Grafik) ---- */
-  --provider-gladia: #7FA38C;      /* Salbei */
-  --provider-assemblyai: #5F7FA8;  /* Fjord */
-  --provider-elevenlabs: #D69A4E;  /* Bernstein */
+  --provider-gladia: #7664C0;      /* Violett (Markenakzent) */
+  --provider-assemblyai: #6170B2;  /* Kobaltblau (Logo) */
+  --provider-elevenlabs: #F7F4EE;  /* Weiß (Markenfarbe), im Hellmodus mit Rand */
   --provider-free: #C07A7A;        /* Rosenholz: nächster Anbieter */
 
   /* ---- Anbieter-Akzente: Stark (Linien, Text im Hellmodus, >= 4,5:1) ---- */
-  --provider-gladia-strong: #56765F;
-  --provider-assemblyai-strong: #46648C;
-  --provider-elevenlabs-strong: #946524;
+  --provider-gladia-strong: #48388A;
+  --provider-assemblyai-strong: #404C82;
+  --provider-elevenlabs-strong: #6E675D;
   --provider-free-strong: #985454;
 
   /* ---- Anbieter-Tints: nur für Anbieter-Flächen, NIE für Sprecher ---- */
-  --provider-gladia-tint: rgba(127, 163, 140, .15);
-  --provider-assemblyai-tint: rgba(95, 127, 168, .15);
-  --provider-elevenlabs-tint: rgba(214, 154, 78, .15);
+  --provider-gladia-tint: rgba(118, 100, 192, .15);
+  --provider-assemblyai-tint: rgba(97, 112, 178, .15);
+  --provider-elevenlabs-tint: rgba(110, 103, 93, .12);
   --provider-free-tint: rgba(192, 122, 122, .15);
 
   /* ---- Status ---- */
@@ -146,9 +146,10 @@
   /* ==== App-Ergänzungen ==== */
 
   /* Mistral ist der "nächste Anbieter" aus DESIGN.md und bekommt den freien Akzent (Rosenholz). */
-  --provider-mistral: var(--provider-free);
-  --provider-mistral-strong: var(--provider-free-strong);
-  --provider-mistral-tint: var(--provider-free-tint);
+  /* Mistral: Orange, wie die Marke. */
+  --provider-mistral: #BC7559;
+  --provider-mistral-strong: #8A4F38;
+  --provider-mistral-tint: rgba(188, 117, 89, .15);
 
   /* Stufen, die DESIGN.md als Zahl nennt */
   --type-button: 500 15px/20px var(--font-body);   /* Sekundärbutton: Inter 15/500 */
@@ -194,12 +195,13 @@
     --action-on-primary: #121110;
     --focus-ring: #F2EEE8;
     /* Im Dunkeln reichen die Basistöne für Linien und Text */
-    --provider-gladia-strong: #9DB9A6;
-    --provider-assemblyai-strong: #8DA6C8;
-    --provider-elevenlabs-strong: #E0AE6C;
+    --provider-gladia-strong: #ACA0D9;
+    --provider-assemblyai-strong: #A6AED4;
+    --provider-elevenlabs-strong: #E8E3D8;
+    --provider-mistral-strong: #D9B1A0;
     --provider-free-strong: #D39A9A;
-    --provider-gladia-tint: rgba(127, 163, 140, .18);
-    --provider-assemblyai-tint: rgba(95, 127, 168, .20);
+    --provider-gladia-tint: rgba(118, 100, 192, .15);
+    --provider-assemblyai-tint: rgba(97, 112, 178, .15);
     --mark-playing-bg: rgba(242, 238, 232, .10);
     --speaker-1: #F2EEE8;
     --speaker-2: #A9A29A;
@@ -234,12 +236,13 @@
   --action-primary: #F2EEE8;
   --action-on-primary: #121110;
   --focus-ring: #F2EEE8;
-  --provider-gladia-strong: #9DB9A6;
-  --provider-assemblyai-strong: #8DA6C8;
-  --provider-elevenlabs-strong: #E0AE6C;
+  --provider-gladia-strong: #ACA0D9;
+  --provider-assemblyai-strong: #A6AED4;
+  --provider-elevenlabs-strong: #E8E3D8;
+  --provider-mistral-strong: #D9B1A0;
   --provider-free-strong: #D39A9A;
-  --provider-gladia-tint: rgba(127, 163, 140, .18);
-  --provider-assemblyai-tint: rgba(95, 127, 168, .20);
+  --provider-gladia-tint: rgba(118, 100, 192, .15);
+  --provider-assemblyai-tint: rgba(97, 112, 178, .15);
   --mark-playing-bg: rgba(242, 238, 232, .10);
   --speaker-1: #F2EEE8;
   --speaker-2: #A9A29A;
