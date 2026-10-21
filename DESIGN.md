@@ -31,7 +31,7 @@ Designregeln für die Multi-API-Transkriptions-Website. Alle Werte stehen in `to
 | ElevenLabs (weiß, im Hellmodus mit Rand) | `--provider-elevenlabs` | `--provider-elevenlabs-strong` | `--provider-elevenlabs-tint` |
 | Mistral (Orange) | `--provider-mistral` | `--provider-mistral-strong` | `--provider-mistral-tint` |
 | nächster Anbieter | neuer Token nötig | | |
-| Alle weiteren (OpenAI, Groq, OpenRouter, Gemini, Anthropic, Together, DeepInfra, Deepgram, Soniox, xAI, Azure, DeepSeek, SiliconFlow, Scaleway, OVHcloud, Cerebras) | offizielle Markenfarbe `--pk` je Anbieter in `css/app.css` (aus den Logos) (xAI schwarz, im Dunkeln hell) | gemischt aus `--pk` | gemischt aus `--pk` |
+| Alle weiteren (OpenAI, Groq, OpenRouter, Gemini, Anthropic, Together, DeepInfra, Deepgram, Soniox, xAI, Azure, DeepSeek, SiliconFlow, Scaleway, OVHcloud, Cerebras) | Farbton der offiziellen Markenfarbe, gedeckt wie Salbei und Fjord: `--pk` je Anbieter in `css/app.css` (xAI schwarz, im Dunkeln hell) | gemischt aus `--pk` | gemischt aus `--pk` |
 
 - Die Zuordnung ist fest und überall gleich: Chips, Fortschrittslinien, Vergleichsspalten, Kostengrafiken.
 - **Basis**töne nie für Text oder dünne Linien auf hellem Grund verwenden (unter 4,5:1), dafür gibt es **Stark**.
