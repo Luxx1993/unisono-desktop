@@ -303,23 +303,23 @@ select.input { appearance: none; padding-right: var(--space-8); background-image
 [data-provider="assembly"] { --p: var(--provider-assemblyai); --p-strong: var(--provider-assemblyai-strong); --p-tint: var(--provider-assemblyai-tint); }
 [data-provider="elevenlabs"] { --p: var(--provider-elevenlabs); --p-strong: var(--provider-elevenlabs-strong); --p-tint: var(--provider-elevenlabs-tint); }
 [data-provider="mistral"] { --p: var(--provider-mistral); --p-strong: var(--provider-mistral-strong); --p-tint: var(--provider-mistral-tint); }
-/* Weitere Anbieter: Markenfarbe als Punkt; Stark und Tint werden aus ihr gemischt. xAI ist schwarz (im Dunkeln hell), ElevenLabs weiß mit Rand. */
-[data-provider="openai"] { --pk: #2E9C9A; }
-[data-provider="groq"] { --pk: #D9503F; }
-[data-provider="openrouter"] { --pk: #6E78B8; }
-[data-provider="gemini"] { --pk: #7C8DEB; }
-[data-provider="anthropic"] { --pk: #C9785D; }
-[data-provider="together"] { --pk: #3C6FD1; }
-[data-provider="deepinfra"] { --pk: #4A90B8; }
-[data-provider="deepgram"] { --pk: #4CC38A; }
-[data-provider="soniox"] { --pk: #C9689A; }
+/* Weitere Anbieter: Markenfarbe als Punkt, aus den offiziellen Logos bzw. Markenfarben (LobeHub-Icons, Simple Icons, Soniox-Favicon); Stark und Tint werden aus ihr gemischt. xAI ist schwarz (im Dunkeln hell), ElevenLabs weiß mit Rand. */
+[data-provider="openai"] { --pk: #10A37F; }
+[data-provider="groq"] { --pk: #F55036; }
+[data-provider="openrouter"] { --pk: #6566F1; }
+[data-provider="gemini"] { --pk: #3186FF; }
+[data-provider="anthropic"] { --pk: #D97757; }
+[data-provider="together"] { --pk: #0F6FFF; }
+[data-provider="deepinfra"] { --pk: #5699DB; }
+[data-provider="deepgram"] { --pk: #13EF93; }
+[data-provider="soniox"] { --pk: #263971; }
 [data-provider="xai"] { --pk: #1F1C1A; }
-[data-provider="azure"] { --pk: #2F8BD6; }
-[data-provider="deepseek"] { --pk: #4F6BE0; }
-[data-provider="siliconflow"] { --pk: #A25CC0; }
-[data-provider="scaleway"] { --pk: #7A4FB3; }
-[data-provider="ovhcloud"] { --pk: #2E3FA0; }
-[data-provider="cerebras"] { --pk: #E07A5F; }
+[data-provider="azure"] { --pk: #0078D4; }
+[data-provider="deepseek"] { --pk: #4D6BFE; }
+[data-provider="siliconflow"] { --pk: #6E29F6; }
+[data-provider="scaleway"] { --pk: #4F0599; }
+[data-provider="ovhcloud"] { --pk: #123F6D; }
+[data-provider="cerebras"] { --pk: #F15A29; }
 [data-provider="openai"],
 [data-provider="groq"],
 [data-provider="openrouter"],
@@ -346,6 +346,15 @@ select.input { appearance: none; padding-right: var(--space-8); background-image
     :root:not([data-theme="light"]) [data-provider="xai"] { --pk: #F2EEE8; --p-strong: #F2EEE8; --p-tint: rgba(242, 238, 232, .10); }
     :root:not([data-theme="light"]) .provider-dot[data-provider="elevenlabs"]:not(.is-empty) { box-shadow: none; }
 }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) [data-provider="ovhcloud"],
+    :root:not([data-theme="light"]) [data-provider="soniox"],
+    :root:not([data-theme="light"]) [data-provider="scaleway"]
+    { --p: color-mix(in srgb, var(--pk) 55%, #F2EEE8); }
+}
+:root[data-theme="dark"] [data-provider="ovhcloud"],
+:root[data-theme="dark"] [data-provider="soniox"],
+:root[data-theme="dark"] [data-provider="scaleway"] { --p: color-mix(in srgb, var(--pk) 55%, #F2EEE8); }
 :root[data-theme="dark"] [data-provider="xai"] { --pk: #F2EEE8; --p-strong: #F2EEE8; --p-tint: rgba(242, 238, 232, .10); }
 :root[data-theme="dark"] .provider-dot[data-provider="elevenlabs"]:not(.is-empty) { box-shadow: none; }
 @media (prefers-color-scheme: dark) {

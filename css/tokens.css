@@ -147,9 +147,9 @@
 
   /* Mistral ist der "nächste Anbieter" aus DESIGN.md und bekommt den freien Akzent (Rosenholz). */
   /* Mistral: Orange, wie die Marke. */
-  --provider-mistral: #E08A3C;
-  --provider-mistral-strong: #A35A1C;
-  --provider-mistral-tint: rgba(224, 138, 60, .15);
+  --provider-mistral: #FA520F;
+  --provider-mistral-strong: #B33A08;
+  --provider-mistral-tint: rgba(250, 82, 15, .13);
 
   /* Stufen, die DESIGN.md als Zahl nennt */
   --type-button: 500 15px/20px var(--font-body);   /* Sekundärbutton: Inter 15/500 */
@@ -198,7 +198,7 @@
     --provider-gladia-strong: #9DB9A6;
     --provider-assemblyai-strong: #8DA6C8;
     --provider-elevenlabs-strong: #E8E3D8;
-    --provider-mistral-strong: #EBA467;
+    --provider-mistral-strong: #FF8A5C;
     --provider-free-strong: #D39A9A;
     --provider-gladia-tint: rgba(127, 163, 140, .18);
     --provider-assemblyai-tint: rgba(95, 127, 168, .20);
@@ -239,7 +239,7 @@
   --provider-gladia-strong: #9DB9A6;
   --provider-assemblyai-strong: #8DA6C8;
   --provider-elevenlabs-strong: #E8E3D8;
-  --provider-mistral-strong: #EBA467;
+  --provider-mistral-strong: #FF8A5C;
   --provider-free-strong: #D39A9A;
   --provider-gladia-tint: rgba(127, 163, 140, .18);
   --provider-assemblyai-tint: rgba(95, 127, 168, .20);
