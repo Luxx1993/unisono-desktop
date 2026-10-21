@@ -246,13 +246,14 @@ window.Unisono = window.Unisono || {};
     function fillModelSelect(select, provider, key, current, onPick) {
         const llm = llms[provider];
         select.dataset.provider = provider;
+        select.title = 'Preis: Eingabe / Ausgabe in € je 1 Mio. Token';
         const option = (value, text) => Object.assign(document.createElement('option'), { value, textContent: text || value });
         const set = (ids, keepCurrent, loading) => {
             if (select.dataset.provider !== provider) return;
             const list = [...ids];
             // The current model stays while the catalog is loading or out of reach (a model typed in by hand survives that).
             if (keepCurrent && current && !list.includes(current)) list.unshift(current);
-            const options = list.map(id => option(id));
+            const options = list.map(id => option(id, S.prices.chatLabel(provider, id)));
             if (!list.length) options.push(option('', loading ? 'Modelle werden geladen …' : 'Modelle nicht abrufbar'));
             options.push(option(CUSTOM, 'Anderes Modell eintragen …'));
             select.replaceChildren(...options);

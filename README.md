@@ -9,8 +9,13 @@ Audio und Video transkribieren, lesen, korrigieren und exportieren, komplett im 
 ## Auf einen Blick
 
 - **Läuft einfach so:** `index.html` per Doppelklick öffnen. Kein Node.js, kein Server, keine Installation, keine Verbindung zu Google Fonts. Ideal für Dienstrechner.
-- **Viele Engines:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral) mit Sprechererkennung, dazu OpenAI, Groq, Deepgram, Soniox, Gemini, xAI u. a. ohne Sprechertrennung. Zur Auswahl stehen nur Engines, für die ein Key hinterlegt ist.
+- **Viele Engines:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral) mit Sprechererkennung, dazu OpenAI, Groq, Deepgram, Soniox, Gemini, xAI, Azure, Together, OpenRouter, Scaleway, OVHcloud u. a. ohne Sprechertrennung. Jeder Anbieter hat in seiner Markenfarbe einen Punkt. Zur Auswahl stehen nur Engines, für die ein Key hinterlegt ist.
+- **Preise sichtbar:** Neben jedem Modell steht der Listenpreis in € pro Stunde Audio (siehe „Preise der Spracherkennung“).
 - **Diktat:** sprechen, die KI räumt den Text auf (Stile wie Aufräumen, E-Mail oder Aktenvermerk), er liegt sofort in der Zwischenablage. Mit schwebendem Fenster, Umformulieren, Langdiktat, Ersetzungsregeln, Verlauf und Statistik.
+- **Live mitschreiben:** Der Text erscheint schon beim Sprechen (ElevenLabs, Deepgram, Mistral, Gladia), auch im schwebenden Fenster.
+- **Archiv:** Alle Transkripte bleiben im Browser, mit Suche und Kennzahlen; ohne Netz aufgenommene Dateien warten und werden später transkribiert.
+- **Projekte, Protokolle, Aufgaben:** Personen je Projekt, Vorlagen wie Baubesprechung oder Aktenvermerk und eine Aufgabenliste mit Verantwortlichen und Fristen.
+- **Meeting-Aufnahme** (zuschaltbares Modul): Tab-Ton und eigenes Mikrofon ohne Bot im Meeting.
 - **Aufnehmen im Browser:** Mikrofonaufnahme mit Pause, Pegelanzeige und Absturzsicherung.
 - **Fachbegriffe:** eine Liste mit Namen und Fachwörtern, die in passender Form an jede Engine geht.
 - **Live-Fortschritt:** Hochladen mit echtem Prozentwert und Tempo, Verarbeitungszeit, jederzeit abbrechbar.
@@ -169,6 +174,8 @@ Die Karte **Statistik** zählt wie die Android-App: Diktate, Wörter, Zeichen, g
 - **Jetzt aufnehmen, später transkribieren:** Ist beim Start keine Verbindung da (oder bricht der Upload deshalb ab), wartet die Datei mit allen Einstellungen im Archiv. Sobald der Browser wieder online ist, wird sie automatisch transkribiert und landet samt Audio im Archiv; „Jetzt versuchen“ startet es von Hand.
 - Auf dem Handy erreicht man das Archiv über **Mehr → Archiv → Anzeigen**. Das Archiv liegt in IndexedDB; im privaten Fenster ist es aus.
 
+<img src="docs/screenshots/archive.png" alt="Archiv mit Kennzahlen, Suche und gespeicherten Transkripten" width="100%">
+
 ## Grenzen der Anbieter
 
 Vor dem Upload prüft Unisono Dateigröße und Länge gegen die Grenzen des gewählten Anbieters und schlägt passende Alternativen vor – so schlägt nichts erst nach einem langen Upload fehl.
@@ -234,10 +241,11 @@ Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (a
 |---|---|---|
 | Gladia (v2) | `solaria-3` (DE/EN/FR/ES/IT, feste Sprache nötig), `solaria-1` (100+ Sprachen) | Upload → `/v2/pre-recorded` → Polling |
 | ElevenLabs (Scribe) | `scribe_v2`, `scribe_v1` | Synchroner Upload an `/v1/speech-to-text` |
-| AssemblyAI (v2) | `universal-3-5-pro`, `universal-2` | Upload → `/v2/transcript` → Polling |
+| AssemblyAI | `universal-3-5-pro`, `universal-2` | Upload → `/v2/transcript` → Polling |
+| AssemblyAI (Sync-Modell) | `universal-3-5-pro-sync` | Eine Anfrage an `/v1/transcribe`, bis 20 Minuten und 256 MB, ohne Sprecher; derselbe Key und dieselbe Region wie AssemblyAI |
 | Mistral (Voxtral) | `voxtral-mini-latest`, `voxtral-small-transcribe-3-0`, `voxtral-mini-transcribe-3-0` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
 
-Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar, außerdem bei OpenAI mit dem Modell `gpt-4o-transcribe-diarize`. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
+Live mitschreiben geht mit ElevenLabs, Deepgram, Mistral und Gladia, siehe „Live mitschreiben (Echtzeit)“. Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar, außerdem bei OpenAI mit dem Modell `gpt-4o-transcribe-diarize`. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
 
 ### Region, Endpunkt und eigene Server
 
@@ -268,6 +276,10 @@ Jede KI mit Key unter „API-Keys“ (Anthropic, OpenAI, Gemini, Mistral, Ollama
 - **Projekte und Personen:** Auf der Seite **Projekte** legst du Projekte an und trägst die Personen ein, die immer wieder vorkommen, mit Rolle oder Firma („Frau Kaya, Bauherrin“). Ein Projekt ist das **aktuelle**; neue Transkripte gehören dazu (wählbar auch auf „Transkribieren“ und im Kopf des Transkripts). Die Namen des aktuellen Projekts gehen als Fachbegriffe an die Spracherkennung, auch im Diktat. Beim Benennen der Sprecher und bei Verantwortlichen schlägt Unisono sie vor, dazu „Ich“.
 - **Protokoll-Vorlagen:** Unter „Zusammenfassung und Protokoll“ gibt es neben Stichpunkten, Zusammenfassung und Protokoll mit Aufgaben die Vorlagen **Baubesprechung** (nummerierte Punkte, Termine, Aufgabentabelle, Behinderungen und Nachträge), **Begehung** (Feststellungen nach Ort, Mängelliste, nach Merkern geordnet), **Telefonnotiz** und **Aktenvermerk**. Projekt, Datum, die Namen der Sprecher, die Personen des Projekts mit Rolle und die Merker gehen als Kontext mit, damit die KI sie nicht raten muss.
 - **Aufgaben:** Die Karte **Aufgaben** sammelt, wer was bis wann tut. **Aufgaben erkennen** liest sie mit der KI aus dem Transkript (Anbieter und Modell wie bei der Zusammenfassung; schon vorhandene kommen nicht doppelt). Jede Aufgabe lässt sich ändern, abhaken, löschen oder von Hand anlegen; eine Frist ist ein Datum oder ein Text wie „nächste Woche“. Kopieren als Tabelle (Markdown) oder Speichern als CSV für Excel.
+<img src="docs/screenshots/projects.png" alt="Projekt mit wiederkehrenden Personen" width="100%">
+
+<p><img src="docs/screenshots/tasks.png" alt="Aufgabenliste mit Verantwortlichen und Fristen" width="280"></p>
+
 - Projekt und Aufgaben gehören zum Transkript: Sie stehen im Archiv (mit der Zahl offener Aufgaben, durchsuchbar), in der Projektdatei und im Markdown- und HTML-Export.
 
 ## Meeting-Aufnahme (Modul)
@@ -314,6 +326,7 @@ js/player.js            Player-Bedienung, Wellenform und Sprecherspur
 js/search.js            Suchen und Ersetzen mit Markierung im Text
 js/progress.js          Fortschrittsanzeige mit Upload-Prozent und Abbrechen
 js/icons.js             Linien-Icons aus dem Sprite in index.html
+js/prices.js            Listenpreise der Modelle in € pro Stunde (mit Node testbar)
 js/brand-logos.js       Logos der Anbieter als SVG
 js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem bearbeiteten Stand
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
@@ -330,17 +343,17 @@ js/orbs.js              Kugeln Wolke (WebGL-Shader) und Welle (Canvas) wie im An
 js/dictation-mini.js    Schwebendes Fenster (Document Picture-in-Picture) für das Diktat
 js/archive-core.js      Archiv ohne Seite: Einträge, Suche, Kennzahlen (mit Node testbar)
 js/archive.js           Archiv und Warteschlange „später transkribieren“ (IndexedDB) mit der Seite „Archiv“
-tests/                  `node tests/dictation-core.test.js`, `node tests/archive-core.test.js`
+tests/                  `node tests/<name>.test.js` für dictation-core, archive-core, protocol-core, realtime und prices
 js/appearance.js        Hell, Dunkel oder wie System, wird vor dem ersten Zeichnen gesetzt
 js/settings.js          Seite „Einstellungen“: Darstellung, Daten löschen
 js/app.js               Seiten, Keys, Engine-Auswahl, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP-Helfer: Upload mit Fortschritt, Polling, Abbrechen
 js/apis/*.js            Je ein Modul pro Engine (Gladia, ElevenLabs, AssemblyAI, Mistral, weitere in dictation-engines.js, KI in llm.js)
-js/apis/realtime.js     Live-Transkription: Mikrofon als 16-kHz-PCM über WebSocket (ElevenLabs, Deepgram)
+js/apis/realtime.js     Live-Transkription: Mikrofon als 16-kHz-PCM über WebSocket (ElevenLabs, Deepgram, Mistral, Gladia)
 docs/screenshots/       Bilder für diese README
 ```
 
-Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und nicht als ES-Module: Browser blockieren ES-Module, wenn eine Seite per Doppelklick (`file://`) geöffnet wird. Die Module teilen sich das globale Objekt `window.Unisono`. Eine neue Engine wird als Datei unter `js/apis/` angelegt, registriert sich in `Unisono.apis` und wird in `index.html` eingebunden. Ihre Farbe kommt aus `--provider-free` bzw. einem neuen Token in `css/tokens.css` und wird in `css/app.css` unter „Provider colors“ zugeordnet.
+Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und nicht als ES-Module: Browser blockieren ES-Module, wenn eine Seite per Doppelklick (`file://`) geöffnet wird. Die Module teilen sich das globale Objekt `window.Unisono`. Eine neue Engine wird als Datei unter `js/apis/` angelegt, registriert sich in `Unisono.apis` und wird in `index.html` eingebunden. Ihre Farbe (Farbton der Marke, gedeckt wie Salbei und Fjord) kommt aus einem Token in `css/tokens.css` bzw. `--pk` in `css/app.css` unter „Provider colors“.
 
 ## Design anpassen
 
@@ -377,7 +390,7 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 
 ## Preise der Spracherkennung
 
-Die App zeigt den Preis neben jedem Modell in der Modellauswahl (Datei) und in der Auswahl der Echtzeit-Modelle, mit 2 bis 4 Nachkommastellen und ohne überflüssige Nullen. Die Daten stehen in `der Android-App (`ModelPrices.kt`)`, hier in `js/prices.js`.
+Die App zeigt den Preis neben jedem Modell in der Modellauswahl (Datei) und in der Auswahl der Echtzeit-Modelle, mit 2 bis 4 Nachkommastellen und ohne überflüssige Nullen. Die Daten stehen in `js/prices.js`; die Android-App führt dieselben Werte in `ModelPrices.kt`.
 
 Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, normale Pay-as-you-go-Preise, Dollarpreise umgerechnet mit 1 € = 1,1215 $ (Gladia, Scaleway und OVHcloud listen in Euro). Aufpreise für Sprechertrennung oder Fachbegriffe sind nicht enthalten. „ca.“ steht bei gerechneten, geschätzten oder nur aus Drittquellen belegten Werten (Token-Preise, Aktionspreise, „ab“-Preise). Wo kein Preis gefunden wurde, zeigt die App keinen.
 
@@ -443,6 +456,168 @@ Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, normale Pay-as-yo
 | Mistral | voxtral-mini-transcribe-realtime-3-0 | 0,428 |
 | Mistral | voxtral-mini-transcribe-realtime-2602 | ca. 0,428 |
 | Gladia | solaria-1 | 0,68 |
+
+### Text-Modelle (Aufräumen, Umformulieren, Zusammenfassen)
+
+Neben jedem Text-Modell steht Eingabe / Ausgabe in € je 1 Million Token („0,09 / 0,45 €/M“). Es sind die normalen Pay-as-you-go-Preise vom 21.10.2026 für kurze Prompts, ohne Batch-, Cache- und Prioritäts-Tarife; Dollarpreise mit 1 € = 1,1215 $ umgerechnet, Scaleway und OVHcloud listen in Euro. Ein Diktat von einer Stunde Text sind grob 10.000 bis 15.000 Token Ausgabe, also meist wenige Cent. „ca.“ steht bei Modell-IDs, die der Anbieter nicht ausdrücklich nennt (aus dem Namen abgeleitet), und bei Werten aus Drittquellen.
+
+Gestaffelt oder befristet:
+- **OpenAI** GPT-6/5.6/5.5/5.4: Preise bis 272.000 Token Eingabe, darüber höher (zum Beispiel gpt-6-luna 0,20 / 0,75 $).
+- **Anthropic** Haiku 5.5: bis 100.000 Token Prompt 0,10 / 0,50 $, darüber 0,50 / 2,50 $.
+- **Gemini** 3.6 und 3.8 Flash: Einführungspreis bis 31.12.2026, ab 1.1.2027 1,50 / 7,50 $. Gemini 4 Argon: bis 30.11.2026 2 / 10 $, danach 4 / 20 $.
+- **DeepSeek:** Spitzenzeit-Preis (Mo bis Fr 01 bis 04 und 06 bis 10 Uhr UTC); außerhalb halb so teuer.
+- **xAI:** ab 200.000 Token Prompt der doppelte Preis.
+- **Cerebras:** Preis für gpt-oss-120b aus einer Drittquelle, die Preisseite nennt keinen.
+- **OpenRouter:** Anbieterpreise ohne Aufschlag; dazu kommen 5,5 % Gebühr beim Aufladen. Die Anzeige hängt deshalb „+5,5 %“ hinter jeden OpenRouter-Preis, bei Spracherkennung und bei Text-Modellen. Die Auswahl sind die meistgenutzten Modelle vom 20.10.2026.
+- **OVHcloud:** Mistral-Small-3.2 und Mistral-Nemo werden zum 04.11.2026 abgeschaltet.
+
+Ohne Preis: Cerebras qwen-3.8-27b, Groq llama-Modelle (nur auf Anfrage), SiliconFlow (die Preisseite nennt keine Währung und keine IDs), Together AI (die Preisseite nennt keine IDs; nur gpt-oss-120b ist sicher zugeordnet). Ollama und eigene Server sind kostenlos.
+
+| Anbieter | Modell | Eingabe / Ausgabe in € je 1 Mio. Token |
+|---|---|---|
+| Anthropic | claude-fable-5 | ca. 8,9166 / 44,5831 |
+| Anthropic | claude-fable-5-1 | 8,9166 / 44,5831 |
+| Anthropic | claude-haiku-4-5 | ca. 0,8917 / 4,4583 |
+| Anthropic | claude-haiku-5-5 | 0,0892 / 0,4458 |
+| Anthropic | claude-opus-4-5 | ca. 4,4583 / 22,2916 |
+| Anthropic | claude-opus-4-6 | ca. 4,4583 / 22,2916 |
+| Anthropic | claude-opus-4-7 | ca. 4,4583 / 22,2916 |
+| Anthropic | claude-opus-4-8 | ca. 4,4583 / 22,2916 |
+| Anthropic | claude-opus-5 | ca. 4,4583 / 22,2916 |
+| Anthropic | claude-opus-5-5 | 3,5667 / 17,8333 |
+| Anthropic | claude-sonnet-4-5 | ca. 2,675 / 13,3749 |
+| Anthropic | claude-sonnet-4-6 | ca. 2,675 / 13,3749 |
+| Anthropic | claude-sonnet-5 | ca. 1,7833 / 8,9166 |
+| Anthropic | claude-sonnet-5-5 | 1,7833 / 8,9166 |
+| Cerebras | gpt-oss-120b | ca. 0,3121 / 0,6687 |
+| DeepInfra | anthropic/claude-haiku-4-5 | 0,8917 / 4,4583 |
+| DeepInfra | anthropic/claude-sonnet-5 | 2,675 / 13,3749 |
+| DeepInfra | deepseek-ai/deepseek-r1-0528 | 0,4458 / 1,9171 |
+| DeepInfra | deepseek-ai/deepseek-v3.2 | 0,2318 / 0,3388 |
+| DeepInfra | deepseek-ai/deepseek-v4-flash | 0,0802 / 0,1605 |
+| DeepInfra | deepseek-ai/deepseek-v4-flash-0731 | 0,0535 / 0,1605 |
+| DeepInfra | deepseek-ai/deepseek-v4-pro | 1,1592 / 2,3183 |
+| DeepInfra | google/gemini-2.5-flash | 0,2675 / 2,2292 |
+| DeepInfra | google/gemma-4-31b-it | 0,1783 / 0,3567 |
+| DeepInfra | meta-llama/llama-3.3-70b-instruct-turbo | 0,0892 / 0,2853 |
+| DeepInfra | meta-llama/llama-4-scout-17b-16e-instruct | 0,0892 / 0,2675 |
+| DeepInfra | meta-llama/meta-llama-3.1-8b-instruct-turbo | 0,0178 / 0,0357 |
+| DeepInfra | microsoft/phi-4 | 0,0624 / 0,1248 |
+| DeepInfra | mistralai/mistral-nemo-instruct-2407 | 0,0259 / 0,0267 |
+| DeepInfra | mistralai/mistral-small-3.2-24b-instruct-2506 | 0,0669 / 0,1783 |
+| DeepInfra | moonshotai/kimi-k2.6 | 0,6687 / 3,1208 |
+| DeepInfra | moonshotai/kimi-k3 | 2,5412 / 12,7062 |
+| DeepInfra | qwen/qwen3-235b-a22b-instruct-2507 | 0,0802 / 0,4904 |
+| DeepInfra | qwen/qwen3-32b | 0,0713 / 0,2497 |
+| DeepInfra | qwen/qwen3.5-397b-a17b | 0,4012 / 2,675 |
+| DeepInfra | qwen/qwen3.6-27b | 0,2853 / 2,8533 |
+| DeepSeek | deepseek-flash | 0,2675 / 1,07 |
+| DeepSeek | deepseek-v4-pro | 1,177 / 3,531 |
+| Google Gemini | gemini-2.5-flash | 0,2675 / 2,2292 |
+| Google Gemini | gemini-2.5-flash-lite | 0,0892 / 0,3567 |
+| Google Gemini | gemini-2.5-pro | 1,1146 / 8,9166 |
+| Google Gemini | gemini-3-flash-preview | 0,4458 / 2,675 |
+| Google Gemini | gemini-3.1-flash-lite | 0,2229 / 1,3375 |
+| Google Gemini | gemini-3.1-pro-preview | 1,7833 / 10,70 |
+| Google Gemini | gemini-3.5-flash-lite | 0,2675 / 2,2292 |
+| Google Gemini | gemini-3.6-flash | 0,6687 / 3,3437 |
+| Google Gemini | gemini-3.8-flash | 0,6687 / 3,3437 |
+| Google Gemini | gemini-4-argon | 1,7833 / 8,9166 |
+| Groq | openai/gpt-oss-120b | 0,1337 / 0,535 |
+| Groq | openai/gpt-oss-20b | 0,0669 / 0,2675 |
+| Groq | openai/gpt-oss-safeguard-20b | 0,0669 / 0,2675 |
+| Groq | qwen/qwen3.8-27b | 0,7133 / 3,5667 |
+| Mistral | codestral | ca. 0,2675 / 0,8025 |
+| Mistral | ministral-3-14b | ca. 0,1783 / 0,1783 |
+| Mistral | ministral-3-3b | ca. 0,0892 / 0,0892 |
+| Mistral | ministral-3-8b | ca. 0,1337 / 0,1337 |
+| Mistral | mistral-large-3 | ca. 0,4458 / 1,3375 |
+| Mistral | mistral-large-4-0 | ca. 1,2127 / 3,7272 |
+| Mistral | mistral-medium-3-5 | 1,3375 / 6,6875 |
+| Mistral | mistral-small-2603 | 0,1337 / 0,535 |
+| OpenAI | chat-latest | 4,4583 / 26,7499 |
+| OpenAI | gpt-3.5-turbo | 0,4458 / 1,3375 |
+| OpenAI | gpt-4-turbo-2024-04-09 | 8,9166 / 26,7499 |
+| OpenAI | gpt-4.1 | 1,7833 / 7,1333 |
+| OpenAI | gpt-4.1-mini | 0,3567 / 1,4267 |
+| OpenAI | gpt-4.1-nano | 0,0892 / 0,3567 |
+| OpenAI | gpt-4o | 2,2292 / 8,9166 |
+| OpenAI | gpt-4o-mini | 0,1337 / 0,535 |
+| OpenAI | gpt-5 | 1,1146 / 8,9166 |
+| OpenAI | gpt-5-mini | 0,2229 / 1,7833 |
+| OpenAI | gpt-5-nano | 0,0446 / 0,3567 |
+| OpenAI | gpt-5-pro | 13,3749 / 106,9996 |
+| OpenAI | gpt-5.1 | 1,1146 / 8,9166 |
+| OpenAI | gpt-5.2 | 1,5604 / 12,4833 |
+| OpenAI | gpt-5.2-pro | 18,7249 / 149,7994 |
+| OpenAI | gpt-5.4 | 2,2292 / 13,3749 |
+| OpenAI | gpt-5.4-mini | 0,6687 / 4,0125 |
+| OpenAI | gpt-5.4-nano | 0,1783 / 1,1146 |
+| OpenAI | gpt-5.4-pro | 26,7499 / 160,4993 |
+| OpenAI | gpt-5.5 | 4,4583 / 26,7499 |
+| OpenAI | gpt-5.5-pro | 26,7499 / 160,4993 |
+| OpenAI | gpt-5.6-luna | 0,1783 / 1,07 |
+| OpenAI | gpt-5.6-sol | 3,5667 / 17,8333 |
+| OpenAI | gpt-5.6-terra | 1,7833 / 10,70 |
+| OpenAI | gpt-6-astra | 8,9166 / 44,5831 |
+| OpenAI | gpt-6-luna | 0,0892 / 0,4458 |
+| OpenAI | gpt-6-sol | 1,7833 / 8,9166 |
+| OpenAI | gpt-6.1-sol | 1,7833 / 8,9166 |
+| OpenAI | o1 | 13,3749 / 53,4998 |
+| OpenAI | o1-pro | 133,7494 / 534,9978 |
+| OpenAI | o3 | 1,7833 / 7,1333 |
+| OpenAI | o3-mini | 0,9808 / 3,9233 |
+| OpenAI | o3-pro | 17,8333 / 71,333 |
+| OpenAI | o4-mini | 0,9808 / 3,9233 |
+| OpenRouter | anthropic/claude-haiku-5.5 | 0,0892 / 0,4458 |
+| OpenRouter | anthropic/claude-opus-5.5 | 3,5667 / 17,8333 |
+| OpenRouter | anthropic/claude-sonnet-5.5 | 1,7833 / 8,9166 |
+| OpenRouter | deepseek/deepseek-v4-flash | 0,0811 / 0,1623 |
+| OpenRouter | deepseek/deepseek-v4-flash-0731 | 0,3923 / 1,177 |
+| OpenRouter | deepseek/deepseek-v4.1-flash | 0,0499 / 0,107 |
+| OpenRouter | deepseek/deepseek-v4.1-flash-1017 | 0,2675 / 1,07 |
+| OpenRouter | meta/muse-spark-1.3-contributor | 0,0892 / 0,1783 |
+| OpenRouter | minimax/minimax-m3.1-flash:free | 0 / 0 |
+| OpenRouter | nvidia/nemotron-3-ultra-550b-a55b:free | 0 / 0 |
+| OpenRouter | openai/gpt-6-luna | 0,0892 / 0,4458 |
+| OpenRouter | stepfun/step-5-preview | 0,8917 / 2,4075 |
+| OpenRouter | tencent/hy3 | 0,1177 / 0,4708 |
+| OpenRouter | tencent/hy4-preview | 0,7436 / 2,23 |
+| OpenRouter | xiaomi/mimo-v2.6-flash | 0,1248 / 0,2497 |
+| OpenRouter | z-ai/glm-5.3 | 0,0704 / 1,2483 |
+| OpenRouter | z-ai/glm-5.3-flash | 0,0419 / 0,107 |
+| OVHcloud | gpt-oss-120b | 0,08 / 0,40 |
+| OVHcloud | gpt-oss-20b | 0,04 / 0,15 |
+| OVHcloud | meta-llama-3_3-70b-instruct | 0,67 / 0,67 |
+| OVHcloud | mistral-nemo-instruct-2407 | 0,13 / 0,13 |
+| OVHcloud | mistral-small-3.2-24b-instruct-2506 | 0,09 / 0,28 |
+| OVHcloud | qwen2.5-vl-72b-instruct | 0,91 / 0,91 |
+| OVHcloud | qwen3.5-397b-a17b | 0,60 / 3,60 |
+| OVHcloud | qwen3.5-9b | 0,10 / 0,15 |
+| OVHcloud | qwen3.6-27b | 0,40 / 2,70 |
+| OVHcloud | qwen3.8-27b | 0,40 / 2,70 |
+| Scaleway | deepseek-v4-flash-0731 | 0,40 / 0,80 |
+| Scaleway | deepseek-v4.1-flash | 0,60 / 1,80 |
+| Scaleway | gemma-4-26b-a4b-it | 0,25 / 0,50 |
+| Scaleway | glm-5.2 | 1,80 / 5,50 |
+| Scaleway | glm-5.3 | 1,80 / 5,50 |
+| Scaleway | gpt-oss-120b | 0,15 / 0,60 |
+| Scaleway | llama-3.3-70b-instruct | 0,90 / 0,90 |
+| Scaleway | mistral-medium-3.5-128b | 1,50 / 7,50 |
+| Scaleway | mistral-small-3.2-24b-instruct-2506 | 0,15 / 0,35 |
+| Scaleway | qwen3-235b-a22b-instruct-2507 | 0,75 / 2,25 |
+| Scaleway | qwen3.5-397b-a17b | 0,60 / 3,60 |
+| Scaleway | qwen3.6-35b-a3b | 0,25 / 1,50 |
+| Scaleway | qwen3.8-27b | 0,60 / 3,30 |
+| Together AI | openai/gpt-oss-120b | 0,1337 / 0,535 |
+| xAI | grok-4.20-0309-non-reasoning | 1,1146 / 2,2292 |
+| xAI | grok-4.20-0309-reasoning | 1,1146 / 2,2292 |
+| xAI | grok-4.20-multi-agent-0309 | 1,1146 / 2,2292 |
+| xAI | grok-4.3 | 1,1146 / 2,2292 |
+| xAI | grok-4.5 | 1,7833 / 5,35 |
+| xAI | grok-4.6 | 1,7833 / 5,35 |
+| xAI | grok-4.7 | 1,7833 / 5,35 |
+| xAI | grok-build-0.1 | 0,8917 / 1,7833 |
 
 ### Nicht gefunden
 
