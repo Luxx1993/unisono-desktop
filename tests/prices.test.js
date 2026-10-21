@@ -33,5 +33,13 @@ test('label puts the price behind the name', () => {
     assert.equal(prices.label('custom', 'whisper-1', 'whisper-1'), 'whisper-1');
 });
 
+test('text models show input / output per million tokens', () => {
+    assert.equal(prices.formatChat(prices.chatPrice('anthropic', 'claude-haiku-5-5')), '0,0892 / 0,4458 €/M');
+    assert.equal(prices.formatChat(prices.chatPrice('scaleway', 'gpt-oss-120b')), '0,15 / 0,60 €/M');
+    assert.equal(prices.formatChat(prices.chatPrice('openrouter', 'minimax/minimax-m3.1-flash:free')), '0 / 0 €/M');
+    assert.equal(prices.chatLabel('groq', 'unknown'), 'unknown');
+    assert.equal(prices.chatLabel('openai', 'gpt-6-luna'), 'gpt-6-luna · 0,0892 / 0,4458 €/M');
+});
+
 if (failed) { console.log(failed + ' FEHLER'); process.exit(1); }
 console.log('Alles gut');
