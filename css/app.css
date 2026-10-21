@@ -246,6 +246,8 @@ select.input { appearance: none; padding-right: var(--space-8); background-image
 .input-wrap .icon-btn { position: absolute; right: var(--space-1); top: 50%; transform: translateY(-50%); }
 
 .options-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+/* Engine and model each get a full row: model names now carry their price and would be cut off at half width. */
+#start-options > .field:has(> #engine-select, > #model-select) { grid-column: 1 / -1; }
 .transcript-aside .options-grid.is-two { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
 
 /* ---------------- Status ---------------- */

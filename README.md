@@ -9,8 +9,13 @@ Audio und Video transkribieren, lesen, korrigieren und exportieren, komplett im 
 ## Auf einen Blick
 
 - **Läuft einfach so:** `index.html` per Doppelklick öffnen. Kein Node.js, kein Server, keine Installation, keine Verbindung zu Google Fonts. Ideal für Dienstrechner.
-- **Viele Engines:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral) mit Sprechererkennung, dazu OpenAI, Groq, Deepgram, Soniox, Gemini, xAI u. a. ohne Sprechertrennung. Zur Auswahl stehen nur Engines, für die ein Key hinterlegt ist.
+- **Viele Engines:** Gladia, ElevenLabs (Scribe), AssemblyAI und Mistral (Voxtral) mit Sprechererkennung, dazu OpenAI, Groq, Deepgram, Soniox, Gemini, xAI, Azure, Together, OpenRouter, Scaleway, OVHcloud u. a. ohne Sprechertrennung. Jeder Anbieter hat in seiner Markenfarbe einen Punkt. Zur Auswahl stehen nur Engines, für die ein Key hinterlegt ist.
+- **Preise sichtbar:** Neben jedem Modell steht der Listenpreis in € pro Stunde Audio (siehe „Preise der Spracherkennung“).
 - **Diktat:** sprechen, die KI räumt den Text auf (Stile wie Aufräumen, E-Mail oder Aktenvermerk), er liegt sofort in der Zwischenablage. Mit schwebendem Fenster, Umformulieren, Langdiktat, Ersetzungsregeln, Verlauf und Statistik.
+- **Live mitschreiben:** Der Text erscheint schon beim Sprechen (ElevenLabs, Deepgram, Mistral, Gladia), auch im schwebenden Fenster.
+- **Archiv:** Alle Transkripte bleiben im Browser, mit Suche und Kennzahlen; ohne Netz aufgenommene Dateien warten und werden später transkribiert.
+- **Projekte, Protokolle, Aufgaben:** Personen je Projekt, Vorlagen wie Baubesprechung oder Aktenvermerk und eine Aufgabenliste mit Verantwortlichen und Fristen.
+- **Meeting-Aufnahme** (zuschaltbares Modul): Tab-Ton und eigenes Mikrofon ohne Bot im Meeting.
 - **Aufnehmen im Browser:** Mikrofonaufnahme mit Pause, Pegelanzeige und Absturzsicherung.
 - **Fachbegriffe:** eine Liste mit Namen und Fachwörtern, die in passender Form an jede Engine geht.
 - **Live-Fortschritt:** Hochladen mit echtem Prozentwert und Tempo, Verarbeitungszeit, jederzeit abbrechbar.
@@ -169,6 +174,8 @@ Die Karte **Statistik** zählt wie die Android-App: Diktate, Wörter, Zeichen, g
 - **Jetzt aufnehmen, später transkribieren:** Ist beim Start keine Verbindung da (oder bricht der Upload deshalb ab), wartet die Datei mit allen Einstellungen im Archiv. Sobald der Browser wieder online ist, wird sie automatisch transkribiert und landet samt Audio im Archiv; „Jetzt versuchen“ startet es von Hand.
 - Auf dem Handy erreicht man das Archiv über **Mehr → Archiv → Anzeigen**. Das Archiv liegt in IndexedDB; im privaten Fenster ist es aus.
 
+<img src="docs/screenshots/archive.png" alt="Archiv mit Kennzahlen, Suche und gespeicherten Transkripten" width="100%">
+
 ## Grenzen der Anbieter
 
 Vor dem Upload prüft Unisono Dateigröße und Länge gegen die Grenzen des gewählten Anbieters und schlägt passende Alternativen vor – so schlägt nichts erst nach einem langen Upload fehl.
@@ -234,10 +241,11 @@ Die KI-Zusammenfassung wird in HTML, Markdown und Projektdatei mit exportiert (a
 |---|---|---|
 | Gladia (v2) | `solaria-3` (DE/EN/FR/ES/IT, feste Sprache nötig), `solaria-1` (100+ Sprachen) | Upload → `/v2/pre-recorded` → Polling |
 | ElevenLabs (Scribe) | `scribe_v2`, `scribe_v1` | Synchroner Upload an `/v1/speech-to-text` |
-| AssemblyAI (v2) | `universal-3-5-pro`, `universal-2` | Upload → `/v2/transcript` → Polling |
+| AssemblyAI | `universal-3-5-pro`, `universal-2` | Upload → `/v2/transcript` → Polling |
+| AssemblyAI (Sync-Modell) | `universal-3-5-pro-sync` | Eine Anfrage an `/v1/transcribe`, bis 20 Minuten und 256 MB, ohne Sprecher; derselbe Key und dieselbe Region wie AssemblyAI |
 | Mistral (Voxtral) | `voxtral-mini-latest`, `voxtral-small-transcribe-3-0`, `voxtral-mini-transcribe-3-0` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
 
-Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar, außerdem bei OpenAI mit dem Modell `gpt-4o-transcribe-diarize`. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
+Live mitschreiben geht mit ElevenLabs, Deepgram, Mistral und Gladia, siehe „Live mitschreiben (Echtzeit)“. Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar, außerdem bei OpenAI mit dem Modell `gpt-4o-transcribe-diarize`. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
 
 ### Region, Endpunkt und eigene Server
 
@@ -268,6 +276,10 @@ Jede KI mit Key unter „API-Keys“ (Anthropic, OpenAI, Gemini, Mistral, Ollama
 - **Projekte und Personen:** Auf der Seite **Projekte** legst du Projekte an und trägst die Personen ein, die immer wieder vorkommen, mit Rolle oder Firma („Frau Kaya, Bauherrin“). Ein Projekt ist das **aktuelle**; neue Transkripte gehören dazu (wählbar auch auf „Transkribieren“ und im Kopf des Transkripts). Die Namen des aktuellen Projekts gehen als Fachbegriffe an die Spracherkennung, auch im Diktat. Beim Benennen der Sprecher und bei Verantwortlichen schlägt Unisono sie vor, dazu „Ich“.
 - **Protokoll-Vorlagen:** Unter „Zusammenfassung und Protokoll“ gibt es neben Stichpunkten, Zusammenfassung und Protokoll mit Aufgaben die Vorlagen **Baubesprechung** (nummerierte Punkte, Termine, Aufgabentabelle, Behinderungen und Nachträge), **Begehung** (Feststellungen nach Ort, Mängelliste, nach Merkern geordnet), **Telefonnotiz** und **Aktenvermerk**. Projekt, Datum, die Namen der Sprecher, die Personen des Projekts mit Rolle und die Merker gehen als Kontext mit, damit die KI sie nicht raten muss.
 - **Aufgaben:** Die Karte **Aufgaben** sammelt, wer was bis wann tut. **Aufgaben erkennen** liest sie mit der KI aus dem Transkript (Anbieter und Modell wie bei der Zusammenfassung; schon vorhandene kommen nicht doppelt). Jede Aufgabe lässt sich ändern, abhaken, löschen oder von Hand anlegen; eine Frist ist ein Datum oder ein Text wie „nächste Woche“. Kopieren als Tabelle (Markdown) oder Speichern als CSV für Excel.
+<img src="docs/screenshots/projects.png" alt="Projekt mit wiederkehrenden Personen" width="100%">
+
+<p><img src="docs/screenshots/tasks.png" alt="Aufgabenliste mit Verantwortlichen und Fristen" width="280"></p>
+
 - Projekt und Aufgaben gehören zum Transkript: Sie stehen im Archiv (mit der Zahl offener Aufgaben, durchsuchbar), in der Projektdatei und im Markdown- und HTML-Export.
 
 ## Meeting-Aufnahme (Modul)
@@ -314,6 +326,7 @@ js/player.js            Player-Bedienung, Wellenform und Sprecherspur
 js/search.js            Suchen und Ersetzen mit Markierung im Text
 js/progress.js          Fortschrittsanzeige mit Upload-Prozent und Abbrechen
 js/icons.js             Linien-Icons aus dem Sprite in index.html
+js/prices.js            Listenpreise der Modelle in € pro Stunde (mit Node testbar)
 js/brand-logos.js       Logos der Anbieter als SVG
 js/export.js            HTML, Markdown, TXT, SRT, VTT und Projektdatei aus dem bearbeiteten Stand
 js/vocabulary.js        Fachbegriffsliste: Pflege, Speicherung, Import/Export, Anbieter-Grenzen
@@ -330,17 +343,17 @@ js/orbs.js              Kugeln Wolke (WebGL-Shader) und Welle (Canvas) wie im An
 js/dictation-mini.js    Schwebendes Fenster (Document Picture-in-Picture) für das Diktat
 js/archive-core.js      Archiv ohne Seite: Einträge, Suche, Kennzahlen (mit Node testbar)
 js/archive.js           Archiv und Warteschlange „später transkribieren“ (IndexedDB) mit der Seite „Archiv“
-tests/                  `node tests/dictation-core.test.js`, `node tests/archive-core.test.js`
+tests/                  `node tests/<name>.test.js` für dictation-core, archive-core, protocol-core, realtime und prices
 js/appearance.js        Hell, Dunkel oder wie System, wird vor dem ersten Zeichnen gesetzt
 js/settings.js          Seite „Einstellungen“: Darstellung, Daten löschen
 js/app.js               Seiten, Keys, Engine-Auswahl, Datei-Upload, Ablauf der Transkription
 js/apis/common.js       Gemeinsame HTTP-Helfer: Upload mit Fortschritt, Polling, Abbrechen
 js/apis/*.js            Je ein Modul pro Engine (Gladia, ElevenLabs, AssemblyAI, Mistral, weitere in dictation-engines.js, KI in llm.js)
-js/apis/realtime.js     Live-Transkription: Mikrofon als 16-kHz-PCM über WebSocket (ElevenLabs, Deepgram)
+js/apis/realtime.js     Live-Transkription: Mikrofon als 16-kHz-PCM über WebSocket (ElevenLabs, Deepgram, Mistral, Gladia)
 docs/screenshots/       Bilder für diese README
 ```
 
-Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und nicht als ES-Module: Browser blockieren ES-Module, wenn eine Seite per Doppelklick (`file://`) geöffnet wird. Die Module teilen sich das globale Objekt `window.Unisono`. Eine neue Engine wird als Datei unter `js/apis/` angelegt, registriert sich in `Unisono.apis` und wird in `index.html` eingebunden. Ihre Farbe kommt aus `--provider-free` bzw. einem neuen Token in `css/tokens.css` und wird in `css/app.css` unter „Provider colors“ zugeordnet.
+Die Skripte werden bewusst als klassische `<script defer>`-Dateien geladen und nicht als ES-Module: Browser blockieren ES-Module, wenn eine Seite per Doppelklick (`file://`) geöffnet wird. Die Module teilen sich das globale Objekt `window.Unisono`. Eine neue Engine wird als Datei unter `js/apis/` angelegt, registriert sich in `Unisono.apis` und wird in `index.html` eingebunden. Ihre Farbe (Farbton der Marke, gedeckt wie Salbei und Fjord) kommt aus einem Token in `css/tokens.css` bzw. `--pk` in `css/app.css` unter „Provider colors“.
 
 ## Design anpassen
 
@@ -377,7 +390,7 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 
 ## Preise der Spracherkennung
 
-Die App zeigt den Preis neben jedem Modell in der Modellauswahl (Datei) und in der Auswahl der Echtzeit-Modelle, mit 2 bis 4 Nachkommastellen und ohne überflüssige Nullen. Die Daten stehen in `der Android-App (`ModelPrices.kt`)`, hier in `js/prices.js`.
+Die App zeigt den Preis neben jedem Modell in der Modellauswahl (Datei) und in der Auswahl der Echtzeit-Modelle, mit 2 bis 4 Nachkommastellen und ohne überflüssige Nullen. Die Daten stehen in `js/prices.js`; die Android-App führt dieselben Werte in `ModelPrices.kt`.
 
 Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, normale Pay-as-you-go-Preise, Dollarpreise umgerechnet mit 1 € = 1,1215 $ (Gladia, Scaleway und OVHcloud listen in Euro). Aufpreise für Sprechertrennung oder Fachbegriffe sind nicht enthalten. „ca.“ steht bei gerechneten, geschätzten oder nur aus Drittquellen belegten Werten (Token-Preise, Aktionspreise, „ab“-Preise). Wo kein Preis gefunden wurde, zeigt die App keinen.
 
