@@ -388,6 +388,22 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 - **Mit echten Keys zu prüfen:** ob Cerebras und Scaleway Anfragen direkt aus dem Browser zulassen („Prüfen“ unter „API-Keys“).
 - **Ideen danach:** Meeting-Aufnahme laufend sichern wie die Aufnahme vor Ort; Aufgaben über alle Transkripte eines Projekts hinweg; eigene Protokoll-Vorlagen.
 
+## Preisvergleich: API oder Abo?
+
+Was kosten 20, 50 oder 100 Stunden Transkription im Monat, wenn du direkt über die API bezahlst (Unisono mit eigenem Key) oder ein Abo nimmst? Die API-Preise sind die Listenpreise aus der Tabelle „Preise der Spracherkennung“ unten, Stand 21.10.2026. Die Abo-Preise stammen teils aus Vergleichsseiten und sind vor einem Kauf zu prüfen. Alles in USD pro Monat, ein Tarif pro Anbieter.
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/preise-20h.png" alt="Kosten pro Monat bei 20 Stunden: APIs 3,59 bis 7,20 $, Abos 8,33 bis 12,99 $"></td>
+    <td><img src="docs/screenshots/preise-50h.png" alt="Kosten pro Monat bei 50 Stunden: Gladia 8,97 $, TurboScribe 10 $, Mistral und AssemblyAI 10,50 $"></td>
+    <td><img src="docs/screenshots/preise-100h.png" alt="Kosten pro Monat bei 100 Stunden: TurboScribe, Wispr Flow und HiNotes günstiger als jede API"></td>
+  </tr>
+</table>
+
+- **Bis etwa 20 Stunden** ist die API immer billiger als ein Abo.
+- **Bei 50 Stunden** liegen Gladia (8,97 $) und TurboScribe (10 $) vorn; Mistral und AssemblyAI folgen mit 10,50 $.
+- **Ab 100 Stunden** sind die Flatrate-Abos von TurboScribe, Wispr Flow und HiNotes (10 bis 16,58 $) günstiger als jede API; Gladia liegt bei 17,94 $.
+
 ## Preise der Spracherkennung
 
 Die App zeigt den Preis neben jedem Modell in der Modellauswahl (Datei) und in der Auswahl der Echtzeit-Modelle, mit 2 bis 4 Nachkommastellen und ohne überflüssige Nullen. Die Daten stehen in `js/prices.js`; die Android-App führt dieselben Werte in `ModelPrices.kt`.
