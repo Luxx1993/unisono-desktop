@@ -116,7 +116,7 @@ Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt i
 - **Verlauf:** die letzten 50 Diktate (Zeit, Stil, Text) mit Kopieren, Anzeigen und Löschen; löschbar unter **Einstellungen → Daten und Datenschutz**.
 - **Einstellungen der Seite:** Engine (Standard: ElevenLabs, wenn ein Key da ist, sonst die erste Engine mit Key), Modell, Sprache, KI-Anbieter und -Modell (Standard Claude Haiku 5.5, schnell und günstig), automatisch kopieren, Langdiktat. ElevenLabs und Mistral antworten in einem Schritt, Gladia und AssemblyAI brauchen einige Sekunden länger.
 
-- **Mehr Anbieter für das Diktat:** Für die Spracherkennung zusätzlich OpenAI, Groq, Together AI, Scaleway, OVHcloud, SiliconFlow, OpenRouter, xAI (Grok), Deepgram, Soniox, Google Gemini und AssemblyAI Sync (die Ein-Anfrage-Variante von AssemblyAI, gleicher Key wie AssemblyAI). Zum Aufräumen die KI von Anthropic, OpenAI, Groq, Google Gemini, Mistral, OpenRouter, Together AI, DeepInfra, xAI, DeepSeek, Cerebras, SiliconFlow, Scaleway oder OVHcloud. Wer einen Anbieter schon für die Spracherkennung eingetragen hat, nutzt denselben Key zum Aufräumen. Modelle und Adressen sind dieselben wie in der Android-App; bei Anbietern ohne feste Modellliste lädt Unisono die Liste des Anbieters, sobald ein Key da ist. Diese Engines gibt es auch für Dateien; dort ist „Sprecher erkennen“ für sie abgeschaltet, und die Grenzen des Anbieters (Größe, Länge) werden vor dem Upload geprüft.
+- **Mehr Anbieter für das Diktat:** Für die Spracherkennung zusätzlich OpenAI, Groq, Together AI, Scaleway, OVHcloud, SiliconFlow, OpenRouter, xAI (Grok), Deepgram, Soniox, Google Gemini. AssemblyAI bietet neben den normalen Modellen ein Sync-Modell (eine Anfrage statt Hochladen und Warten, bis 20 Minuten, ohne Sprecher). Zum Aufräumen die KI von Anthropic, OpenAI, Groq, Google Gemini, Mistral, OpenRouter, Together AI, DeepInfra, xAI, DeepSeek, Cerebras, SiliconFlow, Scaleway oder OVHcloud. Wer einen Anbieter schon für die Spracherkennung eingetragen hat, nutzt denselben Key zum Aufräumen. Modelle und Adressen sind dieselben wie in der Android-App; bei Anbietern ohne feste Modellliste lädt Unisono die Liste des Anbieters, sobald ein Key da ist. Diese Engines gibt es auch für Dateien; dort ist „Sprecher erkennen“ für sie abgeschaltet, und die Grenzen des Anbieters (Größe, Länge) werden vor dem Upload geprüft.
 - **Auch dabei:** Microsoft Azure, Ollama und eigene Server, siehe „Region, Endpunkt und eigene Server“. **Nicht dabei** sind die Offline-Modelle auf dem Gerät. Ob Cerebras und Scaleway Anfragen aus dem Browser zulassen, ließ sich ohne Key nicht prüfen; **Prüfen** unter „API-Keys“ zeigt es.
 - **Falls die KI ausfällt** (Key fehlt, Netzwerk): Das Rohtext-Ergebnis steht trotzdem bereit, mit dem Grund in der Meldung.
 
@@ -245,7 +245,7 @@ Manche Anbieter brauchen in ihrer Zeile unter „API-Keys“ mehr als einen Key.
 
 | Anbieter | Einstellung | Hinweis |
 |---|---|---|
-| AssemblyAI | Region Standard oder EU (Dublin) | Gilt auch für AssemblyAI Sync. Derselbe Key. |
+| AssemblyAI | Region Standard oder EU (Dublin) | Gilt auch für das Sync-Modell. Derselbe Key. |
 | Soniox | Region Standard oder EU | Der Key muss aus einem EU-Projekt der Soniox-Konsole stammen. |
 | Deepgram | Region Standard oder EU | Derselbe Key. |
 | OpenRouter | Region Standard oder EU | Nur für Firmenkonten (Enterprise); gilt für Spracherkennung und Aufräumen. |
@@ -374,3 +374,76 @@ Die JavaScript-Dateien greifen über Element-IDs (z. B. `start-btn`, `segment-li
 - **Echtzeit, weitere Schritte:** live mitschreiben auch auf der Seite „Aufnahme“ (mit Sprechern bei Deepgram) und mit weiteren Anbietern, die es können (Soniox, AssemblyAI, OpenAI, Gemini, xAI).
 - **Mit echten Keys zu prüfen:** ob Cerebras und Scaleway Anfragen direkt aus dem Browser zulassen („Prüfen“ unter „API-Keys“).
 - **Ideen danach:** Meeting-Aufnahme laufend sichern wie die Aufnahme vor Ort; Aufgaben über alle Transkripte eines Projekts hinweg; eigene Protokoll-Vorlagen.
+
+## Preise der Spracherkennung
+
+Die App zeigt den Preis neben jedem Modell in der Modellauswahl (Datei) und in der Auswahl der Echtzeit-Modelle, mit 2 bis 4 Nachkommastellen und ohne überflüssige Nullen. Die Daten stehen in `der Android-App (`ModelPrices.kt`)`, hier in `js/prices.js`.
+
+Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, normale Pay-as-you-go-Preise, Dollarpreise umgerechnet mit 1 € = 1,1215 $ (Gladia, Scaleway und OVHcloud listen in Euro). Aufpreise für Sprechertrennung oder Fachbegriffe sind nicht enthalten. „ca.“ steht bei gerechneten, geschätzten oder nur aus Drittquellen belegten Werten (Token-Preise, Aktionspreise, „ab“-Preise). Wo kein Preis gefunden wurde, zeigt die App keinen.
+
+### Datei
+
+| Anbieter | Modell | €/h |
+|---|---|---|
+| OpenRouter | openai/whisper-large-v3-turbo | 0,0096 |
+| OpenRouter | openai/whisper-large-v3 | 0,0257 |
+| OpenRouter | nvidia/parakeet-tdt-0.6b-v3 | 0,0802 |
+| OpenRouter | microsoft/mai-transcribe-2 | 0,0892 |
+| OpenRouter | openai/gpt-transcribe | 0,2407 |
+| OpenRouter | elevenlabs/scribe-v2 | 0,1958 |
+| OpenRouter | x-ai/grok-stt-1.0 | 0,0899 |
+| OpenRouter | mistralai/voxtral-mini-transcribe | 0,1605 |
+| OpenRouter | google/gemini-3.5-transcribe | ca. 0,2675 |
+| OpenRouter | deepgram/nova-3 | ca. 0,2311 |
+| OpenRouter | assemblyai/universal-3-6-pro | ca. 0,2664 |
+| Groq | whisper-large-v3-turbo | 0,0357 |
+| Groq | whisper-large-v3 | 0,099 |
+| OVHcloud | whisper-large-v3-turbo | 0,046 |
+| OVHcloud | whisper-large-v3 | 0,147 |
+| Scaleway | whisper-large-v3 | 0,18 |
+| Together AI | openai/whisper-large-v3 | 0,0802 |
+| Together AI | nvidia/parakeet-tdt-0.6b-v3 | 0,0802 |
+| xAI | grok-voice-transcribe-2.0 | ca. 0,0892 |
+| Soniox | stt-async-v5 | ca. 0,087 |
+| Azure | mai-transcribe-2 | 0,0892 |
+| Azure | mai-transcribe-1.5 | 0,321 |
+| AssemblyAI | universal-2 | 0,1337 |
+| AssemblyAI | universal-3-5-pro | 0,1872 |
+| AssemblyAI | universal-3-5-pro-sync | ca. 0,4012 |
+| Gladia | solaria-3 | 0,16 |
+| Gladia | solaria-1 | 0,27 |
+| OpenAI | gpt-4o-mini-transcribe | 0,1605 |
+| OpenAI | gpt-transcribe | ca. 0,2407 |
+| OpenAI | gpt-4o-transcribe | 0,321 |
+| OpenAI | gpt-4o-transcribe-diarize | 0,321 |
+| Mistral | voxtral-mini-latest | ca. 0,1872 |
+| Mistral | voxtral-mini-transcribe-3-0 | 0,1872 |
+| Mistral | voxtral-small-transcribe-3-0 | 0,214 |
+| ElevenLabs | scribe_v2 | 0,1962 |
+| Deepgram | nova-3 | 0,23 |
+| Gemini | gemini-3.5-transcribe | ca. 0,2675 |
+| Gemini | gemini-3.6-flash | ca. 0,2318 |
+| Gemini | gemini-3.8-flash | ca. 0,2318 |
+| Gemini | gemini-3.5-flash-lite | ca. 0,058 |
+
+### Echtzeit
+
+| Anbieter | Modell | €/h |
+|---|---|---|
+| Soniox | stt-rt-v5 | 0,107 |
+| AssemblyAI | universal-streaming-english | 0,1337 |
+| AssemblyAI | universal-streaming-multilingual | 0,1337 |
+| AssemblyAI | universal-3-6-pro | 0,4012 |
+| xAI | grok-voice-transcribe-2.0 | ca. 0,1783 |
+| Deepgram | nova-2 | 0,3121 |
+| Deepgram | nova-3 | ca. 0,2568 |
+| Deepgram | flux-general-en | ca. 0,3477 |
+| Deepgram | flux-general-multi | 0,4173 |
+| ElevenLabs | scribe_v2_realtime | 0,3477 |
+| Mistral | voxtral-mini-transcribe-realtime-3-0 | 0,428 |
+| Mistral | voxtral-mini-transcribe-realtime-2602 | ca. 0,428 |
+| Gladia | solaria-1 | 0,68 |
+
+### Nicht gefunden
+
+AssemblyAI Universal-3 Pro, SiliconFlow (SenseVoice wird nach Zeichen abgerechnet), Deepgram Nova-2 und Flux für Dateien, die Preise des Aufräumens mit KI-Modellen (Token-Preise, nicht recherchiert). Groq rechnet mindestens 10 s je Anfrage ab, Scaleway gibt 60 Minuten frei, OpenRouter erhebt 5,5 % beim Aufladen; Deepgram Nova-3 und Flux Streaming sind derzeit Aktionspreise.

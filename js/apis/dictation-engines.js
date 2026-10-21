@@ -4,7 +4,7 @@
  *
  * Endpoints, field names and model ids are the ones the Android app uses, which in turn come from
  * each provider's own documentation. quick: true marks engines that answer within a second or two.
- * keyId: the engine shares the key of another entry (AssemblyAI Sync uses the AssemblyAI key).
+ * keyId: the engine shares the key of another entry (a separate entry can use another entry's key).
  */
 window.Unisono = window.Unisono || {};
 (function (S) {
@@ -261,25 +261,6 @@ window.Unisono = window.Unisono || {};
         return plain(text, raw);
     }
 
-    // ---- AssemblyAI Sync API: one request, the answer is the transcript --------------------------------
-    register('assemblyai_sync', {
-        label: 'AssemblyAI Sync', keyId: 'assembly',
-        description: 'Die schnelle Anfrage-in-einem-Schritt-Variante von AssemblyAI (Key von AssemblyAI).',
-        keyUrl: 'https://www.assemblyai.com/dashboard/api-keys',
-        models: [{ id: 'universal-3-5-pro', name: 'Universal-3.5 Pro' }],
-        async transcribe(file, { key, model, language, signal, onStage, onUpload }) {
-            onStage('upload', 'Sende Audio an AssemblyAI …');
-            const form = new FormData();
-            form.append('audio', file);
-            if (lang(language)) form.append('config', new Blob([JSON.stringify({ language_codes: [language.split('-')[0]] })], { type: 'application/json' }));
-            const raw = await S.http.send((setting('assembly', 'region') === 'eu' ? 'https://sync.eu.assemblyai.com' : 'https://sync.assemblyai.com') + '/v1/transcribe', {
-                headers: { Authorization: key, 'X-AAI-Model': model }, body: form, signal, onUpload,
-                onUploaded: () => onStage('process', 'AssemblyAI verarbeitet das Audio …')
-            }, 'AssemblyAI Sync');
-            return plain(raw.text, raw);
-        }
-    });
-
     // ---- Microsoft Azure Speech: MAI-Transcribe through the fast transcription API --------------------
     // The address is the user's own Speech resource ("Keys and Endpoint" in the Azure portal).
     const AZURE_API = 'api-version=2025-10-15';
@@ -341,7 +322,7 @@ window.Unisono = window.Unisono || {};
     const LIMITS = {
         openai: { maxBytes: 25 * MB }, groq: { maxBytes: 25 * MB }, scaleway: { maxBytes: 25 * MB }, openrouter: { maxBytes: 25 * MB },
         siliconflow: { maxBytes: 50 * MB }, xai: { maxBytes: 500 * 1000 * 1000 }, deepgram: { maxBytes: 2048 * MB }, ovhcloud: { maxBytes: 2048 * MB },
-        assemblyai_sync: { maxBytes: 256 * MB, maxSeconds: 20 * 60 }, soniox: { maxSeconds: 300 * 60 },
+        soniox: { maxSeconds: 300 * 60 },
         azure: { maxBytes: 300 * MB, maxSeconds: 2 * 3600 }
     };
     for (const [id, limit] of Object.entries(LIMITS)) S.apis[id].limits = () => limit;

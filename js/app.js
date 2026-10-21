@@ -21,7 +21,7 @@ window.Unisono = window.Unisono || {};
     const engineIds = () => Object.keys(S.apis);
     const hasEngineKey = id => isConfigured(id);
     const engineIdsWithKey = () => engineIds().filter(hasEngineKey);
-    // An engine may share the key of another entry (AssemblyAI Sync uses the AssemblyAI key).
+    // An engine may share the key of another entry (a separate entry can use another entry's key).
     const keyIdOf = id => S.apis[id]?.keyId || id;
 
     let currentFile = null;
@@ -399,7 +399,7 @@ window.Unisono = window.Unisono || {};
         selectedProvider = S.apis[id] && hasEngineKey(id) ? id : (withKey[0] || (S.apis.gladia ? 'gladia' : engineIds()[0]));
         const api = S.apis[selectedProvider];
         const previousModel = $('model-select').value;
-        $('model-select').replaceChildren(...api.models.map(m => h('option', { value: m.id, text: m.name })));
+        $('model-select').replaceChildren(...api.models.map(m => h('option', { value: m.id, text: S.prices.label(selectedProvider, m.id, m.name) })));
         if (keepModel && api.models.some(m => m.id === previousModel)) $('model-select').value = previousModel;
         renderProviderCards();
         updateHint();
@@ -419,7 +419,9 @@ window.Unisono = window.Unisono || {};
     function loadConfig() {
         let values = {};
         try { values = JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}') || {}; } catch (_) {}
-        selectProvider(values.provider || values['provider-select']);
+        const upgraded = S.upgradeEngine(values.provider || values['provider-select'], values['model-select']);
+        values['model-select'] = upgraded.model;
+        selectProvider(upgraded.id);
         for (const id of CONFIG_FIELDS) {
             if (!(id in values)) continue;
             if ($(id).type === 'checkbox') $(id).checked = values[id];
@@ -477,7 +479,7 @@ window.Unisono = window.Unisono || {};
     function limitProblems(providerId) {
         if (!currentFile) return [];
         const api = S.apis[providerId];
-        const lim = api.limits ? api.limits() : {};
+        const lim = api.limits ? api.limits(providerId === selectedProvider ? $('model-select').value : undefined) : {};
         const problems = [];
         if (lim.maxBytes && currentFile.size > lim.maxBytes) {
             problems.push(`Die Datei ist ${formatSize(currentFile.size)} groß, ${api.label} nimmt höchstens ${formatSize(lim.maxBytes)} an.`);
