@@ -41,20 +41,20 @@
   --focus-ring: #1F1C1A;
 
   /* ---- Anbieter-Akzente: Basis (Punkte, Grafik) ---- */
-  --provider-gladia: #7FA38C;      /* Salbei */
-  --provider-assemblyai: #5F7FA8;  /* Fjord */
+  --provider-gladia: #947AFC;      /* Violett (Markenakzent) */
+  --provider-assemblyai: #2545D3;  /* Kobaltblau (Logo) */
   --provider-elevenlabs: #F7F4EE;  /* Weiß (Markenfarbe), im Hellmodus mit Rand */
   --provider-free: #C07A7A;        /* Rosenholz: nächster Anbieter */
 
   /* ---- Anbieter-Akzente: Stark (Linien, Text im Hellmodus, >= 4,5:1) ---- */
-  --provider-gladia-strong: #56765F;
-  --provider-assemblyai-strong: #46648C;
+  --provider-gladia-strong: #6A4FD6;
+  --provider-assemblyai-strong: #1B33A0;
   --provider-elevenlabs-strong: #6E675D;
   --provider-free-strong: #985454;
 
   /* ---- Anbieter-Tints: nur für Anbieter-Flächen, NIE für Sprecher ---- */
-  --provider-gladia-tint: rgba(127, 163, 140, .15);
-  --provider-assemblyai-tint: rgba(95, 127, 168, .15);
+  --provider-gladia-tint: rgba(148, 122, 252, .15);
+  --provider-assemblyai-tint: rgba(37, 69, 211, .13);
   --provider-elevenlabs-tint: rgba(110, 103, 93, .12);
   --provider-free-tint: rgba(192, 122, 122, .15);
 
@@ -195,13 +195,13 @@
     --action-on-primary: #121110;
     --focus-ring: #F2EEE8;
     /* Im Dunkeln reichen die Basistöne für Linien und Text */
-    --provider-gladia-strong: #9DB9A6;
-    --provider-assemblyai-strong: #8DA6C8;
+    --provider-gladia-strong: #B5A3FD;
+    --provider-assemblyai-strong: #8FA3F0;
     --provider-elevenlabs-strong: #E8E3D8;
     --provider-mistral-strong: #FF8A5C;
     --provider-free-strong: #D39A9A;
-    --provider-gladia-tint: rgba(127, 163, 140, .18);
-    --provider-assemblyai-tint: rgba(95, 127, 168, .20);
+    --provider-gladia-tint: rgba(148, 122, 252, .18);
+    --provider-assemblyai-tint: rgba(37, 69, 211, .24);
     --mark-playing-bg: rgba(242, 238, 232, .10);
     --speaker-1: #F2EEE8;
     --speaker-2: #A9A29A;
@@ -236,13 +236,13 @@
   --action-primary: #F2EEE8;
   --action-on-primary: #121110;
   --focus-ring: #F2EEE8;
-  --provider-gladia-strong: #9DB9A6;
-  --provider-assemblyai-strong: #8DA6C8;
+  --provider-gladia-strong: #B5A3FD;
+  --provider-assemblyai-strong: #8FA3F0;
   --provider-elevenlabs-strong: #E8E3D8;
   --provider-mistral-strong: #FF8A5C;
   --provider-free-strong: #D39A9A;
-  --provider-gladia-tint: rgba(127, 163, 140, .18);
-  --provider-assemblyai-tint: rgba(95, 127, 168, .20);
+  --provider-gladia-tint: rgba(148, 122, 252, .18);
+  --provider-assemblyai-tint: rgba(37, 69, 211, .24);
   --mark-playing-bg: rgba(242, 238, 232, .10);
   --speaker-1: #F2EEE8;
   --speaker-2: #A9A29A;
