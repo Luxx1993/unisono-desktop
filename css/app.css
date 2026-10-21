@@ -303,6 +303,84 @@ select.input { appearance: none; padding-right: var(--space-8); background-image
 [data-provider="assembly"] { --p: var(--provider-assemblyai); --p-strong: var(--provider-assemblyai-strong); --p-tint: var(--provider-assemblyai-tint); }
 [data-provider="elevenlabs"] { --p: var(--provider-elevenlabs); --p-strong: var(--provider-elevenlabs-strong); --p-tint: var(--provider-elevenlabs-tint); }
 [data-provider="mistral"] { --p: var(--provider-mistral); --p-strong: var(--provider-mistral-strong); --p-tint: var(--provider-mistral-tint); }
+/* Weitere Anbieter: Markenfarbe als Punkt; Stark und Tint werden aus ihr gemischt. xAI ist schwarz (im Dunkeln hell), ElevenLabs weiß mit Rand. */
+[data-provider="openai"] { --pk: #2E9C9A; }
+[data-provider="groq"] { --pk: #D9503F; }
+[data-provider="openrouter"] { --pk: #6E78B8; }
+[data-provider="gemini"] { --pk: #7C8DEB; }
+[data-provider="anthropic"] { --pk: #C9785D; }
+[data-provider="together"] { --pk: #3C6FD1; }
+[data-provider="deepinfra"] { --pk: #4A90B8; }
+[data-provider="deepgram"] { --pk: #4CC38A; }
+[data-provider="soniox"] { --pk: #C9689A; }
+[data-provider="xai"] { --pk: #1F1C1A; }
+[data-provider="azure"] { --pk: #2F8BD6; }
+[data-provider="deepseek"] { --pk: #4F6BE0; }
+[data-provider="siliconflow"] { --pk: #A25CC0; }
+[data-provider="scaleway"] { --pk: #7A4FB3; }
+[data-provider="ovhcloud"] { --pk: #2E3FA0; }
+[data-provider="cerebras"] { --pk: #E07A5F; }
+[data-provider="openai"],
+[data-provider="groq"],
+[data-provider="openrouter"],
+[data-provider="gemini"],
+[data-provider="anthropic"],
+[data-provider="together"],
+[data-provider="deepinfra"],
+[data-provider="deepgram"],
+[data-provider="soniox"],
+[data-provider="xai"],
+[data-provider="azure"],
+[data-provider="deepseek"],
+[data-provider="siliconflow"],
+[data-provider="scaleway"],
+[data-provider="ovhcloud"],
+[data-provider="cerebras"] {
+    --p: var(--pk);
+    --p-strong: color-mix(in srgb, var(--pk) 62%, #1F1C1A);
+    --p-tint: color-mix(in srgb, var(--pk) 15%, transparent);
+}
+[data-provider="xai"] { --p-strong: #1F1C1A; --p-tint: rgba(31, 28, 26, .08); }
+.provider-dot[data-provider="elevenlabs"]:not(.is-empty) { box-shadow: inset 0 0 0 1px var(--border-strong); }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) [data-provider="xai"] { --pk: #F2EEE8; --p-strong: #F2EEE8; --p-tint: rgba(242, 238, 232, .10); }
+    :root:not([data-theme="light"]) .provider-dot[data-provider="elevenlabs"]:not(.is-empty) { box-shadow: none; }
+}
+:root[data-theme="dark"] [data-provider="xai"] { --pk: #F2EEE8; --p-strong: #F2EEE8; --p-tint: rgba(242, 238, 232, .10); }
+:root[data-theme="dark"] .provider-dot[data-provider="elevenlabs"]:not(.is-empty) { box-shadow: none; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) [data-provider="openai"],
+    :root:not([data-theme="light"]) [data-provider="groq"],
+    :root:not([data-theme="light"]) [data-provider="openrouter"],
+    :root:not([data-theme="light"]) [data-provider="gemini"],
+    :root:not([data-theme="light"]) [data-provider="anthropic"],
+    :root:not([data-theme="light"]) [data-provider="together"],
+    :root:not([data-theme="light"]) [data-provider="deepinfra"],
+    :root:not([data-theme="light"]) [data-provider="deepgram"],
+    :root:not([data-theme="light"]) [data-provider="soniox"],
+    :root:not([data-theme="light"]) [data-provider="azure"],
+    :root:not([data-theme="light"]) [data-provider="deepseek"],
+    :root:not([data-theme="light"]) [data-provider="siliconflow"],
+    :root:not([data-theme="light"]) [data-provider="scaleway"],
+    :root:not([data-theme="light"]) [data-provider="ovhcloud"],
+    :root:not([data-theme="light"]) [data-provider="cerebras"] { --p-strong: color-mix(in srgb, var(--pk) 70%, #F2EEE8); }
+}
+
+:root[data-theme="dark"] [data-provider="openai"],
+:root[data-theme="dark"] [data-provider="groq"],
+:root[data-theme="dark"] [data-provider="openrouter"],
+:root[data-theme="dark"] [data-provider="gemini"],
+:root[data-theme="dark"] [data-provider="anthropic"],
+:root[data-theme="dark"] [data-provider="together"],
+:root[data-theme="dark"] [data-provider="deepinfra"],
+:root[data-theme="dark"] [data-provider="deepgram"],
+:root[data-theme="dark"] [data-provider="soniox"],
+:root[data-theme="dark"] [data-provider="azure"],
+:root[data-theme="dark"] [data-provider="deepseek"],
+:root[data-theme="dark"] [data-provider="siliconflow"],
+:root[data-theme="dark"] [data-provider="scaleway"],
+:root[data-theme="dark"] [data-provider="ovhcloud"],
+:root[data-theme="dark"] [data-provider="cerebras"] { --p-strong: color-mix(in srgb, var(--pk) 70%, #F2EEE8); }
 .provider-dot { width: var(--space-2); height: var(--space-2); flex: none; border-radius: var(--radius-pill); background: var(--p, var(--text-tertiary)); }
 /* No key: a ring instead of a filled dot, so the difference doesn't rely on color alone */
 .provider-dot.is-empty { background: transparent; border: 1.5px solid var(--p, var(--text-tertiary)); }

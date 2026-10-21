@@ -28,9 +28,10 @@ Designregeln für die Multi-API-Transkriptions-Website. Alle Werte stehen in `to
 | --- | --- | --- | --- |
 | Gladia | `--provider-gladia` | `--provider-gladia-strong` | `--provider-gladia-tint` |
 | AssemblyAI | `--provider-assemblyai` | `--provider-assemblyai-strong` | `--provider-assemblyai-tint` |
-| ElevenLabs | `--provider-elevenlabs` | `--provider-elevenlabs-strong` | `--provider-elevenlabs-tint` |
-| Mistral (bisher „nächster Anbieter“) | `--provider-mistral` = `--provider-free` | `--provider-mistral-strong` | `--provider-mistral-tint` |
+| ElevenLabs (weiß, im Hellmodus mit Rand) | `--provider-elevenlabs` | `--provider-elevenlabs-strong` | `--provider-elevenlabs-tint` |
+| Mistral (Orange) | `--provider-mistral` | `--provider-mistral-strong` | `--provider-mistral-tint` |
 | nächster Anbieter | neuer Token nötig | | |
+| Alle weiteren (OpenAI, Groq, OpenRouter, Gemini, Anthropic, Together, DeepInfra, Deepgram, Soniox, xAI, Azure, DeepSeek, SiliconFlow, Scaleway, OVHcloud, Cerebras) | Markenfarbe `--pk` je Anbieter in `css/app.css` (xAI schwarz, im Dunkeln hell) | gemischt aus `--pk` | gemischt aus `--pk` |
 
 - Die Zuordnung ist fest und überall gleich: Chips, Fortschrittslinien, Vergleichsspalten, Kostengrafiken.
 - **Basis**töne nie für Text oder dünne Linien auf hellem Grund verwenden (unter 4,5:1), dafür gibt es **Stark**.
