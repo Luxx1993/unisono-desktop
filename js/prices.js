@@ -252,15 +252,20 @@
         return (pr.approx ? 'ca. ' : '') + number(pr.eurIn) + ' / ' + number(pr.eurOut) + ' €/M';
     }
 
+    // What a router adds on top of the provider's price: OpenRouter passes prices through and takes 5.5 % when the
+    // balance is topped up.
+    const SURCHARGES = { openrouter: '+5,5 %' };
+    const withSurcharge = (engine, text) => text && SURCHARGES[engine] ? text + ' ' + SURCHARGES[engine] : text;
+
     // The model's name with its price behind it, for the model selects.
     function label(engine, model, name, live) {
-        const text = format(price(engine, model, live));
+        const text = withSurcharge(engine, format(price(engine, model, live)));
         return text ? name + ' · ' + text : name;
     }
 
     // The text model's id with its price behind it, for the model selects of the text AI.
     function chatLabel(provider, model) {
-        const text = formatChat(chatPrice(provider, model));
+        const text = withSurcharge(provider, formatChat(chatPrice(provider, model)));
         return text ? model + ' · ' + text : model;
     }
 

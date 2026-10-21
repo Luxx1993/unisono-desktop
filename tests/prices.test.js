@@ -41,5 +41,11 @@ test('text models show input / output per million tokens', () => {
     assert.equal(prices.chatLabel('openai', 'gpt-6-luna'), 'gpt-6-luna · 0,0892 / 0,4458 €/M');
 });
 
+test('a router adds its surcharge behind the price', () => {
+    assert.equal(prices.chatLabel('openrouter', 'anthropic/claude-haiku-5.5'), 'anthropic/claude-haiku-5.5 · 0,0892 / 0,4458 €/M +5,5 %');
+    assert.equal(prices.label('openrouter', 'openai/whisper-large-v3-turbo', 'Whisper Turbo'), 'Whisper Turbo · 0,0096 €/h +5,5 %');
+    assert.equal(prices.chatLabel('groq', 'openai/gpt-oss-120b'), 'openai/gpt-oss-120b · 0,1337 / 0,535 €/M');
+});
+
 if (failed) { console.log(failed + ' FEHLER'); process.exit(1); }
 console.log('Alles gut');

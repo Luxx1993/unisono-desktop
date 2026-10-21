@@ -468,7 +468,7 @@ Gestaffelt oder befristet:
 - **DeepSeek:** Spitzenzeit-Preis (Mo bis Fr 01 bis 04 und 06 bis 10 Uhr UTC); außerhalb halb so teuer.
 - **xAI:** ab 200.000 Token Prompt der doppelte Preis.
 - **Cerebras:** Preis für gpt-oss-120b aus einer Drittquelle, die Preisseite nennt keinen.
-- **OpenRouter:** Anbieterpreise ohne Aufschlag, 5,5 % Gebühr nur beim Aufladen. Die Auswahl sind die meistgenutzten Modelle vom 20.10.2026.
+- **OpenRouter:** Anbieterpreise ohne Aufschlag; dazu kommen 5,5 % Gebühr beim Aufladen. Die Anzeige hängt deshalb „+5,5 %“ hinter jeden OpenRouter-Preis, bei Spracherkennung und bei Text-Modellen. Die Auswahl sind die meistgenutzten Modelle vom 20.10.2026.
 - **OVHcloud:** Mistral-Small-3.2 und Mistral-Nemo werden zum 04.11.2026 abgeschaltet.
 
 Ohne Preis: Cerebras qwen-3.8-27b, Groq llama-Modelle (nur auf Anfrage), SiliconFlow (die Preisseite nennt keine Währung und keine IDs), Together AI (die Preisseite nennt keine IDs; nur gpt-oss-120b ist sicher zugeordnet). Ollama und eigene Server sind kostenlos.
