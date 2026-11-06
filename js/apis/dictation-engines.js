@@ -76,9 +76,8 @@ window.Unisono = window.Unisono || {};
 
     multipartEngine('openai', {
         label: 'OpenAI', description: 'Spracherkennung von OpenAI; derselbe Key dient zum Aufräumen.',
-        base: 'https://api.openai.com/v1/', models: ['gpt-transcribe', 'gpt-4o-transcribe-diarize'], keyUrl: 'https://platform.openai.com/api-keys',
-        host: 'platform.openai.com', keyPage: 'Unter „Billing“ Guthaben aufladen – ein ChatGPT-Abo gilt für die API nicht – und „API keys“ öffnen.',
-        note: 'Das Modell gpt-4o-transcribe-diarize trennt Sprecher; Fachbegriffe nimmt es nicht an.'
+        base: 'https://api.openai.com/v1/', models: ['gpt-transcribe'], keyUrl: 'https://platform.openai.com/api-keys',
+        host: 'platform.openai.com', keyPage: 'Unter „Billing“ Guthaben aufladen – ein ChatGPT-Abo gilt für die API nicht – und „API keys“ öffnen.'
     });
     multipartEngine('groq', {
         label: 'Groq', description: 'Whisper in sehr hoher Geschwindigkeit; derselbe Key dient zum Aufräumen.',

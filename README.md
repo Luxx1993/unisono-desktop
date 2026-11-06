@@ -260,7 +260,7 @@ Unter **Einstellungen → Zusätzliche Module** lässt sich die **Meeting-Aufnah
 - Aufgenommen wird der Ton eines Web-Meetings ohne Bot im Meeting: ein **Browser-Tab** (Teams, Zoom, Meet im Browser, beim Teilen „Tab-Audio teilen“ eingeschaltet lassen) oder unter Windows der **Bildschirm mit Systemton** für die Desktop-App. Dazu kommt dein **Mikrofon**; beides landet gemischt in einer Datei. Am Mac kann der Browser keinen Systemton aufnehmen; dort geht nur ein Tab.
 - **Vor dem Start** bestätigst du, dass alle Teilnehmer wissen, dass aufgenommen wird, und einverstanden sind. Das nichtöffentlich gesprochene Wort heimlich aufzunehmen ist strafbar (§ 201 StGB).
 - Während der Aufnahme zeigt die Karte die Zeit und die Pegel von Meeting und Mikrofon. „Freigabe beenden“ in der Leiste des Browsers beendet die Aufnahme ebenfalls.
-- Danach geht die Datei wie gewohnt auf „Transkribieren“, mit eingeschalteter Sprechertrennung. Unisono hat sich alle 0,2 Sekunden gemerkt, ob dein Mikrofon lauter war als das Meeting. Der Sprecher, der überwiegend in diesen Momenten spricht, heißt nach dem Transkribieren **„Ich“**. Dafür braucht es eine Engine mit Sprechertrennung (Gladia, ElevenLabs, AssemblyAI, Mistral, OpenAI mit `gpt-4o-transcribe-diarize`). Mit Kopfhörern klappt die Trennung am zuverlässigsten.
+- Danach geht die Datei wie gewohnt auf „Transkribieren“, mit eingeschalteter Sprechertrennung. Unisono hat sich alle 0,2 Sekunden gemerkt, ob dein Mikrofon lauter war als das Meeting. Der Sprecher, der überwiegend in diesen Momenten spricht, heißt nach dem Transkribieren **„Ich“**. Dafür braucht es eine Engine mit Sprechertrennung (Gladia, ElevenLabs, AssemblyAI, Mistral). Mit Kopfhörern klappt die Trennung am zuverlässigsten.
 - Die Meeting-Aufnahme wird nicht laufend gesichert wie die Aufnahme vor Ort; nach dem Stopp lässt sie sich mit **Aufnahme speichern** herunterladen.
 
 ## Anbieter & Modelle
@@ -273,7 +273,7 @@ Unter **Einstellungen → Zusätzliche Module** lässt sich die **Meeting-Aufnah
 | AssemblyAI (Sync-Modell) | `universal-3-5-pro-sync` | Eine Anfrage an `/v1/transcribe`, bis 20 Minuten und 256 MB, ohne Sprecher; derselbe Key und dieselbe Region wie AssemblyAI |
 | Mistral (Voxtral) | `voxtral-mini-transcribe-3-0`, `voxtral-small-transcribe-3-0` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
 
-Live mitschreiben geht mit ElevenLabs, Deepgram, Mistral und Gladia, siehe „Live mitschreiben (Echtzeit)“. Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar, außerdem bei OpenAI mit dem Modell `gpt-4o-transcribe-diarize`. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
+Live mitschreiben geht mit ElevenLabs, Deepgram, Mistral und Gladia, siehe „Live mitschreiben (Echtzeit)“. Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar; OpenAI bietet nach dem Aus von `gpt-4o-transcribe-diarize` keine mehr an. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
 
 ### Region, Endpunkt und eigene Server
 
@@ -352,11 +352,7 @@ Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, aktualisiert am 0
 | AssemblyAI | universal-3-5-pro-sync | ca. 0,4012 |
 | Gladia | solaria-3 | 0,16 |
 | Gladia | solaria-1 | 0,27 |
-| OpenAI | gpt-4o-mini-transcribe | 0,1605 |
 | OpenAI | gpt-transcribe | ca. 0,2407 |
-| OpenAI | gpt-4o-transcribe | 0,321 |
-| OpenAI | gpt-4o-transcribe-diarize | 0,321 |
-| Mistral | voxtral-mini-latest (abgekündigt, aus am 30.04.2027) | ca. 0,1872 |
 | Mistral | voxtral-mini-transcribe-3-0 | 0,1872 |
 | Mistral | voxtral-small-transcribe-3-0 | 0,214 |
 | ElevenLabs | scribe_v2 | 0,1962 |
@@ -381,7 +377,6 @@ Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, aktualisiert am 0
 | Deepgram | flux-general-multi | 0,4191 |
 | ElevenLabs | scribe_v2_realtime | 0,3477 |
 | Mistral | voxtral-mini-transcribe-realtime-3-0 | 0,428 |
-| Mistral | voxtral-mini-transcribe-realtime-2602 | ca. 0,428 |
 | Gladia | solaria-1 | 0,68 |
 
 ### Text-Modelle (Aufräumen, Umformulieren, Zusammenfassen)
@@ -447,7 +442,6 @@ Ohne Preis: Groq llama-Modelle (nur auf Anfrage), SiliconFlow (die Preisseite ne
 | Google Gemini | gemini-2.5-flash-lite | 0,0892 / 0,3567 |
 | Google Gemini | gemini-2.5-pro | 1,1146 / 8,9166 |
 | Google Gemini | gemini-3-flash-preview | 0,4458 / 2,675 |
-| Google Gemini | gemini-3.1-flash-lite | 0,2229 / 1,3375 |
 | Google Gemini | gemini-3.1-pro-preview | 1,7833 / 10,70 |
 | Google Gemini | gemini-3.5-flash-lite | 0,2675 / 2,2292 |
 | Google Gemini | gemini-3.6-flash | 0,6687 / 3,3437 |
@@ -461,9 +455,7 @@ Ohne Preis: Groq llama-Modelle (nur auf Anfrage), SiliconFlow (die Preisseite ne
 | Mistral | ministral-14b-2512 | 0,1783 / 0,1783 |
 | Mistral | ministral-3b-2512 | 0,0892 / 0,0892 |
 | Mistral | ministral-8b-2512 | 0,1337 / 0,1337 |
-| Mistral | mistral-large-2512 (abgekündigt) | ca. 0,4458 / 1,3375 |
 | Mistral | mistral-large-4 (Vorschau) | 0,6242 / 1,8725 |
-| Mistral | mistral-medium-3-5 | 1,3375 / 6,6875 |
 | Mistral | mistral-small-2603 | 0,1337 / 0,535 |
 | OpenAI | chat-latest | 4,4583 / 26,7499 |
 | OpenAI | gpt-3.5-turbo | 0,4458 / 1,3375 |

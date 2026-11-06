@@ -44,11 +44,7 @@
         'assembly|universal-3-5-pro-sync': p(0.4012, true),
         'gladia|solaria-3': p(0.16),
         'gladia|solaria-1': p(0.27),
-        'openai|gpt-4o-mini-transcribe': p(0.1605),
         'openai|gpt-transcribe': p(0.2407, true),
-        'openai|gpt-4o-transcribe': p(0.321),
-        'openai|gpt-4o-transcribe-diarize': p(0.321),
-        'mistral|voxtral-mini-latest': p(0.1872, true),
         'mistral|voxtral-mini-transcribe-3-0': p(0.1872),
         'mistral|voxtral-small-transcribe-3-0': p(0.214),
         'elevenlabs|scribe_v2': p(0.1962),
@@ -72,7 +68,6 @@
         'deepgram|flux-general-multi': p(0.4191),
         'elevenlabs|scribe_v2_realtime': p(0.3477),
         'mistral|voxtral-mini-transcribe-realtime-3-0': p(0.428),
-        'mistral|voxtral-mini-transcribe-realtime-2602': p(0.321),
         'gladia|solaria-1': p(0.68)
     };
 
@@ -128,7 +123,6 @@
         'gemini|gemini-2.5-flash-lite': c(0.0892, 0.3567),
         'gemini|gemini-2.5-pro': c(1.1146, 8.9166),
         'gemini|gemini-3-flash-preview': c(0.4458, 2.675),
-        'gemini|gemini-3.1-flash-lite': c(0.2229, 1.3375),
         'gemini|gemini-3.1-pro-preview': c(1.7833, 10.7),
         'gemini|gemini-3.5-flash-lite': c(0.2675, 2.2292),
         'gemini|gemini-3.6-flash': c(0.6687, 3.3437),
@@ -142,10 +136,8 @@
         'mistral|ministral-14b-2512': c(0.1783, 0.1783),
         'mistral|ministral-3b-2512': c(0.0892, 0.0892),
         'mistral|ministral-8b-2512': c(0.1337, 0.1337),
-        'mistral|mistral-large-2512': c(0.4458, 1.3375, true),
         'mistral|mistral-large-4': c(0.6242, 1.8725),
         'mistral|mistral-small-latest': c(0.1337, 0.535),
-        'mistral|mistral-medium-3-5': c(1.3375, 6.6875),
         'mistral|mistral-small-2603': c(0.1337, 0.535),
         'openai|chat-latest': c(4.4583, 26.7499),
         'openai|gpt-3.5-turbo': c(0.4458, 1.3375),
