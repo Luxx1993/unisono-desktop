@@ -14,7 +14,9 @@ window.Unisono = window.Unisono || {};
         form.append('file', file);
         form.append('timestamp_granularities', 'segment');
         if (diarize) form.append('diarize', 'true');
-        for (const term of vocabulary || []) form.append('context_bias', term);
+        // context_bias takes single words or tokens only (no spaces, no commas); Mistral rejects the whole
+        // request when one entry breaks that rule, so such entries are left out.
+        for (const term of vocabulary || []) if (/^[^,\s]+$/.test(term)) form.append('context_bias', term);
 
         // Synchronous: the answer arrives once Mistral has processed the whole file.
         const raw = await S.http.send('https://api.mistral.ai/v1/audio/transcriptions', {
@@ -43,10 +45,11 @@ window.Unisono = window.Unisono || {};
         description: 'Europäischer Anbieter, schnell und günstig. Sprache wird automatisch erkannt. Derselbe Key dient zum Aufräumen.',
         icon: 'graphic_eq',
         models: [
-            { id: 'voxtral-mini-latest', name: 'Voxtral Mini Transcribe (aktuell)' },
-            // Voxtral 3 (Oktober 2026): Small ist am genauesten, Mini günstiger. Die IDs stehen so auf den Modellseiten von Mistral.
-            { id: 'voxtral-small-transcribe-3-0', name: 'Voxtral Small Transcribe 3 (genauestes Modell)' },
-            { id: 'voxtral-mini-transcribe-3-0', name: 'Voxtral Mini Transcribe 3' }
+            // Voxtral 3 (Oktober 2026): Mini ist der Standard, Small am genauesten. voxtral-mini-latest zeigt auf
+            // voxtral-mini-2602, seit 31.10.2026 abgekündigt und ab 30.04.2027 abgeschaltet; wer es gewählt hatte,
+            // landet beim ersten Modell der Liste.
+            { id: 'voxtral-mini-transcribe-3-0', name: 'Voxtral Mini Transcribe 3' },
+            { id: 'voxtral-small-transcribe-3-0', name: 'Voxtral Small Transcribe 3 (genauestes Modell)' }
         ],
         keyUrl: 'https://console.mistral.ai/api-keys',
         keyGuide: {

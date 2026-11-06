@@ -99,19 +99,19 @@ window.Unisono = window.Unisono || {};
     });
     multipartEngine('siliconflow', {
         label: 'SiliconFlow', description: 'Spracherkennung, in China erreichbar; derselbe Key dient zum Aufräumen.',
-        base: 'https://api.siliconflow.cn/v1/', models: ['FunAudioLLM/SenseVoiceSmall', 'TeleAI/TeleSpeechASR'],
+        base: 'https://api.siliconflow.cn/v1/', models: ['FunAudioLLM/SenseVoiceSmall', 'TeleAI/TeleASR-V3.2', 'Qwen/Qwen3-ASR-1.7B'],
         keyUrl: 'https://cloud.siliconflow.cn/account/ak', host: 'cloud.siliconflow.cn', keyPage: 'Unter „API Keys“ einen Key anlegen.'
     });
     multipartEngine('together', {
         label: 'Together AI', description: 'Whisper und Parakeet als Dienst; derselbe Key dient zum Aufräumen.',
-        base: 'https://api.together.xyz/v1/', models: ['openai/whisper-large-v3', 'nvidia/parakeet-tdt-0.6b-v3'], keyUrl: 'https://api.together.ai/settings/api-keys',
+        base: 'https://api.together.ai/v1/', models: ['openai/whisper-large-v3', 'nvidia/parakeet-tdt-0.6b-v3'], keyUrl: 'https://api.together.ai/settings/api-keys',
         host: 'together.ai', keyPage: 'Unter „Settings → API Keys“ einen Key anlegen.'
     });
     multipartEngine('openrouter', {
         label: 'OpenRouter', description: 'Mehrere Spracherkennungs-Modelle über einen Key; derselbe Key dient zum Aufräumen.',
         base: () => isEu('openrouter') ? 'https://eu.openrouter.ai/api/v1/' : 'https://openrouter.ai/api/v1/', headers: { 'X-Title': 'Unisono' },
         settings: [regionSetting('EU', 'Die EU-Adresse gibt es nur für Firmenkonten (Enterprise); sie gilt auch fürs Aufräumen.')],
-        models: ['openai/gpt-transcribe', 'microsoft/mai-transcribe-2', 'google/gemini-3.5-transcribe', 'elevenlabs/scribe-v2', 'x-ai/grok-stt-1.0', 'assemblyai/universal-3-6-pro', 'mistralai/voxtral-mini-transcribe', 'deepgram/nova-3', 'nvidia/parakeet-tdt-0.6b-v3', 'openai/whisper-large-v3-turbo', 'openai/whisper-large-v3'],
+        models: ['openai/gpt-transcribe', 'microsoft/mai-transcribe-2', 'google/gemini-3.5-transcribe', 'elevenlabs/scribe-v2', 'x-ai/grok-stt-1.0', 'assemblyai/universal-3-6-pro', 'mistralai/voxtral-mini-transcribe-3-0', 'qwen/qwen3-asr-1.7b', 'deepgram/nova-3', 'nvidia/parakeet-tdt-0.6b-v3', 'openai/whisper-large-v3-turbo', 'openai/whisper-large-v3'],
         keyUrl: 'https://openrouter.ai/keys', host: 'openrouter.ai', keyPage: '„Keys“ öffnen.'
     });
 
@@ -165,7 +165,7 @@ window.Unisono = window.Unisono || {};
     register('soniox', {
         label: 'Soniox', quick: false, description: 'Sehr genaue Spracherkennung; das Ergebnis kommt nach einigen Sekunden.',
         keyUrl: 'https://console.soniox.com/api-keys', keyGuide: guide('console.soniox.com', '„API Keys“ öffnen.'),
-        models: [{ id: 'stt-async-v5', name: 'Soniox Async v5' }],
+        models: [{ id: 'stt-async-v6', name: 'Soniox Async v6' }],
         settings: [regionSetting('EU', 'Für die EU-Region braucht es einen Key aus einem EU-Projekt der Soniox-Konsole.')],
         test: key => ({ url: sonioxBase() + 'models', headers: bearer(key) }),
         vocabularySupport: () => ({ maxTerms: 100, maxChars: 50 }),

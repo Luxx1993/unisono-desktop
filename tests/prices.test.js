@@ -23,7 +23,7 @@ test('live prices are separate from file prices', () => {
 
 test('the exact figure shows with 2 to 4 decimals and no trailing zeros', () => {
     assert.equal(prices.format(prices.price('groq', 'whisper-large-v3-turbo')), '0,0357 €/h');
-    assert.equal(prices.format(prices.price('openrouter', 'openai/whisper-large-v3-turbo')), '0,0096 €/h');
+    assert.equal(prices.format(prices.price('openrouter', 'openai/whisper-large-v3-turbo')), '0,0107 €/h');
     assert.equal(prices.format({ eur: 0.1 }), '0,10 €/h');
     assert.equal(prices.format({ eur: 0.015 }), '0,015 €/h');
 });
@@ -43,7 +43,7 @@ test('text models show input / output per million tokens', () => {
 
 test('a router adds its surcharge behind the price', () => {
     assert.equal(prices.chatLabel('openrouter', 'anthropic/claude-haiku-5.5'), 'anthropic/claude-haiku-5.5 · 0,0892 / 0,4458 €/M +5,5 %');
-    assert.equal(prices.label('openrouter', 'openai/whisper-large-v3-turbo', 'Whisper Turbo'), 'Whisper Turbo · 0,0096 €/h +5,5 %');
+    assert.equal(prices.label('openrouter', 'openai/whisper-large-v3-turbo', 'Whisper Turbo'), 'Whisper Turbo · 0,0107 €/h +5,5 %');
     assert.equal(prices.chatLabel('groq', 'openai/gpt-oss-120b'), 'openai/gpt-oss-120b · 0,1337 / 0,535 €/M');
 });
 

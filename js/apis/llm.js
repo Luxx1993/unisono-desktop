@@ -106,7 +106,7 @@ window.Unisono = window.Unisono || {};
         base: 'https://api.openai.com/v1/', keyUrl: 'https://platform.openai.com/api-keys', host: 'platform.openai.com',
         keyPage: 'Unter „Billing“ Guthaben aufladen – ein ChatGPT-Abo gilt für die API nicht – und „API keys“ öffnen.',
         note: 'Unter „Limits“ lässt sich eine monatliche Obergrenze setzen.',
-        models: ['gpt-6-luna', 'gpt-6.1-sol'],
+        models: ['gpt-6-luna', 'gpt-6.1-terra', 'gpt-6.1-sol'],
         // gpt-6-luna thinks at "medium" unless told otherwise, which makes a short cleanup slow.
         extraBody: model => model === 'gpt-6-luna' ? { reasoning_effort: 'none' } : null
     });
@@ -120,14 +120,15 @@ window.Unisono = window.Unisono || {};
         label: 'Google Gemini', description: 'Aufräumen und Zusammenfassungen mit Gemini.',
         base: 'https://generativelanguage.googleapis.com/v1beta/openai/', keyUrl: 'https://aistudio.google.com/app/apikey', host: 'aistudio.google.com',
         keyPage: '„Get API key“ öffnen.',
-        models: ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']
+        models: ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite']
     });
     compat('mistral', {
         label: 'Mistral AI', description: 'Europäischer Anbieter (Frankreich).',
         base: 'https://api.mistral.ai/v1/', keyUrl: 'https://console.mistral.ai/api-keys', host: 'console.mistral.ai',
         keyPage: '„API Keys“ öffnen.',
-        // From Mistral's changelog (2026-10-19); the live list follows once a key is there.
-        models: ['mistral-small-2603'], defaultModel: ''
+        // From Mistral's model overview (2026-11-06); the live list follows once a key is there.
+        // mistral-medium-3-5 and mistral-large-2512 are deprecated since 2026-10-31.
+        models: ['mistral-small-2603', 'mistral-large-4', 'ministral-8b-2512'], defaultModel: ''
     });
     compat('openrouter', {
         label: 'OpenRouter', description: 'Ein Key für sehr viele Modelle verschiedener Anbieter.',
@@ -140,7 +141,7 @@ window.Unisono = window.Unisono || {};
     });
     compat('together', {
         label: 'Together AI', description: 'Offene Modelle als Dienst.',
-        base: 'https://api.together.xyz/v1/', keyUrl: 'https://api.together.ai/settings/api-keys', host: 'together.ai',
+        base: 'https://api.together.ai/v1/', keyUrl: 'https://api.together.ai/settings/api-keys', host: 'together.ai',
         keyPage: 'Unter „Settings → API Keys“ einen Key anlegen.'
     });
     compat('deepinfra', {
@@ -174,7 +175,7 @@ window.Unisono = window.Unisono || {};
         label: 'SiliconFlow', description: 'Offene Modelle, in China erreichbar.',
         base: 'https://api.siliconflow.cn/v1/', keyUrl: 'https://cloud.siliconflow.cn/account/ak', host: 'cloud.siliconflow.cn',
         keyPage: 'Unter „API Keys“ einen Key anlegen.',
-        models: ['deepseek-ai/DeepSeek-V3.2', 'deepseek-ai/DeepSeek-V3.1', 'deepseek-ai/DeepSeek-V3']
+        models: ['deepseek-ai/DeepSeek-V3.2', 'deepseek-ai/DeepSeek-V4.1-Flash', 'deepseek-ai/DeepSeek-V3.1-Terminus']
     });
     compat('scaleway', {
         label: 'Scaleway', description: 'Europäischer Anbieter (Frankreich), Daten bleiben in der EU.',
@@ -187,7 +188,8 @@ window.Unisono = window.Unisono || {};
         label: 'OVHcloud', description: 'Europäischer Anbieter, Daten bleiben in der EU.',
         base: 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/', keyUrl: 'https://manager.eu.ovhcloud.com/#/public-cloud/pci/projects', host: 'manager.eu.ovhcloud.com',
         keyPage: 'Im Public-Cloud-Projekt unter „AI Endpoints“ einen Key anlegen.',
-        models: ['Mistral-Small-3.2-24B-Instruct-2506', 'Meta-Llama-3_3-70B-Instruct', 'gpt-oss-120b', 'gpt-oss-20b', 'Qwen3.8-27B']
+        // Mistral-Small-3.2 was retired on 2026-11-04.
+        models: ['gpt-oss-20b', 'Qwen3.5-9B', 'gpt-oss-120b', 'Meta-Llama-3_3-70B-Instruct', 'Qwen3.8-27B']
     });
 
     // Servers on the user's own machine or network: no key needed, the address is set in the key row.
