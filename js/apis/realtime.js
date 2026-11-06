@@ -341,8 +341,8 @@
         },
         mistral: {
             models: [
-                { id: 'voxtral-mini-transcribe-realtime-2602', name: 'Voxtral Mini Transcribe Realtime' },
-                { id: 'voxtral-mini-transcribe-realtime-3-0', name: 'Voxtral Mini Transcribe Realtime 3 (neu)' }
+                // 2602 ist seit 31.10.2026 abgekündigt (aus am 30.04.2027).
+                { id: 'voxtral-mini-transcribe-realtime-3-0', name: 'Voxtral Mini Transcribe Realtime 3' }
             ],
             open({ key, model, onText, onError }) {
                 let acc = '';

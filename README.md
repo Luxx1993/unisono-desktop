@@ -103,7 +103,7 @@ Auf der Seite **Diktat** sprichst du, die KI räumt den Text auf, und er liegt i
 Mit **ElevenLabs**, **Deepgram**, **Mistral** oder **Gladia** als Engine gibt es unter „Einstellungen“ der Seite den Schalter **Live mitschreiben**. Dann geht das Mikrofon schon beim Sprechen an den Anbieter, und der Text erscheint unter dem Aufnahmeknopf und im schwebenden Fenster, während du redest. Beim Stopp ist der Rohtext sofort fertig; Aufräumen, Ersetzungen, Verlauf und Kopieren laufen wie gewohnt.
 
 - **Gladia:** *Solaria 1* (das einzige Live-Modell von Gladia). Unisono legt die Sitzung mit `POST /v2/live?region=eu-west` an, also in der EU-Region (die Voreinstellung von Gladia), und verbindet sich mit der Adresse aus der Antwort. Sprache und Fachbegriffe gehen mit; Pausen bestimmt Gladia (`endpointing`). Zum Beenden schickt Unisono `stop_recording`. Die Region gilt nur für Live; bei Dateien gibt Gladias Doku keine Region an, deshalb zeigt der Filter „EU“ Gladia weiterhin nicht.
-- **Modelle:** Mistral *Voxtral Mini Transcribe Realtime* (`voxtral-mini-transcribe-realtime-2602`, Standard) und das neue `voxtral-mini-transcribe-realtime-3-0` (Modell-ID von Mistrals Voxtral-3-Seite; mit einem Key noch nicht ausprobiert). Mistral erkennt die Sprache selbst und nimmt bei Echtzeit keine Fachbegriffe an. ElevenLabs *Scribe v2 Realtime*; Deepgram *Nova-3* (mit „Automatisch erkennen“ folgt es mehreren Sprachen), *Nova-2* und *Flux* (erkennt Sprechpausen). Bei Deepgram gilt die EU-Region aus „API-Keys“ auch live. Fachbegriffe gehen bei Nova-3 als Schlüsselbegriffe mit.
+- **Modelle:** Mistral *Voxtral Mini Transcribe Realtime 3* (`voxtral-mini-transcribe-realtime-3-0`; das ältere 2602-Modell ist abgekündigt). Mistral erkennt die Sprache selbst und nimmt bei Echtzeit keine Fachbegriffe an. ElevenLabs *Scribe v2 Realtime*; Deepgram *Nova-3* (mit „Automatisch erkennen“ folgt es mehreren Sprachen), *Nova-2* und *Flux* (erkennt Sprechpausen). Bei Deepgram gilt die EU-Region aus „API-Keys“ auch live. Fachbegriffe gehen bei Nova-3 als Schlüsselbegriffe mit.
 - **Ausfall:** Unisono nimmt nebenher wie immer auf. Bricht die Live-Verbindung ab oder kommt kein Text, wird die Aufnahme nach dem Stopp mit dem Modell aus „Modell“ transkribiert. Die Meldung nennt den Grund.
 - **Anmeldung:** Ein Browser kann bei Live-Verbindungen keinen Key im Header mitschicken. Deepgram nimmt ihn deshalb, wie für Browser dokumentiert, im Protokoll-Feld der Verbindung entgegen. Bei Gladia kommt die Adresse mit Token aus der Sitzungsanfrage. Für ElevenLabs und Mistral holt Unisono mit dem Key zuerst ein kurzlebiges Token (bei Mistral `POST /v1/client/sessions`, etwa 15 Minuten gültig, an das Modell gebunden) und öffnet die Verbindung nur damit; bei Mistral geht es als Subprotokoll `realtime` mit. Die Nachrichten (`session.update`, `input_audio.append`, `input_audio.flush`, `input_audio.end`, `transcription.text.delta`, `transcription.done`) sind die des offiziellen Python-SDKs von Mistral.
 - Das Audio geht als 16-kHz-PCM in Häppchen von etwa 0,1 Sekunden. Langdiktat ist bei „Live“ nicht nötig und ruht.
@@ -260,7 +260,7 @@ Unter **Einstellungen → Zusätzliche Module** lässt sich die **Meeting-Aufnah
 - Aufgenommen wird der Ton eines Web-Meetings ohne Bot im Meeting: ein **Browser-Tab** (Teams, Zoom, Meet im Browser, beim Teilen „Tab-Audio teilen“ eingeschaltet lassen) oder unter Windows der **Bildschirm mit Systemton** für die Desktop-App. Dazu kommt dein **Mikrofon**; beides landet gemischt in einer Datei. Am Mac kann der Browser keinen Systemton aufnehmen; dort geht nur ein Tab.
 - **Vor dem Start** bestätigst du, dass alle Teilnehmer wissen, dass aufgenommen wird, und einverstanden sind. Das nichtöffentlich gesprochene Wort heimlich aufzunehmen ist strafbar (§ 201 StGB).
 - Während der Aufnahme zeigt die Karte die Zeit und die Pegel von Meeting und Mikrofon. „Freigabe beenden“ in der Leiste des Browsers beendet die Aufnahme ebenfalls.
-- Danach geht die Datei wie gewohnt auf „Transkribieren“, mit eingeschalteter Sprechertrennung. Unisono hat sich alle 0,2 Sekunden gemerkt, ob dein Mikrofon lauter war als das Meeting. Der Sprecher, der überwiegend in diesen Momenten spricht, heißt nach dem Transkribieren **„Ich“**. Dafür braucht es eine Engine mit Sprechertrennung (Gladia, ElevenLabs, AssemblyAI, Mistral, OpenAI mit `gpt-4o-transcribe-diarize`). Mit Kopfhörern klappt die Trennung am zuverlässigsten.
+- Danach geht die Datei wie gewohnt auf „Transkribieren“, mit eingeschalteter Sprechertrennung. Unisono hat sich alle 0,2 Sekunden gemerkt, ob dein Mikrofon lauter war als das Meeting. Der Sprecher, der überwiegend in diesen Momenten spricht, heißt nach dem Transkribieren **„Ich“**. Dafür braucht es eine Engine mit Sprechertrennung (Gladia, ElevenLabs, AssemblyAI, Mistral). Mit Kopfhörern klappt die Trennung am zuverlässigsten.
 - Die Meeting-Aufnahme wird nicht laufend gesichert wie die Aufnahme vor Ort; nach dem Stopp lässt sie sich mit **Aufnahme speichern** herunterladen.
 
 ## Anbieter & Modelle
@@ -271,9 +271,9 @@ Unter **Einstellungen → Zusätzliche Module** lässt sich die **Meeting-Aufnah
 | ElevenLabs (Scribe) | `scribe_v2`, `scribe_v1` | Synchroner Upload an `/v1/speech-to-text` |
 | AssemblyAI | `universal-3-5-pro`, `universal-2` | Upload → `/v2/transcript` → Polling |
 | AssemblyAI (Sync-Modell) | `universal-3-5-pro-sync` | Eine Anfrage an `/v1/transcribe`, bis 20 Minuten und 256 MB, ohne Sprecher; derselbe Key und dieselbe Region wie AssemblyAI |
-| Mistral (Voxtral) | `voxtral-mini-latest`, `voxtral-small-transcribe-3-0`, `voxtral-mini-transcribe-3-0` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
+| Mistral (Voxtral) | `voxtral-mini-transcribe-3-0`, `voxtral-small-transcribe-3-0` | Synchroner Upload an `/v1/audio/transcriptions` mit Sprechertrennung und Segment-Zeitstempeln (Sprache wird automatisch erkannt) |
 
-Live mitschreiben geht mit ElevenLabs, Deepgram, Mistral und Gladia, siehe „Live mitschreiben (Echtzeit)“. Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar, außerdem bei OpenAI mit dem Modell `gpt-4o-transcribe-diarize`. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
+Live mitschreiben geht mit ElevenLabs, Deepgram, Mistral und Gladia, siehe „Live mitschreiben (Echtzeit)“. Sprechererkennung (Diarization) ist bei diesen Anbietern aktivierbar; OpenAI bietet nach dem Aus von `gpt-4o-transcribe-diarize` keine mehr an. Die übrigen Engines liefern Text ohne Sprecher; der Haken ist bei ihnen gesperrt.
 
 ### Region, Endpunkt und eigene Server
 
@@ -317,23 +317,25 @@ Besprechungen von 1–2 Stunden (typisch 40–60 MB) passen bei allen Anbietern.
 
 Die App zeigt den Preis neben jedem Modell in der Modellauswahl (Datei) und in der Auswahl der Echtzeit-Modelle, mit 2 bis 4 Nachkommastellen und ohne überflüssige Nullen. Die Daten stehen in `js/prices.js`; die Android-App führt dieselben Werte in `ModelPrices.kt`.
 
-Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, normale Pay-as-you-go-Preise, Dollarpreise umgerechnet mit 1 € = 1,1215 $ (Gladia, Scaleway und OVHcloud listen in Euro). Aufpreise für Sprechertrennung oder Fachbegriffe sind nicht enthalten. „ca.“ steht bei gerechneten, geschätzten oder nur aus Drittquellen belegten Werten (Token-Preise, Aktionspreise, „ab“-Preise). Wo kein Preis gefunden wurde, zeigt die App keinen.
+Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, aktualisiert am 06.11.2026, normale Pay-as-you-go-Preise, Dollarpreise umgerechnet mit 1 € = 1,1215 $ (Gladia, Scaleway und OVHcloud listen in Euro). Aufpreise für Sprechertrennung oder Fachbegriffe sind nicht enthalten. „ca.“ steht bei gerechneten, geschätzten oder nur aus Drittquellen belegten Werten (Token-Preise, Aktionspreise, „ab“-Preise). Wo kein Preis gefunden wurde, zeigt die App keinen.
 
 ### Datei
 
 | Anbieter | Modell | €/h |
 |---|---|---|
-| OpenRouter | openai/whisper-large-v3-turbo | 0,0096 |
-| OpenRouter | openai/whisper-large-v3 | 0,0257 |
-| OpenRouter | nvidia/parakeet-tdt-0.6b-v3 | 0,0802 |
+| OpenRouter | openai/whisper-large-v3-turbo | 0,0107 |
+| OpenRouter | openai/whisper-large-v3 | 0,0241 |
+| OpenRouter | nvidia/parakeet-tdt-0.6b-v3 | 0,0535 |
 | OpenRouter | microsoft/mai-transcribe-2 | 0,0892 |
 | OpenRouter | openai/gpt-transcribe | 0,2407 |
 | OpenRouter | elevenlabs/scribe-v2 | 0,1958 |
-| OpenRouter | x-ai/grok-stt-1.0 | 0,0899 |
+| OpenRouter | x-ai/grok-stt-1.0 | 0,0892 |
 | OpenRouter | mistralai/voxtral-mini-transcribe | 0,1605 |
 | OpenRouter | google/gemini-3.5-transcribe | ca. 0,2675 |
 | OpenRouter | deepgram/nova-3 | ca. 0,2311 |
-| OpenRouter | assemblyai/universal-3-6-pro | ca. 0,2664 |
+| OpenRouter | assemblyai/universal-3-6-pro | 0,2675 |
+| OpenRouter | mistralai/voxtral-mini-transcribe-3-0 | 0,1872 |
+| OpenRouter | qwen/qwen3-asr-1.7b | 0,0241 |
 | Groq | whisper-large-v3-turbo | 0,0357 |
 | Groq | whisper-large-v3 | 0,099 |
 | OVHcloud | whisper-large-v3-turbo | 0,046 |
@@ -342,7 +344,7 @@ Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, normale Pay-as-yo
 | Together AI | openai/whisper-large-v3 | 0,0802 |
 | Together AI | nvidia/parakeet-tdt-0.6b-v3 | 0,0802 |
 | xAI | grok-voice-transcribe-2.0 | ca. 0,0892 |
-| Soniox | stt-async-v5 | ca. 0,087 |
+| Soniox | stt-async-v6 | ca. 0,087 |
 | Azure | mai-transcribe-2 | 0,0892 |
 | Azure | mai-transcribe-1.5 | 0,321 |
 | AssemblyAI | universal-2 | 0,1337 |
@@ -350,11 +352,7 @@ Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, normale Pay-as-yo
 | AssemblyAI | universal-3-5-pro-sync | ca. 0,4012 |
 | Gladia | solaria-3 | 0,16 |
 | Gladia | solaria-1 | 0,27 |
-| OpenAI | gpt-4o-mini-transcribe | 0,1605 |
 | OpenAI | gpt-transcribe | ca. 0,2407 |
-| OpenAI | gpt-4o-transcribe | 0,321 |
-| OpenAI | gpt-4o-transcribe-diarize | 0,321 |
-| Mistral | voxtral-mini-latest | ca. 0,1872 |
 | Mistral | voxtral-mini-transcribe-3-0 | 0,1872 |
 | Mistral | voxtral-small-transcribe-3-0 | 0,214 |
 | ElevenLabs | scribe_v2 | 0,1962 |
@@ -368,18 +366,17 @@ Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, normale Pay-as-yo
 
 | Anbieter | Modell | €/h |
 |---|---|---|
-| Soniox | stt-rt-v5 | 0,107 |
+| Soniox | stt-rt-v6 | 0,107 |
 | AssemblyAI | universal-streaming-english | 0,1337 |
 | AssemblyAI | universal-streaming-multilingual | 0,1337 |
 | AssemblyAI | universal-3-6-pro | 0,4012 |
 | xAI | grok-voice-transcribe-2.0 | ca. 0,1783 |
 | Deepgram | nova-2 | 0,3121 |
-| Deepgram | nova-3 | ca. 0,2568 |
-| Deepgram | flux-general-en | ca. 0,3477 |
-| Deepgram | flux-general-multi | 0,4173 |
+| Deepgram | nova-3 | 0,4102 |
+| Deepgram | flux-general-en | 0,4102 |
+| Deepgram | flux-general-multi | 0,4191 |
 | ElevenLabs | scribe_v2_realtime | 0,3477 |
 | Mistral | voxtral-mini-transcribe-realtime-3-0 | 0,428 |
-| Mistral | voxtral-mini-transcribe-realtime-2602 | ca. 0,428 |
 | Gladia | solaria-1 | 0,68 |
 
 ### Text-Modelle (Aufräumen, Umformulieren, Zusammenfassen)
@@ -392,11 +389,11 @@ Gestaffelt oder befristet:
 - **Gemini** 3.6 und 3.8 Flash: Einführungspreis bis 31.12.2026, ab 1.1.2027 1,50 / 7,50 $. Gemini 4 Argon: bis 30.11.2026 2 / 10 $, danach 4 / 20 $.
 - **DeepSeek:** Spitzenzeit-Preis (Mo bis Fr 01 bis 04 und 06 bis 10 Uhr UTC); außerhalb halb so teuer.
 - **xAI:** ab 200.000 Token Prompt der doppelte Preis.
-- **Cerebras:** Preis für gpt-oss-120b aus einer Drittquelle, die Preisseite nennt keinen.
+- **Cerebras:** gpt-oss-120b und qwen-3.8-27b stehen seit November 2026 auf der Preisseite.
 - **OpenRouter:** Anbieterpreise ohne Aufschlag; dazu kommen 5,5 % Gebühr beim Aufladen. Die Anzeige hängt deshalb „+5,5 %“ hinter jeden OpenRouter-Preis, bei Spracherkennung und bei Text-Modellen. Die Auswahl sind die meistgenutzten Modelle vom 20.10.2026.
-- **OVHcloud:** Mistral-Small-3.2 und Mistral-Nemo werden zum 04.11.2026 abgeschaltet.
+- **OVHcloud:** Mistral-Small-3.2 ist seit dem 04.11.2026 abgeschaltet; Standard ist jetzt gpt-oss-20b.
 
-Ohne Preis: Cerebras qwen-3.8-27b, Groq llama-Modelle (nur auf Anfrage), SiliconFlow (die Preisseite nennt keine Währung und keine IDs), Together AI (die Preisseite nennt keine IDs; nur gpt-oss-120b ist sicher zugeordnet). Ollama und eigene Server sind kostenlos.
+Ohne Preis: Groq llama-Modelle (nur auf Anfrage), SiliconFlow (die Preisseite nennt keine Währung und keine IDs), Together AI (die Preisseite nennt keine IDs; nur gpt-oss-120b ist sicher zugeordnet). Ollama und eigene Server sind kostenlos.
 
 | Anbieter | Modell | Eingabe / Ausgabe in € je 1 Mio. Token |
 |---|---|---|
@@ -414,7 +411,8 @@ Ohne Preis: Cerebras qwen-3.8-27b, Groq llama-Modelle (nur auf Anfrage), Silicon
 | Anthropic | claude-sonnet-4-6 | ca. 2,675 / 13,3749 |
 | Anthropic | claude-sonnet-5 | ca. 1,7833 / 8,9166 |
 | Anthropic | claude-sonnet-5-5 | 1,7833 / 8,9166 |
-| Cerebras | gpt-oss-120b | ca. 0,3121 / 0,6687 |
+| Cerebras | gpt-oss-120b | 0,3121 / 0,6687 |
+| Cerebras | qwen-3.8-27b | 0,8827 / 1,3286 |
 | DeepInfra | anthropic/claude-haiku-4-5 | 0,8917 / 4,4583 |
 | DeepInfra | anthropic/claude-sonnet-5 | 2,675 / 13,3749 |
 | DeepInfra | deepseek-ai/deepseek-r1-0528 | 0,4458 / 1,9171 |
@@ -436,13 +434,14 @@ Ohne Preis: Cerebras qwen-3.8-27b, Groq llama-Modelle (nur auf Anfrage), Silicon
 | DeepInfra | qwen/qwen3-32b | 0,0713 / 0,2497 |
 | DeepInfra | qwen/qwen3.5-397b-a17b | 0,4012 / 2,675 |
 | DeepInfra | qwen/qwen3.6-27b | 0,2853 / 2,8533 |
+| DeepInfra | qwen/qwen3.5-9b | 0,0892 / 0,1337 |
+| DeepInfra | openai/gpt-oss-120b | 0,033 / 0,1516 |
 | DeepSeek | deepseek-flash | 0,2675 / 1,07 |
 | DeepSeek | deepseek-v4-pro | 1,177 / 3,531 |
 | Google Gemini | gemini-2.5-flash | 0,2675 / 2,2292 |
 | Google Gemini | gemini-2.5-flash-lite | 0,0892 / 0,3567 |
 | Google Gemini | gemini-2.5-pro | 1,1146 / 8,9166 |
 | Google Gemini | gemini-3-flash-preview | 0,4458 / 2,675 |
-| Google Gemini | gemini-3.1-flash-lite | 0,2229 / 1,3375 |
 | Google Gemini | gemini-3.1-pro-preview | 1,7833 / 10,70 |
 | Google Gemini | gemini-3.5-flash-lite | 0,2675 / 2,2292 |
 | Google Gemini | gemini-3.6-flash | 0,6687 / 3,3437 |
@@ -453,12 +452,10 @@ Ohne Preis: Cerebras qwen-3.8-27b, Groq llama-Modelle (nur auf Anfrage), Silicon
 | Groq | openai/gpt-oss-safeguard-20b | 0,0669 / 0,2675 |
 | Groq | qwen/qwen3.8-27b | 0,7133 / 3,5667 |
 | Mistral | codestral | ca. 0,2675 / 0,8025 |
-| Mistral | ministral-3-14b | ca. 0,1783 / 0,1783 |
-| Mistral | ministral-3-3b | ca. 0,0892 / 0,0892 |
-| Mistral | ministral-3-8b | ca. 0,1337 / 0,1337 |
-| Mistral | mistral-large-3 | ca. 0,4458 / 1,3375 |
-| Mistral | mistral-large-4-0 | ca. 1,2127 / 3,7272 |
-| Mistral | mistral-medium-3-5 | 1,3375 / 6,6875 |
+| Mistral | ministral-14b-2512 | 0,1783 / 0,1783 |
+| Mistral | ministral-3b-2512 | 0,0892 / 0,0892 |
+| Mistral | ministral-8b-2512 | 0,1337 / 0,1337 |
+| Mistral | mistral-large-4 (Vorschau) | 0,6242 / 1,8725 |
 | Mistral | mistral-small-2603 | 0,1337 / 0,535 |
 | OpenAI | chat-latest | 4,4583 / 26,7499 |
 | OpenAI | gpt-3.5-turbo | 0,4458 / 1,3375 |
@@ -488,6 +485,7 @@ Ohne Preis: Cerebras qwen-3.8-27b, Groq llama-Modelle (nur auf Anfrage), Silicon
 | OpenAI | gpt-6-luna | 0,0892 / 0,4458 |
 | OpenAI | gpt-6-sol | 1,7833 / 8,9166 |
 | OpenAI | gpt-6.1-sol | 1,7833 / 8,9166 |
+| OpenAI | gpt-6.1-terra | 0,8917 / 4,4583 |
 | OpenAI | o1 | 13,3749 / 53,4998 |
 | OpenAI | o1-pro | 133,7494 / 534,9978 |
 | OpenAI | o3 | 1,7833 / 7,1333 |
@@ -515,7 +513,6 @@ Ohne Preis: Cerebras qwen-3.8-27b, Groq llama-Modelle (nur auf Anfrage), Silicon
 | OVHcloud | gpt-oss-20b | 0,04 / 0,15 |
 | OVHcloud | meta-llama-3_3-70b-instruct | 0,67 / 0,67 |
 | OVHcloud | mistral-nemo-instruct-2407 | 0,13 / 0,13 |
-| OVHcloud | mistral-small-3.2-24b-instruct-2506 | 0,09 / 0,28 |
 | OVHcloud | qwen2.5-vl-72b-instruct | 0,91 / 0,91 |
 | OVHcloud | qwen3.5-397b-a17b | 0,60 / 3,60 |
 | OVHcloud | qwen3.5-9b | 0,10 / 0,15 |
