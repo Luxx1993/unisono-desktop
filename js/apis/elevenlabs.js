@@ -60,15 +60,17 @@ window.Unisono = window.Unisono || {};
                 '„Create API Key“ wählen und bei den Berechtigungen mindestens „Speech to Text“ erlauben.',
                 'Den Key sofort kopieren – er wird nur einmal angezeigt – und hier einfügen.'
             ],
-            note: 'Der kostenlose Plan enthält ein kleines monatliches Kontingent; Scribe v2 mit Fachbegriffen kostet etwas mehr.'
+            note: 'Der kostenlose Plan enthält ein kleines monatliches Kontingent; Scribe mit Fachbegriffen kostet etwas mehr.'
         },
         test: key => ({ url: 'https://api.elevenlabs.io/v1/models', headers: { 'xi-api-key': key } }),
         models: [
-            { id: 'scribe_v2', name: 'Scribe v2 (neuestes Modell)' }
+            // Scribe v3 (November 2026) ist Nachfolger und günstiger; v2 bleibt verfügbar.
+            { id: 'scribe_v3', name: 'Scribe v3 (neuestes Modell)' },
+            { id: 'scribe_v2', name: 'Scribe v2' }
         ],
         limits: () => ({ maxBytes: 3 * 1024 * 1024 * 1024, maxSeconds: 10 * 3600 }),
-        // Keyterms exist only on Scribe v2 and cost extra.
-        vocabularySupport: model => model === 'scribe_v2'
+        // Keyterms cost extra; the API ties them to no model (Scribe v2 and v3 alike).
+        vocabularySupport: model => model === 'scribe_v2' || model === 'scribe_v3'
             ? { maxTerms: 100, maxChars: 50, note: 'Hinweis: ElevenLabs berechnet mit Fachbegriffen ca. 30 % Aufpreis.' }
             : null,
         transcribe
