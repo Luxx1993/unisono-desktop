@@ -88,7 +88,8 @@ window.Unisono = window.Unisono || {};
         }],
         test: key => ({ url: base() + '/transcript?limit=1', headers: { 'authorization': key } }),
         models: [
-            { id: 'universal-3-5-pro', name: 'Universal-3.5 Pro (höchste Genauigkeit)' },
+            // AssemblyAI-STT-3.7 (November 2026) folgt auf das abgekündigte Universal-3.5 Pro.
+            { id: 'assemblyai-stt-3-7', name: 'AssemblyAI-STT-3.7 (höchste Genauigkeit)' },
             { id: 'universal-2', name: 'Universal-2 (99 Sprachen, günstiger)' },
             { id: 'universal-3-5-pro' + SYNC_SUFFIX, name: 'Universal-3.5 Pro Sync (eine Anfrage, bis 20 Min., ohne Sprecher)' }
         ],

@@ -106,7 +106,7 @@ window.Unisono = window.Unisono || {};
         base: 'https://api.openai.com/v1/', keyUrl: 'https://platform.openai.com/api-keys', host: 'platform.openai.com',
         keyPage: 'Unter „Billing“ Guthaben aufladen – ein ChatGPT-Abo gilt für die API nicht – und „API keys“ öffnen.',
         note: 'Unter „Limits“ lässt sich eine monatliche Obergrenze setzen.',
-        models: ['gpt-6-luna', 'gpt-6.1-terra', 'gpt-6.1-sol'],
+        models: ['gpt-6-luna', 'gpt-6.1-terra', 'gpt-6.2-sol'],
         // gpt-6-luna thinks at "medium" unless told otherwise, which makes a short cleanup slow.
         extraBody: model => model === 'gpt-6-luna' ? { reasoning_effort: 'none' } : null
     });
@@ -120,7 +120,7 @@ window.Unisono = window.Unisono || {};
         label: 'Google Gemini', description: 'Aufräumen und Zusammenfassungen mit Gemini.',
         base: 'https://generativelanguage.googleapis.com/v1beta/openai/', keyUrl: 'https://aistudio.google.com/app/apikey', host: 'aistudio.google.com',
         keyPage: '„Get API key“ öffnen.',
-        models: ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite']
+        models: ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-4-hydrogen']
     });
     compat('mistral', {
         label: 'Mistral AI', description: 'Europäischer Anbieter (Frankreich).',

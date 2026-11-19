@@ -317,7 +317,9 @@ Besprechungen von 1–2 Stunden (typisch 40–60 MB) passen bei allen Anbietern.
 
 Die App zeigt den Preis neben jedem Modell in der Modellauswahl (Datei) und in der Auswahl der Echtzeit-Modelle, mit 2 bis 4 Nachkommastellen und ohne überflüssige Nullen. Die Daten stehen in `js/prices.js`; die Android-App führt dieselben Werte in `ModelPrices.kt`.
 
-Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, aktualisiert am 06.11.2026, normale Pay-as-you-go-Preise, Dollarpreise umgerechnet mit 1 € = 1,1215 $ (Gladia, Scaleway und OVHcloud listen in Euro). Aufpreise für Sprechertrennung oder Fachbegriffe sind nicht enthalten. „ca.“ steht bei gerechneten, geschätzten oder nur aus Drittquellen belegten Werten (Token-Preise, Aktionspreise, „ab“-Preise). Wo kein Preis gefunden wurde, zeigt die App keinen.
+Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, aktualisiert am 19.11.2026, normale Pay-as-you-go-Preise, Dollarpreise umgerechnet mit 1 € = 1,1215 $ (Gladia, Scaleway und OVHcloud listen in Euro). Aufpreise für Sprechertrennung oder Fachbegriffe sind nicht enthalten. „ca.“ steht bei gerechneten, geschätzten oder nur aus Drittquellen belegten Werten (Token-Preise, Aktionspreise, „ab“-Preise). Wo kein Preis gefunden wurde, zeigt die App keinen.
+
+**Stand 19.11.2026:** neu sind AssemblyAI-STT-3.7 (Datei) und 3.7-Realtime (Universal-3.5 Pro ist abgekündigt, Universal-Streaming ersetzt), ElevenLabs Scribe v3 und v3 Live (Scribe v2 ist günstiger geworden), xAI Grok STT 2.0 (OpenRouter), OpenAI GPT-6.2, Google Gemini 4 Carbon, Neon und Hydrogen sowie Claude Fable 5.2. Deepgram hat für Echtzeit wieder Aktionspreise (ohne Enddatum). Gemini 4 Argon und Carbon kosten ab 01.12.2026 das Doppelte; Gemini 2.5 Pro und Flash sind abgekündigt.
 
 ### Datei
 
@@ -330,8 +332,9 @@ Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, aktualisiert am 0
 | OpenRouter | openai/gpt-transcribe | 0,2407 |
 | OpenRouter | elevenlabs/scribe-v2 | 0,1958 |
 | OpenRouter | x-ai/grok-stt-1.0 | 0,0892 |
+| OpenRouter | x-ai/grok-stt-2.0 | 0,0899 |
 | OpenRouter | mistralai/voxtral-mini-transcribe | 0,1605 |
-| OpenRouter | google/gemini-3.5-transcribe | ca. 0,2675 |
+| OpenRouter | google/gemini-3.5-transcribe | ca. 0,1605 |
 | OpenRouter | deepgram/nova-3 | ca. 0,2311 |
 | OpenRouter | assemblyai/universal-3-6-pro | 0,2675 |
 | OpenRouter | mistralai/voxtral-mini-transcribe-3-0 | 0,1872 |
@@ -343,21 +346,22 @@ Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, aktualisiert am 0
 | Scaleway | whisper-large-v3 | 0,18 |
 | Together AI | openai/whisper-large-v3 | 0,0802 |
 | Together AI | nvidia/parakeet-tdt-0.6b-v3 | 0,0802 |
-| xAI | grok-voice-transcribe-2.0 | ca. 0,0892 |
-| Soniox | stt-async-v6 | ca. 0,087 |
+| xAI | grok-voice-transcribe-2.0 | 0,0892 |
+| Soniox | stt-async-v6 | 0,0892 |
 | Azure | mai-transcribe-2 | 0,0892 |
 | Azure | mai-transcribe-1.5 | 0,321 |
 | AssemblyAI | universal-2 | 0,1337 |
-| AssemblyAI | universal-3-5-pro | 0,1872 |
+| AssemblyAI | assemblyai-stt-3-7 | 0,1872 |
 | AssemblyAI | universal-3-5-pro-sync | ca. 0,4012 |
 | Gladia | solaria-3 | 0,16 |
 | Gladia | solaria-1 | 0,27 |
-| OpenAI | gpt-transcribe | ca. 0,2407 |
+| OpenAI | gpt-transcribe | 0,2407 |
 | Mistral | voxtral-mini-transcribe-3-0 | 0,1872 |
 | Mistral | voxtral-small-transcribe-3-0 | 0,214 |
-| ElevenLabs | scribe_v2 | 0,1962 |
+| ElevenLabs | scribe_v2 | 0,1783 |
+| ElevenLabs | scribe_v3 | 0,1783 |
 | Deepgram | nova-3 | 0,23 |
-| Gemini | gemini-3.5-transcribe | ca. 0,2675 |
+| Gemini | gemini-3.5-transcribe | 0,1605 |
 | Gemini | gemini-3.6-flash | ca. 0,2318 |
 | Gemini | gemini-3.8-flash | ca. 0,2318 |
 | Gemini | gemini-3.5-flash-lite | ca. 0,058 |
@@ -367,15 +371,16 @@ Quelle: die Preisseiten der Anbieter, abgerufen am 21.10.2026, aktualisiert am 0
 | Anbieter | Modell | €/h |
 |---|---|---|
 | Soniox | stt-rt-v6 | 0,107 |
-| AssemblyAI | universal-streaming-english | 0,1337 |
-| AssemblyAI | universal-streaming-multilingual | 0,1337 |
 | AssemblyAI | universal-3-6-pro | 0,4012 |
-| xAI | grok-voice-transcribe-2.0 | ca. 0,1783 |
+| AssemblyAI | assemblyai-stt-3-7-realtime | 0,2675 |
+| AssemblyAI | assemblyai-stt-3-7-realtime-agent | 0,4012 |
+| xAI | grok-voice-transcribe-2.0 | 0,1783 |
 | Deepgram | nova-2 | 0,3121 |
-| Deepgram | nova-3 | 0,4102 |
-| Deepgram | flux-general-en | 0,4102 |
-| Deepgram | flux-general-multi | 0,4191 |
-| ElevenLabs | scribe_v2_realtime | 0,3477 |
+| Deepgram | nova-3 | 0,2568 (Aktion) |
+| Deepgram | flux-general-en | 0,3477 (Aktion) |
+| Deepgram | flux-general-multi | 0,4173 |
+| ElevenLabs | scribe_v2_realtime | 0,1962 |
+| ElevenLabs | scribe_v3_live | 0,1962 |
 | Mistral | voxtral-mini-transcribe-realtime-3-0 | 0,428 |
 | Gladia | solaria-1 | 0,68 |
 
@@ -397,19 +402,20 @@ Ohne Preis: Groq llama-Modelle (nur auf Anfrage), SiliconFlow (die Preisseite ne
 
 | Anbieter | Modell | Eingabe / Ausgabe in € je 1 Mio. Token |
 |---|---|---|
-| Anthropic | claude-fable-5 | ca. 8,9166 / 44,5831 |
+| Anthropic | claude-fable-5 | 8,9166 / 44,5831 |
 | Anthropic | claude-fable-5-1 | 8,9166 / 44,5831 |
-| Anthropic | claude-haiku-4-5 | ca. 0,8917 / 4,4583 |
+| Anthropic | claude-fable-5-2 | 7,1333 / 35,6666 |
+| Anthropic | claude-haiku-4-5 | 0,8917 / 4,4583 |
 | Anthropic | claude-haiku-5-5 | 0,0892 / 0,4458 |
 | Anthropic | claude-opus-4-5 | ca. 4,4583 / 22,2916 |
-| Anthropic | claude-opus-4-6 | ca. 4,4583 / 22,2916 |
-| Anthropic | claude-opus-4-7 | ca. 4,4583 / 22,2916 |
-| Anthropic | claude-opus-4-8 | ca. 4,4583 / 22,2916 |
-| Anthropic | claude-opus-5 | ca. 4,4583 / 22,2916 |
+| Anthropic | claude-opus-4-6 | 4,4583 / 22,2916 |
+| Anthropic | claude-opus-4-7 | 4,4583 / 22,2916 |
+| Anthropic | claude-opus-4-8 | 4,4583 / 22,2916 |
+| Anthropic | claude-opus-5 | 4,4583 / 22,2916 |
 | Anthropic | claude-opus-5-5 | 3,5667 / 17,8333 |
 | Anthropic | claude-sonnet-4-5 | ca. 2,675 / 13,3749 |
-| Anthropic | claude-sonnet-4-6 | ca. 2,675 / 13,3749 |
-| Anthropic | claude-sonnet-5 | ca. 1,7833 / 8,9166 |
+| Anthropic | claude-sonnet-4-6 | 2,675 / 13,3749 |
+| Anthropic | claude-sonnet-5 | 1,7833 / 8,9166 |
 | Anthropic | claude-sonnet-5-5 | 1,7833 / 8,9166 |
 | Cerebras | gpt-oss-120b | 0,3121 / 0,6687 |
 | Cerebras | qwen-3.8-27b | 0,8827 / 1,3286 |
@@ -438,15 +444,16 @@ Ohne Preis: Groq llama-Modelle (nur auf Anfrage), SiliconFlow (die Preisseite ne
 | DeepInfra | openai/gpt-oss-120b | 0,033 / 0,1516 |
 | DeepSeek | deepseek-flash | 0,2675 / 1,07 |
 | DeepSeek | deepseek-v4-pro | 1,177 / 3,531 |
-| Google Gemini | gemini-2.5-flash | 0,2675 / 2,2292 |
 | Google Gemini | gemini-2.5-flash-lite | 0,0892 / 0,3567 |
-| Google Gemini | gemini-2.5-pro | 1,1146 / 8,9166 |
 | Google Gemini | gemini-3-flash-preview | 0,4458 / 2,675 |
 | Google Gemini | gemini-3.1-pro-preview | 1,7833 / 10,70 |
 | Google Gemini | gemini-3.5-flash-lite | 0,2675 / 2,2292 |
 | Google Gemini | gemini-3.6-flash | 0,6687 / 3,3437 |
 | Google Gemini | gemini-3.8-flash | 0,6687 / 3,3437 |
-| Google Gemini | gemini-4-argon | 1,7833 / 8,9166 |
+| Google Gemini | gemini-4-argon | 1,7833 / 8,9166 (ab 01.12.: 3,5667 / 17,8333) |
+| Google Gemini | gemini-4-carbon | 1,7833 / 8,9166 (ab 01.12.: 3,5667 / 17,8333) |
+| Google Gemini | gemini-4-hydrogen | 1,3375 / 6,6875 |
+| Google Gemini | gemini-4-neon | 2,675 / 13,3749 |
 | Groq | openai/gpt-oss-120b | 0,1337 / 0,535 |
 | Groq | openai/gpt-oss-20b | 0,0669 / 0,2675 |
 | Groq | openai/gpt-oss-safeguard-20b | 0,0669 / 0,2675 |
@@ -486,6 +493,8 @@ Ohne Preis: Groq llama-Modelle (nur auf Anfrage), SiliconFlow (die Preisseite ne
 | OpenAI | gpt-6-sol | 1,7833 / 8,9166 |
 | OpenAI | gpt-6.1-sol | 1,7833 / 8,9166 |
 | OpenAI | gpt-6.1-terra | 0,8917 / 4,4583 |
+| OpenAI | gpt-6.2-astra | 7,1333 / 35,6666 |
+| OpenAI | gpt-6.2-sol | 1,7833 / 8,9166 |
 | OpenAI | o1 | 13,3749 / 53,4998 |
 | OpenAI | o1-pro | 133,7494 / 534,9978 |
 | OpenAI | o3 | 1,7833 / 7,1333 |

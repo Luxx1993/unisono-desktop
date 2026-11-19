@@ -110,7 +110,7 @@ window.Unisono = window.Unisono || {};
         label: 'OpenRouter', description: 'Mehrere Spracherkennungs-Modelle über einen Key; derselbe Key dient zum Aufräumen.',
         base: () => isEu('openrouter') ? 'https://eu.openrouter.ai/api/v1/' : 'https://openrouter.ai/api/v1/', headers: { 'X-Title': 'Unisono' },
         settings: [regionSetting('EU', 'Die EU-Adresse gibt es nur für Firmenkonten (Enterprise); sie gilt auch fürs Aufräumen.')],
-        models: ['openai/gpt-transcribe', 'microsoft/mai-transcribe-2', 'google/gemini-3.5-transcribe', 'elevenlabs/scribe-v2', 'x-ai/grok-stt-1.0', 'assemblyai/universal-3-6-pro', 'mistralai/voxtral-mini-transcribe-3-0', 'qwen/qwen3-asr-1.7b', 'deepgram/nova-3', 'nvidia/parakeet-tdt-0.6b-v3', 'openai/whisper-large-v3-turbo', 'openai/whisper-large-v3'],
+        models: ['openai/gpt-transcribe', 'microsoft/mai-transcribe-2', 'google/gemini-3.5-transcribe', 'elevenlabs/scribe-v2', 'x-ai/grok-stt-2.0', 'assemblyai/universal-3-6-pro', 'mistralai/voxtral-mini-transcribe-3-0', 'qwen/qwen3-asr-1.7b', 'deepgram/nova-3', 'nvidia/parakeet-tdt-0.6b-v3', 'openai/whisper-large-v3-turbo', 'openai/whisper-large-v3'],
         keyUrl: 'https://openrouter.ai/keys', host: 'openrouter.ai', keyPage: '„Keys“ öffnen.'
     });
 

@@ -393,7 +393,7 @@
             }
         },
         elevenlabs: {
-            models: [{ id: 'scribe_v2_realtime', name: 'Scribe v2 Realtime' }],
+            models: [{ id: 'scribe_v3_live', name: 'Scribe v3 Live' }, { id: 'scribe_v2_realtime', name: 'Scribe v2 Realtime' }],
             open({ key, model, language, onText, onError }) {
                 let committed = false;
                 return socketSession({
