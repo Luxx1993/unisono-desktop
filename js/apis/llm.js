@@ -76,12 +76,12 @@ window.Unisono = window.Unisono || {};
     // ---- OpenAI-compatible providers (chat/completions with a Bearer key) -------------------------
     // base: the address, or a function for one that depends on a setting (region, own server).
     const bearer = key => key ? { Authorization: 'Bearer ' + key } : {};
-    function compat(id, { label, description, base, keyUrl, host, keyPage, note, models = [], defaultModel, extraBody, headers = {}, ...extra }) {
+    function compat(id, { label, description, base, keyUrl, host, keyPage, note, models = [], defaultModel, extraBody, headers = {}, auth = bearer, ...extra }) {
         const baseUrl = typeof base === 'function' ? base : () => base;
         llms[id] = {
             label, description, keyUrl,
             keyGuide: guide(host, keyPage, note),
-            test: key => ({ url: baseUrl() + 'models', headers: { ...bearer(key), ...headers } }),
+            test: key => ({ url: baseUrl() + 'models', headers: { ...auth(key), ...headers } }),
             models,
             defaultModel: defaultModel ?? models[0] ?? '',
             live: true,
@@ -93,7 +93,7 @@ window.Unisono = window.Unisono || {};
                 Object.assign(body, extraBody?.(model));
                 const data = await S.http.fetchJson(baseUrl() + 'chat/completions', {
                     method: 'POST',
-                    headers: { ...bearer(key), 'Content-Type': 'application/json', ...headers },
+                    headers: { ...auth(key), 'Content-Type': 'application/json', ...headers },
                     body: JSON.stringify(body)
                 }, label);
                 return data.choices?.[0]?.message?.content || '';
@@ -129,6 +129,33 @@ window.Unisono = window.Unisono || {};
         // From Mistral's model overview (2026-11-06); the live list follows once a key is there.
         // mistral-medium-3-5 and mistral-large-2512 are deprecated since 2026-10-31.
         models: ['mistral-small-2603', 'mistral-large-4', 'ministral-8b-2512'], defaultModel: ''
+    });
+    // AssemblyAI's LLM Gateway: OpenAI-compatible, same key as the speech engine (raw, as its docs show), same
+    // region as chosen there. Claude runs via AWS Bedrock at Anthropic's list price, +10 % for staying in the
+    // region. The gateway caps answers at 1000 tokens unless max_tokens says otherwise.
+    const ASSEMBLY_FALLBACK = 'claude-haiku-5-5';
+    compat('assembly', {
+        label: 'AssemblyAI', description: 'Aufräumen mit Claude oder Gemini über denselben AssemblyAI-Key.',
+        base: () => S.providerSettings.get('assembly', 'region') === 'eu'
+            ? 'https://llm-gateway.eu.assemblyai.com/v1/' : 'https://llm-gateway.assemblyai.com/v1/',
+        keyUrl: 'https://www.assemblyai.com/dashboard/api-keys', host: 'assemblyai.com',
+        keyPage: 'Im Dashboard „API Keys“ öffnen.',
+        note: 'Derselbe Key wie für die Spracherkennung; die Region (USA/EU) gilt auch hier.',
+        // Default from AssemblyAI's model guide for short dictation clean-up, weighted towards speed: Gemini 3.5
+        // Flash-Lite at reasoning effort low; the gateway retries on Claude Haiku 5.5 if it fails.
+        models: ['gemini-3.5-flash-lite', 'claude-haiku-5-5', 'claude-sonnet-5-5'],
+        auth: key => key ? { Authorization: key } : {},
+        extraBody: model => ({
+            max_tokens: 16000,
+            ...(model === 'gemini-3.5-flash-lite' ? { reasoning_effort: 'low' } : {}),
+            ...(model !== ASSEMBLY_FALLBACK ? { fallbacks: [{ model: ASSEMBLY_FALLBACK }] } : {})
+        }),
+        // The model list is public, so it says nothing about the key: test with the transcript list instead.
+        test: key => ({
+            url: (S.providerSettings.get('assembly', 'region') === 'eu' ? 'https://api.eu.assemblyai.com' : 'https://api.assemblyai.com') + '/v2/transcript?limit=1',
+            headers: { authorization: key }
+        }),
+        live: false
     });
     compat('openrouter', {
         label: 'OpenRouter', description: 'Ein Key für sehr viele Modelle verschiedener Anbieter.',
