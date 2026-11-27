@@ -133,6 +133,7 @@ window.Unisono = window.Unisono || {};
     // AssemblyAI's LLM Gateway: OpenAI-compatible, same key as the speech engine (raw, as its docs show), same
     // region as chosen there. Claude runs via AWS Bedrock at Anthropic's list price, +10 % for staying in the
     // region. The gateway caps answers at 1000 tokens unless max_tokens says otherwise.
+    const ASSEMBLY_FALLBACK = 'claude-haiku-5-5';
     compat('assembly', {
         label: 'AssemblyAI', description: 'Aufräumen mit Claude oder Gemini über denselben AssemblyAI-Key.',
         base: () => S.providerSettings.get('assembly', 'region') === 'eu'
@@ -140,9 +141,15 @@ window.Unisono = window.Unisono || {};
         keyUrl: 'https://www.assemblyai.com/dashboard/api-keys', host: 'assemblyai.com',
         keyPage: 'Im Dashboard „API Keys“ öffnen.',
         note: 'Derselbe Key wie für die Spracherkennung; die Region (USA/EU) gilt auch hier.',
-        models: ['claude-haiku-5-5', 'claude-sonnet-5-5', 'gemini-3.5-flash-lite'],
+        // Default from AssemblyAI's model guide for short dictation clean-up, weighted towards speed: Gemini 3.5
+        // Flash-Lite at reasoning effort low; the gateway retries on Claude Haiku 5.5 if it fails.
+        models: ['gemini-3.5-flash-lite', 'claude-haiku-5-5', 'claude-sonnet-5-5'],
         auth: key => key ? { Authorization: key } : {},
-        extraBody: () => ({ max_tokens: 16000 }),
+        extraBody: model => ({
+            max_tokens: 16000,
+            ...(model === 'gemini-3.5-flash-lite' ? { reasoning_effort: 'low' } : {}),
+            ...(model !== ASSEMBLY_FALLBACK ? { fallbacks: [{ model: ASSEMBLY_FALLBACK }] } : {})
+        }),
         // The model list is public, so it says nothing about the key: test with the transcript list instead.
         test: key => ({
             url: (S.providerSettings.get('assembly', 'region') === 'eu' ? 'https://api.eu.assemblyai.com' : 'https://api.assemblyai.com') + '/v2/transcript?limit=1',
